@@ -74,16 +74,108 @@ export const PrivacyPolicy = ({ open, onOpenChange }: PrivacyPolicyProps) => {
             </section>
 
             <section>
-              <h3 className="font-semibold text-base mb-2">6. Cookies</h3>
+              <h3 className="font-semibold text-base mb-2">6. Conservation des données</h3>
               <p className="text-muted-foreground">
-                Notre plateforme utilise des cookies essentiels pour assurer le bon fonctionnement du site et maintenir votre session active. Ces cookies ne collectent pas d'informations personnelles à des fins publicitaires.
+                Nous conservons vos données personnelles aussi longtemps que nécessaire pour :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Maintenir votre compte actif</li>
+                <li>Respecter nos obligations légales</li>
+                <li>Résoudre les litiges éventuels</li>
+                <li>Faire respecter nos accords</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                Lorsque vous supprimez votre compte, vos données personnelles sont effacées dans un délai de 30 jours. Les données de transaction peuvent être conservées plus longtemps pour des raisons légales et comptables.
               </p>
             </section>
 
             <section>
-              <h3 className="font-semibold text-base mb-2">7. Contact</h3>
+              <h3 className="font-semibold text-base mb-2">7. Cookies et technologies similaires</h3>
               <p className="text-muted-foreground">
-                Pour toute question concernant cette politique de confidentialité ou pour exercer vos droits, vous pouvez nous contacter via les paramètres de votre compte ou par email.
+                Notre plateforme utilise des cookies et technologies similaires pour :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Maintenir votre session active et sécurisée</li>
+                <li>Mémoriser vos préférences (langue, mode sombre, etc.)</li>
+                <li>Analyser l'utilisation de la plateforme pour l'améliorer</li>
+                <li>Assurer le bon fonctionnement des fonctionnalités</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                Les cookies essentiels ne peuvent pas être désactivés. Vous pouvez gérer les cookies non essentiels dans les paramètres de votre navigateur.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">8. Transfert international de données</h3>
+              <p className="text-muted-foreground">
+                Vos données peuvent être transférées et stockées sur des serveurs situés en dehors de votre pays de résidence. Nous nous assurons que ces transferts respectent les normes de protection des données en vigueur, notamment le RGPD pour les résidents européens.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">9. Protection des mineurs</h3>
+              <p className="text-muted-foreground">
+                ReVivo n'est pas destiné aux personnes de moins de 18 ans. Nous ne collectons pas sciemment d'informations personnelles auprès de mineurs. Si vous pensez qu'un mineur a fourni des informations personnelles, veuillez nous contacter immédiatement.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">10. Conformité iOS et Android</h3>
+              <p className="text-muted-foreground">
+                Notre application respecte les exigences de confidentialité des plateformes mobiles :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Apple : Transparence du suivi des apps (ATT) - Nous demandons votre autorisation avant tout suivi</li>
+                <li>Google : Déclaration de sécurité des données - Toutes les pratiques de collecte sont déclarées</li>
+                <li>Accès aux données de l'appareil (photos, caméra, localisation) uniquement avec votre permission explicite</li>
+                <li>Aucun partage de données avec des tiers à des fins publicitaires sans consentement</li>
+                <li>Chiffrement des données en transit et au repos</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">11. Permissions de l'application</h3>
+              <p className="text-muted-foreground">
+                ReVivo peut demander les permissions suivantes :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li><strong>Appareil photo/Photos :</strong> Pour ajouter des images à vos annonces</li>
+                <li><strong>Localisation :</strong> Pour filtrer les annonces près de vous (optionnel)</li>
+                <li><strong>Notifications :</strong> Pour vous informer des messages et activités</li>
+                <li><strong>Stockage :</strong> Pour sauvegarder temporairement des images</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                Vous pouvez gérer ces permissions à tout moment dans les paramètres de votre appareil.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">12. Modifications de la politique</h3>
+              <p className="text-muted-foreground">
+                Nous pouvons modifier cette politique de confidentialité à tout moment. Les changements importants seront notifiés par :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Notification dans l'application</li>
+                <li>Email à votre adresse enregistrée</li>
+                <li>Alerte lors de votre prochaine connexion</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                La date de dernière mise à jour est indiquée en haut de ce document.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">13. Contact et réclamations</h3>
+              <p className="text-muted-foreground">
+                Pour toute question concernant cette politique de confidentialité ou pour exercer vos droits :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Email : privacy@revivo.com</li>
+                <li>Via les paramètres de votre compte</li>
+                <li>Centre d'aide dans l'application</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                Vous avez également le droit de déposer une réclamation auprès de l'autorité de protection des données de votre pays si vous estimez que vos droits ne sont pas respectés.
               </p>
             </section>
           </div>

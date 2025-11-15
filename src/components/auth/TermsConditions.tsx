@@ -79,53 +79,141 @@ export const TermsConditions = ({ open, onOpenChange }: TermsConditionsProps) =>
             </section>
 
             <section>
-              <h3 className="font-semibold text-base mb-2">6. Comportement interdit</h3>
+              <h3 className="font-semibold text-base mb-2">6. Comportements interdits</h3>
               <p className="text-muted-foreground">
                 Il est strictement interdit de :
               </p>
               <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
-                <li>Publier du contenu illégal ou frauduleux</li>
-                <li>Usurper l'identité d'une autre personne</li>
-                <li>Harceler ou menacer d'autres utilisateurs</li>
-                <li>Utiliser la plateforme à des fins illégales</li>
-                <li>Contourner les mesures de sécurité</li>
-                <li>Collecter des données d'autres utilisateurs sans autorisation</li>
+                <li>Utiliser la plateforme à des fins frauduleuses ou illégales</li>
+                <li>Publier du contenu illégal, offensant, diffamatoire ou discriminatoire</li>
+                <li>Harceler, menacer ou intimider d'autres utilisateurs</li>
+                <li>Créer plusieurs comptes pour contourner les restrictions</li>
+                <li>Utiliser des systèmes automatisés (bots) pour collecter des données</li>
+                <li>Vendre des articles contrefaits, volés ou interdits par la loi</li>
+                <li>Manipuler les prix ou les évaluations</li>
+                <li>Usurper l'identité d'une autre personne ou entité</li>
               </ul>
             </section>
 
             <section>
               <h3 className="font-semibold text-base mb-2">7. Propriété intellectuelle</h3>
               <p className="text-muted-foreground">
-                Tous les éléments de la plateforme ReVivo (logo, design, code) sont protégés par les droits de propriété intellectuelle. Vous conservez les droits sur le contenu que vous publiez, mais accordez à ReVivo une licence pour afficher ce contenu sur la plateforme.
+                Tout le contenu de ReVivo (logo, design, interface, textes, graphiques, etc.) est protégé par les droits de propriété intellectuelle. Vous ne pouvez pas utiliser, copier, reproduire ou distribuer ce contenu sans autorisation écrite préalable. En publiant du contenu sur ReVivo, vous accordez à la plateforme une licence non exclusive pour afficher et distribuer ce contenu.
               </p>
             </section>
 
             <section>
-              <h3 className="font-semibold text-base mb-2">8. Résiliation</h3>
+              <h3 className="font-semibold text-base mb-2">8. Modération et suppression de contenu</h3>
               <p className="text-muted-foreground">
-                Nous nous réservons le droit de suspendre ou de résilier votre compte en cas de violation de ces conditions, sans préavis. Vous pouvez également supprimer votre compte à tout moment depuis les paramètres.
+                ReVivo se réserve le droit de modérer, modifier ou supprimer tout contenu qui viole ces conditions ou les lois en vigueur. Nous pouvons également suspendre ou supprimer des annonces sans préavis si nécessaire pour protéger la communauté.
               </p>
             </section>
 
             <section>
-              <h3 className="font-semibold text-base mb-2">9. Limitation de responsabilité</h3>
+              <h3 className="font-semibold text-base mb-2">9. Sécurité des transactions</h3>
               <p className="text-muted-foreground">
-                ReVivo ne peut être tenu responsable des transactions entre utilisateurs, de la qualité des articles, des retards de livraison, ou de tout dommage résultant de l'utilisation de la plateforme.
+                ReVivo recommande fortement de :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Rencontrer les vendeurs dans des lieux publics et sûrs</li>
+                <li>Inspecter les articles avant tout paiement</li>
+                <li>Ne jamais partager vos informations bancaires par messagerie</li>
+                <li>Signaler tout comportement suspect immédiatement</li>
+                <li>Utiliser des méthodes de paiement sécurisées</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">10. Résiliation du compte</h3>
+              <p className="text-muted-foreground">
+                Nous nous réservons le droit de suspendre ou de résilier votre compte à tout moment, sans préavis, en cas de :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Violation de ces conditions d'utilisation</li>
+                <li>Activité frauduleuse ou illégale</li>
+                <li>Comportement nuisible envers d'autres utilisateurs</li>
+                <li>Non-paiement des frais applicables</li>
+                <li>Inactivité prolongée du compte</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                Vous pouvez également supprimer votre compte à tout moment depuis les paramètres. La suppression entraîne la perte définitive de toutes vos données.
               </p>
             </section>
 
             <section>
-              <h3 className="font-semibold text-base mb-2">10. Modifications des conditions</h3>
+              <h3 className="font-semibold text-base mb-2">11. Limitation de responsabilité</h3>
               <p className="text-muted-foreground">
-                Nous nous réservons le droit de modifier ces conditions à tout moment. Les modifications seront effectives dès leur publication sur la plateforme. Votre utilisation continue de ReVivo après ces modifications constitue votre acceptation des nouvelles conditions.
+                ReVivo agit uniquement comme intermédiaire entre acheteurs et vendeurs. Nous ne pouvons être tenus responsables de :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>La qualité, la sécurité ou la légalité des articles vendus</li>
+                <li>L'exactitude des descriptions fournies par les utilisateurs</li>
+                <li>Les dommages directs ou indirects liés aux transactions</li>
+                <li>Les pertes financières résultant de fraudes entre utilisateurs</li>
+                <li>Les interruptions temporaires du service</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">12. Conformité légale (iOS & Android)</h3>
+              <p className="text-muted-foreground">
+                Cette application respecte les directives des plateformes :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Apple App Store Guidelines - Conforme aux règles de contenu et de sécurité</li>
+                <li>Google Play Store Policies - Respect des politiques de contenu généré par les utilisateurs</li>
+                <li>Protection des mineurs - Interdiction aux moins de 18 ans sans autorisation parentale</li>
+                <li>Vérification d'âge requise pour certaines catégories de produits</li>
+                <li>Signalement et modération du contenu inapproprié</li>
+              </ul>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">13. Achats intégrés et paiements</h3>
+              <p className="text-muted-foreground">
+                Les transactions sur ReVivo s'effectuent directement entre utilisateurs. Aucun achat intégré n'est effectué via l'App Store ou Google Play. ReVivo peut proposer des services premium (badges vérifiés, mises en avant d'annonces) qui seront clairement indiqués avec leur prix.
               </p>
             </section>
 
             <section>
-              <h3 className="font-semibold text-base mb-2">11. Contact</h3>
+              <h3 className="font-semibold text-base mb-2">14. Confidentialité et données personnelles</h3>
               <p className="text-muted-foreground">
-                Pour toute question concernant ces conditions, veuillez nous contacter via les paramètres de votre compte.
+                L'utilisation de vos données personnelles est régie par notre Politique de Confidentialité. En utilisant ReVivo, vous acceptez notre traitement des données conformément au RGPD et aux lois sur la protection des données applicables.
               </p>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">15. Modification des conditions</h3>
+              <p className="text-muted-foreground">
+                Nous nous réservons le droit de modifier ces conditions à tout moment. Les modifications importantes seront communiquées par :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Notification dans l'application</li>
+                <li>Email à l'adresse enregistrée</li>
+                <li>Message lors de votre prochaine connexion</li>
+              </ul>
+              <p className="text-muted-foreground mt-2">
+                L'utilisation continue de la plateforme après modification constitue votre acceptation des nouvelles conditions.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">16. Droit applicable et juridiction</h3>
+              <p className="text-muted-foreground">
+                Ces conditions sont régies par les lois en vigueur dans votre pays de résidence. Tout litige sera soumis aux tribunaux compétents de votre juridiction.
+              </p>
+            </section>
+
+            <section>
+              <h3 className="font-semibold text-base mb-2">17. Contact et support</h3>
+              <p className="text-muted-foreground">
+                Pour toute question concernant ces conditions d'utilisation, vous pouvez nous contacter via :
+              </p>
+              <ul className="list-disc list-inside text-muted-foreground mt-2 space-y-1">
+                <li>Le centre d'aide dans l'application</li>
+                <li>Email : support@revivo.com</li>
+                <li>Les paramètres de votre compte</li>
+              </ul>
             </section>
           </div>
         </ScrollArea>
