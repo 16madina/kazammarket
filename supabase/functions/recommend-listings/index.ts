@@ -35,6 +35,15 @@ serve(async (req) => {
       });
     }
 
+    // Récupérer le profil utilisateur pour le filtrage géographique
+    const { data: userProfile } = await supabase
+      .from("profiles")
+      .select("city, country")
+      .eq("id", user.id)
+      .single();
+
+    console.log("User profile:", userProfile);
+
     // Récupérer les favoris de l'utilisateur
     const { data: favorites } = await supabase
       .from("favorites")
@@ -50,7 +59,21 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .limit(10);
 
-    // Récupérer toutes les catégories actives
+    // Fonction pour déterminer la priorité géographique
+    const getLocationPriority = (location: string) => {
+      const [city, country] = location.split(',').map(s => s.trim());
+      
+      if (userProfile?.city && city && city.toLowerCase() === userProfile.city.toLowerCase()) {
+        return 0; // same-city
+      }
+      if (userProfile?.country && country && country.toLowerCase() === userProfile.country.toLowerCase()) {
+        return 1; // same-country
+      }
+      // Ne pas recommander les pays voisins ou autres
+      return 999; // other
+    };
+
+    // Récupérer toutes les annonces actives
     const { data: allListings } = await supabase
       .from("listings")
       .select(`
@@ -67,9 +90,22 @@ serve(async (req) => {
       .eq("status", "active")
       .neq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(50);
+      .limit(100);
 
-    if (!allListings || allListings.length === 0) {
+    // Filtrer pour ne garder que les annonces du même pays
+    const filteredListings = allListings?.filter(listing => {
+      const priority = getLocationPriority(listing.location);
+      return priority < 999; // Garder seulement same-city et same-country
+    }) || [];
+
+    // Trier par priorité géographique
+    const sortedListings = filteredListings.sort((a, b) => {
+      return getLocationPriority(a.location) - getLocationPriority(b.location);
+    });
+
+    console.log(`Total listings: ${allListings?.length}, Filtered: ${filteredListings.length}`);
+
+    if (!sortedListings || sortedListings.length === 0) {
       return new Response(JSON.stringify({ recommendations: [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -82,12 +118,17 @@ serve(async (req) => {
       category: f.listing?.categories?.name,
     })) || [];
 
-    const listingsContext = allListings.map((l: any) => ({
+    const listingsContext = sortedListings.map((l: any) => ({
       id: l.id,
       title: l.title,
       category: l.categories?.name,
       description: l.description?.substring(0, 100),
+      location: l.location,
     }));
+
+    const userLocation = userProfile?.city && userProfile?.country 
+      ? `${userProfile.city}, ${userProfile.country}`
+      : userProfile?.country || "non spécifié";
 
     // Appeler Lovable AI pour obtenir des recommandations
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -101,18 +142,28 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `Tu es un système de recommandation pour une plateforme de vente d'occasion. 
-Analyse les préférences de l'utilisateur basées sur ses favoris et recommande 5 annonces pertinentes parmi la liste disponible.
+            content: `Tu es un système de recommandation pour une plateforme de vente d'occasion en Afrique de l'Ouest. 
+L'utilisateur se trouve à: ${userLocation}
+
+RÈGLES IMPORTANTES:
+- Privilégie ABSOLUMENT les annonces de la même ville en priorité
+- Ensuite, privilégie les annonces du même pays
+- NE RECOMMANDE JAMAIS d'annonces d'autres pays
+- Les annonces sont déjà pré-filtrées géographiquement
+
+Analyse les préférences de l'utilisateur basées sur ses favoris et recommande jusqu'à 5 annonces pertinentes.
 Retourne uniquement un tableau JSON avec les IDs des annonces recommandées dans l'ordre de pertinence.
 Format: {"recommendations": ["id1", "id2", "id3", "id4", "id5"]}`
           },
           {
             role: "user",
-            content: `Favoris de l'utilisateur: ${JSON.stringify(favoritesContext)}
-            
-Annonces disponibles: ${JSON.stringify(listingsContext)}
+            content: `Localisation utilisateur: ${userLocation}
 
-Recommande 5 annonces qui correspondent le mieux aux intérêts de l'utilisateur.`
+Favoris de l'utilisateur: ${JSON.stringify(favoritesContext)}
+            
+Annonces disponibles (déjà filtrées par localisation): ${JSON.stringify(listingsContext)}
+
+Recommande jusqu'à 5 annonces qui correspondent le mieux aux intérêts de l'utilisateur, en privilégiant la proximité géographique.`
           }
         ],
         tools: [

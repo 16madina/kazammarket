@@ -36,7 +36,7 @@ const RecommendedListings = () => {
   });
 
   const { data: recommendations, isLoading } = useQuery({
-    queryKey: ["recommendations", user?.id],
+    queryKey: ["recommendations", user?.id, userProfile?.city, userProfile?.country],
     queryFn: async () => {
       if (!user) return null;
 
@@ -51,7 +51,35 @@ const RecommendedListings = () => {
         return null;
       }
 
-      return data?.recommendations || [];
+      const recs = data?.recommendations || [];
+
+      // Filtrage post-recommandation : ne garder que les annonces du même pays
+      const filteredRecs = recs.filter((listing: any) => {
+        const locationInfo = getLocationPriority(
+          listing.location,
+          userProfile?.city || null,
+          userProfile?.country || null
+        );
+        // Garder uniquement same-city et same-country
+        return locationInfo.priority === 'same-city' || locationInfo.priority === 'same-country';
+      });
+
+      // Trier par priorité géographique
+      const sortedRecs = filteredRecs.sort((a: any, b: any) => {
+        const priorityA = getLocationPriority(a.location, userProfile?.city || null, userProfile?.country || null);
+        const priorityB = getLocationPriority(b.location, userProfile?.city || null, userProfile?.country || null);
+        
+        const priorityOrder = {
+          'same-city': 0,
+          'same-country': 1,
+          'neighboring-country': 2,
+          'other': 3
+        };
+        
+        return priorityOrder[priorityA.priority] - priorityOrder[priorityB.priority];
+      });
+
+      return sortedRecs;
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5 minutes
