@@ -13,9 +13,13 @@ interface LocationMapProps {
 const LocationMap = ({ location }: LocationMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>(import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || '');
+  const [mapboxToken, setMapboxToken] = useState<string>(() => {
+    return localStorage.getItem('mapbox_token') || import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || '';
+  });
   const [tokenInput, setTokenInput] = useState<string>('');
-  const [showTokenInput, setShowTokenInput] = useState<boolean>(!import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN);
+  const [showTokenInput, setShowTokenInput] = useState<boolean>(() => {
+    return !localStorage.getItem('mapbox_token') && !import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
+  });
 
   useEffect(() => {
     if (!mapContainer.current || !mapboxToken) return;
@@ -71,6 +75,7 @@ const LocationMap = ({ location }: LocationMapProps) => {
 
   const handleTokenSubmit = () => {
     if (tokenInput.trim()) {
+      localStorage.setItem('mapbox_token', tokenInput.trim());
       setMapboxToken(tokenInput.trim());
       setShowTokenInput(false);
     }
