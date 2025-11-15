@@ -1,8 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 interface LocationMapProps {
   location: string;
@@ -11,9 +13,12 @@ interface LocationMapProps {
 const LocationMap = ({ location }: LocationMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
+  const [mapboxToken, setMapboxToken] = useState<string>(import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN || '');
+  const [tokenInput, setTokenInput] = useState<string>('');
+  const [showTokenInput, setShowTokenInput] = useState<boolean>(!import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN);
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current || !mapboxToken) return;
 
     // Geocode location to coordinates (simple approach for West African cities)
     const getCoordinates = (loc: string): [number, number] => {
@@ -40,15 +45,8 @@ const LocationMap = ({ location }: LocationMapProps) => {
 
     const coordinates = getCoordinates(location);
 
-    // Initialize map with token from environment
-    const token = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
-    
-    if (!token) {
-      console.error('VITE_MAPBOX_PUBLIC_TOKEN n\'est pas défini');
-      return;
-    }
-
-    mapboxgl.accessToken = token;
+    // Initialize map with token
+    mapboxgl.accessToken = mapboxToken;
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -69,7 +67,14 @@ const LocationMap = ({ location }: LocationMapProps) => {
     return () => {
       map.current?.remove();
     };
-  }, [location]);
+  }, [location, mapboxToken]);
+
+  const handleTokenSubmit = () => {
+    if (tokenInput.trim()) {
+      setMapboxToken(tokenInput.trim());
+      setShowTokenInput(false);
+    }
+  };
 
   return (
     <Card>
@@ -79,8 +84,37 @@ const LocationMap = ({ location }: LocationMapProps) => {
           Localisation
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
-        <div ref={mapContainer} className="h-64 w-full rounded-b-lg" />
+      <CardContent className="p-4">
+        {showTokenInput ? (
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Pour afficher la carte, veuillez entrer votre token Mapbox public.
+              Vous pouvez l'obtenir gratuitement sur{' '}
+              <a 
+                href="https://mapbox.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-primary underline"
+              >
+                mapbox.com
+              </a>
+            </p>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="pk.eyJ1Ijoi..."
+                value={tokenInput}
+                onChange={(e) => setTokenInput(e.target.value)}
+                className="flex-1"
+              />
+              <Button onClick={handleTokenSubmit}>
+                Afficher
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div ref={mapContainer} className="h-64 w-full rounded-lg" />
+        )}
       </CardContent>
     </Card>
   );
