@@ -27,13 +27,11 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
-import { DeleteAccountDialog } from "@/components/settings/DeleteAccountDialog";
 
 const Settings = () => {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
-  const [deleteAccountDialogOpen, setDeleteAccountDialogOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
@@ -197,7 +195,7 @@ const Settings = () => {
             <SettingItem
               icon={SettingsIcon}
               label="Gérer le compte"
-              onClick={() => setDeleteAccountDialogOpen(true)}
+              onClick={() => navigate("/account-management")}
             />
             <div className="border-t" />
             <SettingItem
@@ -319,11 +317,6 @@ const Settings = () => {
       <NotificationSettings 
         open={notificationDialogOpen} 
         onOpenChange={setNotificationDialogOpen}
-      />
-
-      <DeleteAccountDialog
-        open={deleteAccountDialogOpen}
-        onOpenChange={setDeleteAccountDialogOpen}
       />
 
       <BottomNav />
