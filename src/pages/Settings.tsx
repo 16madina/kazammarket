@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import BottomNav from "@/components/BottomNav";
 import { toast } from "sonner";
 import {
@@ -24,9 +26,57 @@ import {
   ArrowLeft
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { NotificationSettings } from "@/components/settings/NotificationSettings";
 
 const Settings = () => {
   const navigate = useNavigate();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    checkAuth();
+
+    // Check for dark mode preference
+    const isDark = document.documentElement.classList.contains('dark');
+    setDarkMode(isDark);
+  }, []);
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    if (newMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+    toast.success(`Mode ${newMode ? 'sombre' : 'clair'} activé`);
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'ReVivo',
+          text: 'Découvrez ReVivo - Achetez et vendez facilement !',
+          url: window.location.origin
+        });
+      } catch (err) {
+        console.log('Erreur de partage:', err);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.origin);
+      toast.success('Lien copié dans le presse-papiers');
+    }
+  };
 
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -79,14 +129,14 @@ const Settings = () => {
           <SettingItem
             icon={User}
             label="Ma page publique"
-            onClick={() => toast.info("Fonctionnalité à venir")}
+            onClick={() => userId ? navigate(`/seller/${userId}`) : navigate("/auth")}
           />
         </Card>
 
         <div className="grid grid-cols-2 gap-4">
           <Card className="overflow-hidden">
             <button
-              onClick={() => toast.info("Fonctionnalité à venir")}
+              onClick={() => navigate("/favorites")}
               className="w-full flex items-center justify-between p-4 hover:bg-muted/50"
             >
               <div className="flex items-center gap-3">
@@ -126,14 +176,14 @@ const Settings = () => {
             <SettingItem
               icon={UserCircle}
               label="Détails personnels"
-              onClick={() => toast.info("Fonctionnalité à venir")}
+              onClick={() => navigate("/edit-profile")}
               highlight={true}
             />
             <div className="border-t" />
             <SettingItem
               icon={Share2}
-              label="Liens vers les médias sociaux"
-              onClick={() => toast.info("Fonctionnalité à venir")}
+              label="Partager ReVivo"
+              onClick={handleShare}
             />
           </Card>
         </div>
@@ -145,13 +195,13 @@ const Settings = () => {
             <SettingItem
               icon={SettingsIcon}
               label="Gérer le compte"
-              onClick={() => toast.info("Fonctionnalité à venir")}
+              onClick={() => navigate("/edit-profile")}
             />
             <div className="border-t" />
             <SettingItem
               icon={Bell}
               label="Préférences de notifications"
-              onClick={() => toast.info("Fonctionnalité à venir")}
+              onClick={() => setNotificationDialogOpen(true)}
             />
           </Card>
         </div>
@@ -163,19 +213,19 @@ const Settings = () => {
             <SettingItem
               icon={FileText}
               label="Conditions d'utilisation"
-              onClick={() => toast.info("Fonctionnalité à venir")}
+              onClick={() => navigate("/auth?view=terms")}
             />
             <div className="border-t" />
             <SettingItem
               icon={Shield}
               label="Politique de confidentialité"
-              onClick={() => toast.info("Fonctionnalité à venir")}
+              onClick={() => navigate("/auth?view=privacy")}
             />
             <div className="border-t" />
             <SettingItem
               icon={HelpCircle}
               label="Aide"
-              onClick={() => toast.info("Fonctionnalité à venir")}
+              onClick={() => navigate("/help")}
             />
           </Card>
         </div>
@@ -237,12 +287,14 @@ const Settings = () => {
         {/* Paramètres d'affichage */}
         <div className="space-y-2">
           <h2 className="text-sm font-semibold text-muted-foreground px-1">Paramètres d'affichage</h2>
-          <Card className="overflow-hidden">
-            <SettingItem
-              icon={Palette}
-              label="Thème de l'application"
-              onClick={() => toast.info("Fonctionnalité à venir")}
-            />
+          <Card className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">Mode sombre</span>
+              </div>
+              <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
+            </div>
           </Card>
         </div>
 
@@ -261,6 +313,11 @@ const Settings = () => {
           Version 19.70.1
         </div>
       </div>
+
+      <NotificationSettings 
+        open={notificationDialogOpen} 
+        onOpenChange={setNotificationDialogOpen}
+      />
 
       <BottomNav />
     </div>
