@@ -1,4 +1,4 @@
-import { Home, Grid3x3, PlusCircle, MessageCircle, User } from "lucide-react";
+import { House, LayoutGrid, CirclePlus, MessagesSquare, CircleUserRound } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -18,11 +18,11 @@ const BottomNav = () => {
   const { unreadCount } = useUnreadMessages(user?.id);
 
   const navItems = [
-    { to: "/", icon: Home, label: "Accueil" },
-    { to: "/categories", icon: Grid3x3, label: "Catégories" },
-    { to: "/publish", icon: PlusCircle, label: "Publier" },
-    { to: "/messages", icon: MessageCircle, label: "Messages", badge: unreadCount },
-    { to: "/profile", icon: User, label: "Profil" },
+    { to: "/", icon: House, label: "Accueil" },
+    { to: "/categories", icon: LayoutGrid, label: "Catégories" },
+    { to: "/publish", icon: CirclePlus, label: "Publier" },
+    { to: "/messages", icon: MessagesSquare, label: "Messages", badge: unreadCount },
+    { to: "/profile", icon: CircleUserRound, label: "Profil" },
   ];
 
   return (
@@ -30,8 +30,8 @@ const BottomNav = () => {
       {/* Glassmorphism background with gradient */}
       <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/90 to-background/80 backdrop-blur-xl border-t border-border/50" />
       
-      <div className="relative max-w-screen-xl mx-auto px-2 pt-1 pb-safe">
-        <div className="flex items-center justify-around gap-1">
+      <div className="relative max-w-screen-xl mx-auto px-2 pb-safe">
+        <div className="flex items-center justify-around gap-0.5 py-1">
           {navItems.map(({ to, icon: Icon, label, badge }) => (
             <NavLink
               key={to}
@@ -42,7 +42,7 @@ const BottomNav = () => {
               {({ isActive }) => (
                 <div
                   className={cn(
-                    "flex flex-col items-center justify-center gap-0.5 py-1.5 px-2 rounded-2xl transition-all duration-200",
+                    "flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-2xl transition-all duration-200",
                     "hover:scale-105 active:scale-90 active:bg-primary/20",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-warm"
@@ -52,7 +52,7 @@ const BottomNav = () => {
                   <div className="relative">
                     <Icon
                       className={cn(
-                        "h-6 w-6 transition-all duration-200",
+                        "h-5 w-5 transition-all duration-200",
                         isActive && "drop-shadow-sm animate-scale-in"
                       )}
                       strokeWidth={isActive ? 2.5 : 2}
