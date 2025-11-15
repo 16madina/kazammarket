@@ -18,6 +18,7 @@ import { PriceOfferCard } from "./PriceOfferCard";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { usePresence } from "@/hooks/usePresence";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -29,6 +30,7 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
   const [isTyping, setIsTyping] = useState(false);
   const [otherUserTyping, setOtherUserTyping] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { toast } = useToast();
@@ -442,7 +444,8 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
                         <img 
                           src={msg.media_url} 
                           alt="Shared media"
-                          className="rounded-lg max-h-64 object-cover"
+                          className="rounded-lg max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => setSelectedImage(msg.media_url)}
                         />
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(new Date(msg.created_at), {
@@ -567,6 +570,19 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Image Viewer Dialog */}
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-black/95">
+          {selectedImage && (
+            <img 
+              src={selectedImage} 
+              alt="Vue agrandie"
+              className="w-full h-auto max-h-[90vh] object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
