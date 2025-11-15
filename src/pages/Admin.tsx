@@ -84,6 +84,41 @@ const Admin = () => {
     enabled: isAdmin,
   });
 
+  // Fetch all reports
+  const { data: reports, refetch: refetchReports } = useQuery({
+    queryKey: ["admin-reports"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reports")
+        .select(`
+          *,
+          listings(id, title, images, price)
+        `)
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      
+      // Fetch reporter profiles separately
+      if (data && data.length > 0) {
+        const reporterIds = data.map(r => r.reporter_id);
+        const { data: profilesData } = await supabase
+          .from("profiles")
+          .select("id, full_name, phone")
+          .in("id", reporterIds);
+        
+        const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+        
+        return data.map(report => ({
+          ...report,
+          reporter_profile: profilesMap.get(report.reporter_id)
+        })) as any;
+      }
+      
+      return data as any;
+    },
+    enabled: isAdmin,
+  });
+
   const handleBanUser = async (userId: string) => {
     const { error } = await supabase
       .from("profiles")
@@ -175,6 +210,45 @@ const Admin = () => {
     toast.info(`SMS à envoyer au: ${phone}`);
   };
 
+  const handleResolveReport = async (reportId: string) => {
+    const { error } = await supabase
+      .from("reports")
+      .update({
+        status: "resolved",
+        resolved_at: new Date().toISOString(),
+        resolved_by: user?.id,
+      })
+      .eq("id", reportId);
+
+    if (error) {
+      toast.error("Erreur lors de la résolution");
+      return;
+    }
+
+    toast.success("Signalement résolu");
+    refetchReports();
+  };
+
+  const handleDismissReport = async (reportId: string, notes: string) => {
+    const { error } = await supabase
+      .from("reports")
+      .update({
+        status: "dismissed",
+        resolved_at: new Date().toISOString(),
+        resolved_by: user?.id,
+        admin_notes: notes,
+      })
+      .eq("id", reportId);
+
+    if (error) {
+      toast.error("Erreur lors du rejet");
+      return;
+    }
+
+    toast.success("Signalement rejeté");
+    refetchReports();
+  };
+
   if (!isAdmin) {
     return <div className="flex items-center justify-center min-h-screen">Chargement...</div>;
   }
@@ -188,7 +262,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Utilisateurs
@@ -196,6 +270,10 @@ const Admin = () => {
             <TabsTrigger value="listings" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Annonces
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4" />
+              Signalements
             </TabsTrigger>
           </TabsList>
 
@@ -422,6 +500,127 @@ const Admin = () => {
                     </div>
                   </Card>
                 ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Reports Tab */}
+          <TabsContent value="reports" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Tous les signalements ({reports?.length || 0})</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {reports?.map((report) => (
+                  <Card key={report.id} className="p-4">
+                    <div className="flex gap-4">
+                      <img
+                        src={report.listings?.images?.[0] || "/placeholder.svg"}
+                        alt={report.listings?.title}
+                        className="w-24 h-24 object-cover rounded-md"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-semibold">{report.listings?.title}</h3>
+                            <p className="text-lg font-bold text-primary">
+                              {report.listings?.price > 0 ? `${report.listings.price.toLocaleString()} FCFA` : "Gratuit"}
+                            </p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant={
+                                report.status === "resolved" ? "default" :
+                                report.status === "dismissed" ? "secondary" :
+                                report.status === "reviewing" ? "outline" :
+                                "destructive"
+                              }>
+                                {report.status === "resolved" ? "Résolu" :
+                                 report.status === "dismissed" ? "Rejeté" :
+                                 report.status === "reviewing" ? "En cours" :
+                                 "En attente"}
+                              </Badge>
+                              <Badge variant="outline">
+                                {report.reason === "inappropriate" ? "Contenu inapproprié" :
+                                 report.reason === "scam" ? "Arnaque" :
+                                 report.reason === "spam" ? "Spam" :
+                                 report.reason === "fake" ? "Contrefait" :
+                                 report.reason === "misleading" ? "Trompeur" :
+                                 "Autre"}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-2">
+                              Signalé par: {report.reporter_profile?.full_name || "Utilisateur"}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {new Date(report.created_at).toLocaleDateString()} à {new Date(report.created_at).toLocaleTimeString()}
+                            </p>
+                            <div className="mt-2 p-2 bg-muted rounded-md">
+                              <p className="text-sm"><strong>Détails:</strong> {report.description}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/listing/${report.listing_id}`)}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Voir annonce
+                            </Button>
+                            {report.status === "pending" && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => handleResolveReport(report.id)}
+                                >
+                                  <CheckCircle className="h-3 w-3 mr-1" />
+                                  Résoudre
+                                </Button>
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline">
+                                      <XCircle className="h-3 w-3 mr-1" />
+                                      Rejeter
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Rejeter le signalement</DialogTitle>
+                                      <DialogDescription>
+                                        Indiquez pourquoi ce signalement n'est pas valide:
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <Textarea
+                                      placeholder="Notes administratives..."
+                                      value={messageContent}
+                                      onChange={(e) => setMessageContent(e.target.value)}
+                                    />
+                                    <DialogFooter>
+                                      <Button
+                                        variant="outline"
+                                        onClick={() => {
+                                          handleDismissReport(report.id, messageContent);
+                                          setMessageContent("");
+                                        }}
+                                      >
+                                        Confirmer le rejet
+                                      </Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+                {(!reports || reports.length === 0) && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Aucun signalement pour le moment
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

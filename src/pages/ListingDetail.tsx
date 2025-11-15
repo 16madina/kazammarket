@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ImageGallery } from "@/components/listing/ImageGallery";
 import { SellerProfile } from "@/components/listing/SellerProfile";
 import { FavoriteButton } from "@/components/listing/FavoriteButton";
+import { ReportDialog } from "@/components/listing/ReportDialog";
 import LocationMap from "@/components/listing/LocationMap";
 import { ArrowLeft, MapPin, Eye, MessageCircle, Share2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
@@ -202,6 +203,7 @@ const ListingDetail = () => {
                   </div>
                   <div className="flex gap-2">
                     <FavoriteButton listingId={listing.id} />
+                    <ReportDialog listingId={listing.id} />
                     <Button variant="outline" size="icon" onClick={handleShare}>
                       <Share2 className="h-5 w-5" />
                     </Button>
