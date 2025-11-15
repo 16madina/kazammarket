@@ -38,42 +38,65 @@ const Messages = () => {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen pb-24 bg-muted/30">
-      <div className="max-w-screen-xl mx-auto p-4 md:p-6">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(-1)}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+    <div className="min-h-screen pb-16 md:pb-0 bg-muted/30">
+      <div className="max-w-screen-xl mx-auto h-screen flex flex-col">
+        {/* Header - Hidden on mobile when chat is open */}
+        <div className={`${selectedConversationId ? 'hidden md:block' : 'block'} bg-card border-b border-border p-4`}>
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="md:inline-flex"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold">Messages</h1>
+          </div>
+        </div>
 
-        <h1 className="text-3xl font-bold mb-6">Messages</h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Conversation list */}
-          <Card className="p-4 lg:col-span-1">
-            <ConversationList
-              userId={user.id}
-              onSelectConversation={setSelectedConversationId}
-              selectedConversationId={selectedConversationId || undefined}
-            />
-          </Card>
-
-          {/* Chat window */}
-          <Card className="lg:col-span-2 overflow-hidden">
-            {selectedConversationId ? (
-              <ChatWindow
-                conversationId={selectedConversationId}
+        {/* Main content area */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Conversation list - Full width on mobile, sidebar on desktop */}
+          <div className={`${
+            selectedConversationId ? 'hidden md:flex' : 'flex'
+          } w-full md:w-96 flex-shrink-0 border-r border-border bg-card overflow-hidden`}>
+            <div className="flex-1 overflow-y-auto">
+              <ConversationList
                 userId={user.id}
+                onSelectConversation={setSelectedConversationId}
+                selectedConversationId={selectedConversationId || undefined}
               />
+            </div>
+          </div>
+
+          {/* Chat window - Full width on mobile when selected, beside list on desktop */}
+          <div className={`${
+            selectedConversationId ? 'flex' : 'hidden md:flex'
+          } flex-1 bg-card overflow-hidden`}>
+            {selectedConversationId ? (
+              <div className="flex-1 flex flex-col">
+                {/* Mobile back button */}
+                <div className="md:hidden flex items-center gap-2 p-3 border-b border-border bg-card">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedConversationId(null)}
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                </div>
+                <ChatWindow
+                  conversationId={selectedConversationId}
+                  userId={user.id}
+                />
+              </div>
             ) : (
-              <div className="h-[600px] flex items-center justify-center text-muted-foreground">
+              <div className="hidden md:flex flex-1 items-center justify-center text-muted-foreground">
                 <p>Sélectionnez une conversation pour commencer</p>
               </div>
             )}
-          </Card>
+          </div>
         </div>
       </div>
       <BottomNav />
