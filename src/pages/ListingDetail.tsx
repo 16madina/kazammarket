@@ -14,6 +14,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import BottomNav from "@/components/BottomNav";
 import { addToRecentlyViewed } from "@/utils/recentlyViewed";
+import { translateCondition } from "@/utils/translations";
 import { useEffect } from "react";
 
 const ListingDetail = () => {
@@ -141,13 +142,6 @@ const ListingDetail = () => {
     );
   }
 
-  const conditionLabels: Record<string, string> = {
-    new: "Neuf",
-    like_new: "Comme neuf",
-    good: "Bon état",
-    fair: "État moyen",
-  };
-
   return (
     <div className="min-h-screen pb-24 bg-muted/30">
       <div className="max-w-screen-xl mx-auto p-4 md:p-6">
@@ -179,7 +173,7 @@ const ListingDetail = () => {
                       <Badge>{listing.categories?.name}</Badge>
                       {listing.condition && (
                         <Badge variant="outline">
-                          {conditionLabels[listing.condition]}
+                          {translateCondition(listing.condition)}
                         </Badge>
                       )}
                     </div>

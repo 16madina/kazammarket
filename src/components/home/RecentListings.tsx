@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { translateCondition } from "@/utils/translations";
 
 const RecentListings = () => {
   const { data: listings } = useQuery({
@@ -56,7 +57,7 @@ const RecentListings = () => {
                     </div>
                   )}
                   <Badge className="absolute top-2 left-2 bg-accent/90 text-accent-foreground backdrop-blur-sm text-xs">
-                    {listing.condition || "Comme neuf"}
+                    {translateCondition(listing.condition)}
                   </Badge>
                 </div>
                 <CardContent className="p-3">
