@@ -434,19 +434,23 @@ const Auth = () => {
                   : "Créer mon compte"}
               </Button>
 
-              <div className="text-center">
+              <div className="text-center pt-4 border-t">
+                <p className="text-sm text-muted-foreground mb-2">
+                  {isLogin
+                    ? "Pas encore de compte ?"
+                    : "Déjà un compte ?"}
+                </p>
                 <Button
                   type="button"
-                  variant="link"
+                  variant="outline"
                   onClick={() => {
                     setIsLogin(!isLogin);
                     setAcceptTerms(false);
                   }}
                   disabled={isLoading}
+                  className="w-full"
                 >
-                  {isLogin
-                    ? "Pas encore de compte ? Inscrivez-vous"
-                    : "Déjà un compte ? Connectez-vous"}
+                  {isLogin ? "Créer un compte" : "Se connecter"}
                 </Button>
               </div>
             </form>
