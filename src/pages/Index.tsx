@@ -31,10 +31,10 @@ const Index = () => {
     <div className="min-h-screen pb-20">
       <Header isAuthenticated={isAuthenticated} />
       <HeroSection />
+      <RecentlyViewed />
       <div className="px-4 py-4 flex justify-start">
         <FilterSheet />
       </div>
-      <RecentlyViewed />
       <div className="container mx-auto px-4">
         <RecommendedListings />
       </div>
