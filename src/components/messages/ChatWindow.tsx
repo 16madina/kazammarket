@@ -18,7 +18,6 @@ import { PriceOfferCard } from "./PriceOfferCard";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { usePresence } from "@/hooks/usePresence";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -572,17 +571,28 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
       </AlertDialog>
 
       {/* Image Viewer Dialog */}
-      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-        <DialogContent className="max-w-4xl w-full p-0 overflow-hidden bg-black/95">
-          {selectedImage && (
-            <img 
-              src={selectedImage} 
-              alt="Vue agrandie"
-              className="w-full h-auto max-h-[90vh] object-contain"
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <button
+            onClick={() => setSelectedImage(null)}
+            className="absolute top-4 right-4 text-white hover:text-white/80 transition-colors z-10"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <img 
+            src={selectedImage} 
+            alt="Vue agrandie"
+            className="max-w-full max-h-[90vh] object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 };
