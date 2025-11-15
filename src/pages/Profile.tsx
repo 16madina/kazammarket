@@ -160,11 +160,17 @@ const Profile = () => {
       {/* Tabs */}
       <div className="px-4">
         <Tabs defaultValue="listings" className="w-full">
-          <TabsList className="w-full grid grid-cols-2 mb-4">
-            <TabsTrigger value="listings">
+          <TabsList className="w-full grid grid-cols-2 mb-4 bg-muted/50 p-1 h-12">
+            <TabsTrigger 
+              value="listings"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold"
+            >
               Mes annonces ({(activeListings.length + soldListings.length) || 0})
             </TabsTrigger>
-            <TabsTrigger value="reviews">
+            <TabsTrigger 
+              value="reviews"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold"
+            >
               Mes avis (0)
             </TabsTrigger>
           </TabsList>
