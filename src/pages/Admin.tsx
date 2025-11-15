@@ -408,22 +408,22 @@ const Admin = () => {
               </CardHeader>
               <CardContent className="space-y-3">
                 {listings?.map((listing) => (
-                  <Card key={listing.id} className="p-4">
-                    <div className="flex gap-4">
+                  <Card key={listing.id} className="p-3">
+                    <div className="flex gap-3">
                       <img
                         src={listing.images?.[0] || "/placeholder.svg"}
                         alt={listing.title}
-                        className="w-24 h-24 object-cover rounded-md"
+                        className="w-16 h-16 object-cover rounded-md"
                       />
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-semibold">{listing.title}</h3>
-                            <p className="text-lg font-bold text-primary">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm truncate">{listing.title}</h3>
+                            <p className="text-sm font-bold text-primary">
                               {listing.price > 0 ? `${listing.price.toLocaleString()} FCFA` : "Gratuit"}
                             </p>
-                            <div className="flex gap-2 mt-2">
-                              <Badge variant={
+                            <div className="flex gap-1 mt-1 flex-wrap">
+                              <Badge className="text-xs py-0" variant={
                                 listing.moderation_status === "approved" ? "default" :
                                 listing.moderation_status === "rejected" ? "destructive" :
                                 "secondary"
@@ -432,19 +432,20 @@ const Admin = () => {
                                  listing.moderation_status === "rejected" ? "Rejeté" :
                                  "En attente"}
                               </Badge>
-                              <Badge variant="outline">{listing.categories?.name}</Badge>
+                              <Badge className="text-xs py-0" variant="outline">{listing.categories?.name}</Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground mt-2">
+                            <p className="text-xs text-muted-foreground mt-1">
                               Par: {listing.profiles?.full_name || "Utilisateur"}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                               Vues: {listing.views || 0} | Créé: {new Date(listing.created_at).toLocaleDateString()}
                             </p>
                           </div>
-                          <div className="flex flex-col gap-2">
+                          <div className="flex flex-col gap-1 shrink-0">
                             <Button
                               size="sm"
                               variant="outline"
+                              className="h-8 px-2"
                               onClick={() => navigate(`/listing/${listing.id}`)}
                             >
                               <Eye className="h-3 w-3 mr-1" />
@@ -454,6 +455,7 @@ const Admin = () => {
                               <Button
                                 size="sm"
                                 variant="default"
+                                className="h-8 px-2"
                                 onClick={() => handleApproveListing(listing.id)}
                               >
                                 <CheckCircle className="h-3 w-3 mr-1" />
@@ -462,7 +464,7 @@ const Admin = () => {
                             )}
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button size="sm" variant="destructive" onClick={() => setSelectedListing(listing)}>
+                                <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => setSelectedListing(listing)}>
                                   <XCircle className="h-3 w-3 mr-1" />
                                   Rejeter
                                 </Button>
