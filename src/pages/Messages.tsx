@@ -42,11 +42,11 @@ const Messages = () => {
       <div className="max-w-screen-xl mx-auto p-4 md:p-6">
         <Button
           variant="ghost"
+          size="icon"
           onClick={() => navigate(-1)}
           className="mb-4"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour
+          <ArrowLeft className="h-5 w-5" />
         </Button>
 
         <h1 className="text-3xl font-bold mb-6">Messages</h1>

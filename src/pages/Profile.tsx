@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BottomNav from "@/components/BottomNav";
 import { UserListingCard } from "@/components/profile/UserListingCard";
 import { toast } from "sonner";
-import { LogOut, Edit, Settings, Shield, Bell, Share2 } from "lucide-react";
+import { LogOut, Edit, Settings, Shield, Bell, Share2, ArrowLeft } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -89,6 +89,13 @@ const Profile = () => {
       {/* Header */}
       <div className="bg-background border-b sticky top-0 z-10">
         <div className="flex items-center justify-between p-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg" />
             <span className="font-bold text-xl">ReVivo</span>

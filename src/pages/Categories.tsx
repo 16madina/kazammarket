@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Search } from "lucide-react";
+import { MessageCircle, Search, ArrowLeft } from "lucide-react";
 
 // Import des images
 import gratuitImg from "@/assets/categories/gratuit.jpg";
@@ -149,7 +149,14 @@ const Categories = () => {
       {/* Header */}
       <div className="bg-background border-b sticky top-0 z-10">
         <div className="flex items-center justify-between p-4">
-          <h1 className="text-3xl font-bold">Marketplace</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <h1 className="text-2xl font-bold">Catégories</h1>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="relative">
               <MessageCircle className="h-5 w-5" />

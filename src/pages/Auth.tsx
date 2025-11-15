@@ -155,11 +155,11 @@ const Auth = () => {
       <div className="w-full max-w-2xl">
         <Button
           variant="ghost"
-          onClick={() => navigate("/")}
+          size="icon"
+          onClick={() => navigate(-1)}
           className="mb-4"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour à l'accueil
+          <ArrowLeft className="h-5 w-5" />
         </Button>
 
         <Card>
