@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocked_users: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocked_users_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocked_users_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
@@ -194,6 +230,11 @@ export type Database = {
           id: string
           is_read: boolean | null
           listing_id: string
+          location_lat: number | null
+          location_lng: number | null
+          location_name: string | null
+          media_url: string | null
+          message_type: string | null
           receiver_id: string
           sender_id: string
         }
@@ -204,6 +245,11 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           listing_id: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          media_url?: string | null
+          message_type?: string | null
           receiver_id: string
           sender_id: string
         }
@@ -214,6 +260,11 @@ export type Database = {
           id?: string
           is_read?: boolean | null
           listing_id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          location_name?: string | null
+          media_url?: string | null
+          message_type?: string | null
           receiver_id?: string
           sender_id?: string
         }
@@ -248,6 +299,81 @@ export type Database = {
           },
         ]
       }
+      price_offers: {
+        Row: {
+          amount: number
+          conversation_id: string
+          created_at: string
+          id: string
+          listing_id: string
+          message_id: string | null
+          receiver_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          conversation_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          message_id?: string | null
+          receiver_id: string
+          sender_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          message_id?: string | null
+          receiver_id?: string
+          sender_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_offers_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_offers_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_offers_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "price_offers_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -257,9 +383,12 @@ export type Database = {
           first_name: string | null
           full_name: string | null
           id: string
+          is_online: boolean | null
           last_name: string | null
+          last_seen: string | null
           location: string | null
           phone: string | null
+          typing_in_conversation: string | null
           updated_at: string
         }
         Insert: {
@@ -270,9 +399,12 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           id: string
+          is_online?: boolean | null
           last_name?: string | null
+          last_seen?: string | null
           location?: string | null
           phone?: string | null
+          typing_in_conversation?: string | null
           updated_at?: string
         }
         Update: {
@@ -283,12 +415,47 @@ export type Database = {
           first_name?: string | null
           full_name?: string | null
           id?: string
+          is_online?: boolean | null
           last_name?: string | null
+          last_seen?: string | null
           location?: string | null
           phone?: string | null
+          typing_in_conversation?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      quick_replies: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          order_index: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          order_index?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          order_index?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quick_replies_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
