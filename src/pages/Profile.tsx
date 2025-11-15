@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BottomNav from "@/components/BottomNav";
 import { UserListingCard } from "@/components/profile/UserListingCard";
+import { ReviewCard } from "@/components/profile/ReviewCard";
 import { toast } from "sonner";
 import { LogOut, Edit, Settings, Shield, Bell, Share2, ArrowLeft } from "lucide-react";
 
@@ -61,6 +62,24 @@ const Profile = () => {
           categories (name)
         `)
         .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const { data: reviews } = useQuery({
+    queryKey: ["user-reviews", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("reviews")
+        .select(`
+          *,
+          reviewer:profiles!reviewer_id(full_name, avatar_url)
+        `)
+        .eq("reviewee_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -178,7 +197,7 @@ const Profile = () => {
               value="reviews"
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold"
             >
-              Mes avis (0)
+              Mes avis ({reviews?.length || 0})
             </TabsTrigger>
           </TabsList>
 
@@ -215,10 +234,16 @@ const Profile = () => {
           </TabsContent>
 
           <TabsContent value="reviews" className="space-y-4">
-            <div className="text-center py-12 text-muted-foreground">
-              <p className="text-lg">Aucun avis</p>
-              <p className="text-sm mt-2">Les avis de vos acheteurs apparaîtront ici</p>
-            </div>
+            {!reviews || reviews.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <p className="text-lg">Aucun avis</p>
+                <p className="text-sm mt-2">Les avis de vos acheteurs apparaîtront ici</p>
+              </div>
+            ) : (
+              reviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))
+            )}
           </TabsContent>
         </Tabs>
       </div>

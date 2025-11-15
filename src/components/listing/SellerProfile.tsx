@@ -1,9 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Package } from "lucide-react";
+import { MapPin, Package, Star, Shield, TrendingUp, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 
 interface SellerProfileProps {
   userId: string;
@@ -56,13 +59,51 @@ export const SellerProfile = ({ userId }: SellerProfileProps) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h3 className="font-semibold text-lg">{profile.full_name || "Utilisateur"}</h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-semibold text-lg">{profile.full_name || "Utilisateur"}</h3>
+              {profile.verified_seller && (
+                <Badge variant="default" className="flex items-center gap-1">
+                  <Shield className="h-3 w-3" />
+                  Vérifié
+                </Badge>
+              )}
+            </div>
             {profile.location && (
               <div className="flex items-center gap-1 text-sm text-muted-foreground">
                 <MapPin className="h-3 w-3" />
                 <span>{profile.location}</span>
               </div>
             )}
+            {profile.rating_count > 0 && (
+              <div className="flex items-center gap-1 mt-1">
+                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <span className="font-semibold text-sm">{profile.rating_average.toFixed(1)}</span>
+                <span className="text-xs text-muted-foreground">({profile.rating_count} avis)</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Statistics */}
+        <div className="grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
+          <div className="flex items-start gap-2">
+            <TrendingUp className="h-4 w-4 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="text-xs text-muted-foreground">Ventes</p>
+              <p className="font-semibold">{profile.total_sales || 0}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-start gap-2">
+            <Clock className="h-4 w-4 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="text-xs text-muted-foreground">Membre</p>
+              <p className="font-semibold text-sm">
+                {profile.created_at
+                  ? formatDistanceToNow(new Date(profile.created_at), { locale: fr })
+                  : "N/A"}
+              </p>
+            </div>
           </div>
         </div>
 

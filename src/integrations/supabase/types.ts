@@ -377,6 +377,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          avg_response_time_minutes: number | null
           city: string | null
           country: string | null
           created_at: string
@@ -388,11 +389,17 @@ export type Database = {
           last_seen: string | null
           location: string | null
           phone: string | null
+          rating_average: number | null
+          rating_count: number | null
+          response_rate: number | null
+          total_sales: number | null
           typing_in_conversation: string | null
           updated_at: string
+          verified_seller: boolean | null
         }
         Insert: {
           avatar_url?: string | null
+          avg_response_time_minutes?: number | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -404,11 +411,17 @@ export type Database = {
           last_seen?: string | null
           location?: string | null
           phone?: string | null
+          rating_average?: number | null
+          rating_count?: number | null
+          response_rate?: number | null
+          total_sales?: number | null
           typing_in_conversation?: string | null
           updated_at?: string
+          verified_seller?: boolean | null
         }
         Update: {
           avatar_url?: string | null
+          avg_response_time_minutes?: number | null
           city?: string | null
           country?: string | null
           created_at?: string
@@ -420,8 +433,13 @@ export type Database = {
           last_seen?: string | null
           location?: string | null
           phone?: string | null
+          rating_average?: number | null
+          rating_count?: number | null
+          response_rate?: number | null
+          total_sales?: number | null
           typing_in_conversation?: string | null
           updated_at?: string
+          verified_seller?: boolean | null
         }
         Relationships: []
       }
@@ -453,6 +471,85 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          listing_id: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+          transaction_type: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id: string
+          rating: number
+          reviewee_id: string
+          reviewer_id: string
+          transaction_type: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          listing_id?: string
+          rating?: number
+          reviewee_id?: string
+          reviewer_id?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          buyer_id: string
+          created_at: string
+          id: string
+          listing_id: string
+          seller_id: string
+          status: string
+        }
+        Insert: {
+          amount: number
+          buyer_id: string
+          created_at?: string
+          id?: string
+          listing_id: string
+          seller_id: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          buyer_id?: string
+          created_at?: string
+          id?: string
+          listing_id?: string
+          seller_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
             referencedColumns: ["id"]
           },
         ]
