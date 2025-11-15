@@ -6,8 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ProfileImageUpload } from "@/components/auth/ProfileImageUpload";
+import { PrivacyPolicy } from "@/components/auth/PrivacyPolicy";
+import { TermsConditions } from "@/components/auth/TermsConditions";
 import { westAfricanCountries } from "@/data/westAfricaData";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 
@@ -18,6 +21,9 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptTerms, setAcceptTerms] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showTermsConditions, setShowTermsConditions] = useState(false);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -89,6 +95,16 @@ const Auth = () => {
           toast({
             title: "Erreur",
             description: "Le mot de passe doit contenir au moins 6 caractères",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (!acceptTerms) {
+          toast({
+            title: "Erreur",
+            description: "Vous devez accepter les politiques de confidentialité et les conditions générales",
             variant: "destructive",
           });
           setIsLoading(false);
@@ -369,6 +385,47 @@ const Auth = () => {
                 </div>
               )}
 
+              {!isLogin && (
+                <div className="flex items-start space-x-2">
+                  <Checkbox
+                    id="terms"
+                    checked={acceptTerms}
+                    onCheckedChange={(checked) => setAcceptTerms(checked as boolean)}
+                    disabled={isLoading}
+                    className="mt-1"
+                  />
+                  <div className="text-sm leading-none">
+                    <label
+                      htmlFor="terms"
+                      className="text-muted-foreground cursor-pointer"
+                    >
+                      J'accepte les{" "}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowPrivacyPolicy(true);
+                        }}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        politiques de confidentialité
+                      </button>
+                      {" "}et les{" "}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowTermsConditions(true);
+                        }}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        conditions générales
+                      </button>
+                    </label>
+                  </div>
+                </div>
+              )}
+
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
                 {isLoading
                   ? "Chargement..."
@@ -381,7 +438,10 @@ const Auth = () => {
                 <Button
                   type="button"
                   variant="link"
-                  onClick={() => setIsLogin(!isLogin)}
+                  onClick={() => {
+                    setIsLogin(!isLogin);
+                    setAcceptTerms(false);
+                  }}
                   disabled={isLoading}
                 >
                   {isLogin
@@ -393,6 +453,10 @@ const Auth = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialogs */}
+      <PrivacyPolicy open={showPrivacyPolicy} onOpenChange={setShowPrivacyPolicy} />
+      <TermsConditions open={showTermsConditions} onOpenChange={setShowTermsConditions} />
     </div>
   );
 };
