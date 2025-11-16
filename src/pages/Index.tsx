@@ -6,8 +6,8 @@ import HeroSection from "@/components/home/HeroSection";
 import CategoryGrid from "@/components/home/CategoryGrid";
 import RecentListings from "@/components/home/RecentListings";
 import RecentlyViewed from "@/components/home/RecentlyViewed";
-import RecommendedListings from "@/components/home/RecommendedListings";
 import FilterSheet from "@/components/home/FilterSheet";
+import RecommendedSheet from "@/components/home/RecommendedSheet";
 import BottomNav from "@/components/BottomNav";
 
 const Index = () => {
@@ -34,11 +34,9 @@ const Index = () => {
       <HeroSection />
       <CategoryGrid />
       <RecentlyViewed />
-      <div className="px-4 py-4 flex justify-start">
+      <div className="px-4 py-4 flex justify-start gap-2">
         <FilterSheet />
-      </div>
-      <div className="container mx-auto px-4">
-        <RecommendedListings />
+        <RecommendedSheet />
       </div>
       <RecentListings />
       <BottomNav />
