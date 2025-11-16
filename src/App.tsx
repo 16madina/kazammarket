@@ -25,6 +25,11 @@ import Support from "./pages/settings/Support";
 import Report from "./pages/settings/Report";
 import Terms from "./pages/settings/Terms";
 import Privacy from "./pages/settings/Privacy";
+import ChangePassword from "./pages/settings/ChangePassword";
+import TwoFactor from "./pages/settings/TwoFactor";
+import ProfileVisibility from "./pages/settings/ProfileVisibility";
+import BlockedUsers from "./pages/settings/BlockedUsers";
+import SalesHistory from "./pages/settings/SalesHistory";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +61,11 @@ const App = () => (
           <Route path="/settings/report" element={<Report />} />
           <Route path="/settings/terms" element={<Terms />} />
           <Route path="/settings/privacy" element={<Privacy />} />
+          <Route path="/settings/change-password" element={<ChangePassword />} />
+          <Route path="/settings/two-factor" element={<TwoFactor />} />
+          <Route path="/settings/profile-visibility" element={<ProfileVisibility />} />
+          <Route path="/settings/blocked-users" element={<BlockedUsers />} />
+          <Route path="/settings/sales-history" element={<SalesHistory />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

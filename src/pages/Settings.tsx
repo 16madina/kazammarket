@@ -246,7 +246,7 @@ const Settings = () => {
             <SettingItem 
               icon={Key} 
               label="Mot de passe" 
-              onClick={() => navigate("/account-management")}
+              onClick={() => navigate("/settings/change-password")}
               iconColor="bg-orange-500/10"
               iconTextColor="text-orange-600"
             />
@@ -254,7 +254,7 @@ const Settings = () => {
             <SettingItem 
               icon={Shield} 
               label="Authentification à deux facteurs" 
-              onClick={() => toast.info("Fonctionnalité bientôt disponible")}
+              onClick={() => navigate("/settings/two-factor")}
               iconColor="bg-indigo-500/10"
               iconTextColor="text-indigo-600"
             />
@@ -262,7 +262,7 @@ const Settings = () => {
             <SettingItem 
               icon={Eye} 
               label="Qui peut voir mon profil" 
-              onClick={() => toast.info("Fonctionnalité bientôt disponible")}
+              onClick={() => navigate("/settings/profile-visibility")}
               iconColor="bg-cyan-500/10"
               iconTextColor="text-cyan-600"
             />
@@ -270,7 +270,7 @@ const Settings = () => {
             <SettingItem 
               icon={UserX} 
               label="Utilisateurs bloqués" 
-              onClick={() => toast.info("Fonctionnalité bientôt disponible")}
+              onClick={() => navigate("/settings/blocked-users")}
               iconColor="bg-gray-500/10"
               iconTextColor="text-gray-600"
             />
@@ -291,7 +291,7 @@ const Settings = () => {
             <SettingItem 
               icon={Bell} 
               label="Ventes et offres" 
-              onClick={() => setNotificationDialogOpen(true)}
+              onClick={() => navigate("/settings/sales-history")}
               iconColor="bg-yellow-500/10"
               iconTextColor="text-yellow-600"
             />
