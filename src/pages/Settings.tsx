@@ -115,8 +115,12 @@ const Settings = () => {
           text: 'Découvrez ReVivo - Achetez et vendez facilement !',
           url: window.location.origin
         });
+        toast.success('Application partagée avec succès');
       } catch (err) {
-        console.log('Erreur de partage:', err);
+        if ((err as Error).name !== 'AbortError') {
+          navigator.clipboard.writeText(window.location.origin);
+          toast.success('Lien copié dans le presse-papiers');
+        }
       }
     } else {
       navigator.clipboard.writeText(window.location.origin);
@@ -252,14 +256,6 @@ const Settings = () => {
         <SettingSection title="Sécurité et Confidentialité">
           <CardContent className="p-0">
             <SettingItem 
-              icon={Fingerprint} 
-              label="Face ID / Touch ID" 
-              onClick={() => toast.info("Fonctionnalité bientôt disponible")}
-              iconColor="bg-red-500/10"
-              iconTextColor="text-red-600"
-            />
-            <Separator />
-            <SettingItem 
               icon={Key} 
               label="Mot de passe" 
               onClick={() => navigate("/settings/change-password")}
@@ -331,22 +327,6 @@ const Settings = () => {
               onClick={() => navigate("/transactions")}
               iconColor="bg-green-500/10"
               iconTextColor="text-green-600"
-            />
-            <Separator />
-            <SettingItem 
-              icon={CreditCard} 
-              label="Méthodes de paiement" 
-              onClick={() => toast.info("Fonctionnalité bientôt disponible")}
-              iconColor="bg-blue-500/10"
-              iconTextColor="text-blue-600"
-            />
-            <Separator />
-            <SettingItem 
-              icon={Receipt} 
-              label="Historique et facturation" 
-              onClick={() => toast.info("Fonctionnalité bientôt disponible")}
-              iconColor="bg-purple-500/10"
-              iconTextColor="text-purple-600"
             />
           </CardContent>
         </SettingSection>
@@ -457,7 +437,7 @@ const Settings = () => {
             <SettingItem 
               icon={User} 
               label="Ma page publique" 
-              onClick={() => navigate("/profile")}
+              onClick={() => userId && navigate(`/seller/${userId}`)}
               iconColor="bg-purple-500/10"
               iconTextColor="text-purple-600"
             />
