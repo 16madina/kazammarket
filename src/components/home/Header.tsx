@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { LogIn, User, Moon, Sun } from "lucide-react";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { SystemNotifications } from "@/components/notifications/SystemNotifications";
-import djassaLogo from "@/assets/djassa-header-logo.jpeg";
+import djassaLogo from "@/assets/djassa-header-logo.png";
 
 interface HeaderProps {
   isAuthenticated: boolean;
