@@ -20,7 +20,7 @@ const Header = ({ isAuthenticated }: HeaderProps) => {
           <img 
             src={djassaLogo} 
             alt="DJASSA" 
-            className="h-8 cursor-pointer transition-all duration-300 hover:scale-105"
+            className="h-6 cursor-pointer transition-all duration-300 hover:scale-105"
           />
         </div>
 
