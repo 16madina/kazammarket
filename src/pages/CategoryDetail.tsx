@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
@@ -6,11 +6,12 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft } from "lucide-react";
-import * as Icons from "lucide-react";
+import { useState } from "react";
 
 const CategoryDetail = () => {
   const navigate = useNavigate();
   const { slug } = useParams();
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<string | null>(null);
 
   // Get parent category
   const { data: parentCategory, isLoading: parentLoading } = useQuery({
@@ -62,21 +63,32 @@ const CategoryDetail = () => {
     enabled: !!parentCategory?.id,
   });
 
-  // Get parent category listing count
-  const { data: parentCount } = useQuery({
-    queryKey: ["parent-category-count", parentCategory?.id],
+  // Get listings for selected subcategory or parent
+  const { data: listings, isLoading: listingsLoading } = useQuery({
+    queryKey: ["category-listings", selectedSubcategoryId || parentCategory?.id],
     queryFn: async () => {
-      if (!parentCategory?.id) return 0;
+      const categoryId = selectedSubcategoryId || parentCategory?.id;
+      if (!categoryId) return [];
       
-      const { count } = await supabase
+      const { data, error } = await supabase
         .from("listings")
-        .select("*", { count: "exact", head: true })
-        .eq("category_id", parentCategory.id)
-        .eq("status", "active");
+        .select(`
+          *,
+          profiles (
+            id,
+            full_name,
+            avatar_url,
+            city
+          )
+        `)
+        .eq("category_id", categoryId)
+        .eq("status", "active")
+        .order("created_at", { ascending: false });
       
-      return count || 0;
+      if (error) throw error;
+      return data;
     },
-    enabled: !!parentCategory?.id,
+    enabled: !!(selectedSubcategoryId || parentCategory?.id),
   });
 
   const isLoading = parentLoading || subcategoriesLoading;
@@ -117,62 +129,76 @@ const CategoryDetail = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4">
-        <h2 className="text-xl font-bold mb-4">Sous-catégories</h2>
-        
-        <div className="grid grid-cols-2 gap-4">
-          {/* All items in parent category */}
-          <Card
-            className="relative overflow-hidden cursor-pointer group hover:scale-105 transition-transform duration-200 shadow-md"
-            onClick={() => navigate(`/search?category=${parentCategory?.id}`)}
-          >
-            <div className="h-32 relative overflow-hidden bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-              <div className="text-center">
-                <p className="text-lg font-bold text-primary">Tout voir</p>
-              </div>
-            </div>
-            <div className="p-3 bg-background">
-              <p className="text-sm font-medium text-center">
-                Toutes les annonces
-              </p>
-              <p className="text-xs text-muted-foreground text-center mt-1">
-                {parentCount} {parentCount === 1 ? 'annonce' : 'annonces'}
-              </p>
-            </div>
-          </Card>
-
-          {/* Subcategories */}
-          {subcategories?.map((subcategory) => {
-            const IconComponent = Icons[subcategory.icon as keyof typeof Icons] as any;
-            
-            return (
-              <Card
+      {/* Subcategories Tabs */}
+      {subcategories && subcategories.length > 0 && (
+        <div className="border-b bg-background sticky top-[73px] z-10 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 px-4 py-2">
+            <button
+              onClick={() => setSelectedSubcategoryId(null)}
+              className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                selectedSubcategoryId === null
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+              }`}
+            >
+              Tout
+            </button>
+            {subcategories.map((subcategory) => (
+              <button
                 key={subcategory.id}
-                className="relative overflow-hidden cursor-pointer group hover:scale-105 transition-transform duration-200 shadow-md"
-                onClick={() => navigate(`/search?category=${subcategory.id}`)}
+                onClick={() => setSelectedSubcategoryId(subcategory.id)}
+                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                  selectedSubcategoryId === subcategory.id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                }`}
               >
-                <div className="h-32 relative overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                  {IconComponent && (
-                    <IconComponent className="h-16 w-16 text-primary/40 group-hover:text-primary/60 transition-colors" />
-                  )}
+                {subcategory.name} ({subcategory.count})
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Listings */}
+      <div className="p-4">
+        {listingsLoading ? (
+          <div className="grid grid-cols-2 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="h-64 w-full" />
+            ))}
+          </div>
+        ) : listings && listings.length > 0 ? (
+          <div className="grid grid-cols-2 gap-4">
+            {listings.map((listing) => (
+              <Card
+                key={listing.id}
+                className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => navigate(`/listing/${listing.id}`)}
+              >
+                <div className="aspect-square relative overflow-hidden">
+                  <img
+                    src={listing.images?.[0] || "/placeholder.svg"}
+                    alt={listing.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <div className="p-3 bg-background">
-                  <p className="text-sm font-medium text-center line-clamp-2">
-                    {subcategory.name}
+                <div className="p-3">
+                  <p className="font-semibold text-lg text-primary">
+                    {listing.price.toLocaleString()} {listing.currency || "FCFA"}
                   </p>
-                  <p className="text-xs text-muted-foreground text-center mt-1">
-                    {subcategory.count} {subcategory.count === 1 ? 'annonce' : 'annonces'}
+                  <p className="text-sm line-clamp-2 mt-1">{listing.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {listing.profiles?.city}
                   </p>
                 </div>
               </Card>
-            );
-          })}
-        </div>
-
-        {subcategories?.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground">
-            Aucune sous-catégorie disponible
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-muted-foreground">
+            <p className="text-lg">Aucune annonce disponible</p>
+            <p className="text-sm mt-2">Soyez le premier à publier dans cette catégorie</p>
           </div>
         )}
       </div>
