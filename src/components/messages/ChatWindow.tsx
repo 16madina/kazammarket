@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Send, MapPin, MoreVertical, AlertCircle } from "lucide-react";
+import { Send, MapPin, MoreVertical, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -21,6 +21,7 @@ import { MessageReactions } from "./MessageReactions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { usePresence } from "@/hooks/usePresence";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { TransactionCompleteDialog } from "@/components/transactions/TransactionCompleteDialog";
 
 interface ChatWindowProps {
   conversationId: string;
@@ -36,6 +37,7 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showTransactionDialog, setShowTransactionDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { toast } = useToast();
@@ -430,6 +432,11 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setShowTransactionDialog(true)}>
+                <CheckCircle2 className="h-4 w-4 mr-2" />
+                Transaction complétée
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => toggleMute.mutate()}>
                 {isMuted ? "🔔 Activer" : "🔇 Couper"} les notifications
               </DropdownMenuItem>
@@ -733,6 +740,23 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
           />
         </div>
       )}
+
+      {/* Transaction Complete Dialog */}
+      <TransactionCompleteDialog
+        open={showTransactionDialog}
+        onOpenChange={setShowTransactionDialog}
+        listingId={conversation?.listing_id || ""}
+        sellerId={conversation?.seller_id || ""}
+        buyerId={conversation?.buyer_id || ""}
+        price={conversation?.listing?.price || 0}
+        onSuccess={() => {
+          queryClient.invalidateQueries({ queryKey: ["conversation", conversationId] });
+          toast({
+            title: "Transaction complétée",
+            description: "Vous pouvez maintenant laisser un avis",
+          });
+        }}
+      />
     </div>
   );
 };

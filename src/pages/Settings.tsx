@@ -326,6 +326,14 @@ const Settings = () => {
         <SettingSection title="Paiements">
           <CardContent className="p-0">
             <SettingItem 
+              icon={Receipt} 
+              label="Mes transactions" 
+              onClick={() => navigate("/transactions")}
+              iconColor="bg-green-500/10"
+              iconTextColor="text-green-600"
+            />
+            <Separator />
+            <SettingItem 
               icon={CreditCard} 
               label="Méthodes de paiement" 
               onClick={() => toast.info("Fonctionnalité bientôt disponible")}
