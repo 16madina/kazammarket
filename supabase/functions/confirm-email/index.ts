@@ -66,6 +66,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Profile updated successfully");
 
+    // Send welcome email in background
+    const welcomeEmailPromise = fetch(`${SUPABASE_URL}/functions/v1/send-welcome-email`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+      body: JSON.stringify({
+        email: userData.user.email,
+        userName: userData.user.user_metadata?.first_name || userData.user.email?.split('@')[0]
+      })
+    }).catch(err => console.error('Error sending welcome email:', err));
+
+    // Don't wait for welcome email to complete
+    console.log("Welcome email triggered in background");
+
     return new Response(
       JSON.stringify({ success: true, message: "Email confirmed successfully" }),
       {
