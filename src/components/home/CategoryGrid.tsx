@@ -17,23 +17,36 @@ const CategoryGrid = () => {
     },
   });
 
+  // Filtrer pour afficher seulement les catégories populaires
+  const popularSlugs = ['gratuit', 'electronique', 'mode-femme', 'meubles'];
+  const popularCategories = categories?.filter(cat => popularSlugs.includes(cat.slug)) || [];
+
   return (
-    <section className="py-8 px-4">
+    <section className="py-6 px-4">
       <div className="max-w-screen-xl mx-auto">
-        <h2 className="text-2xl font-bold mb-6">Catégories populaires</h2>
-        <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
-          {categories?.map((category) => {
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold">Catégories populaires</h2>
+          <Link 
+            to="/categories" 
+            className="text-primary hover:text-primary/80 text-sm font-medium flex items-center gap-1"
+          >
+            Voir plus
+            <Icons.ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          {popularCategories.map((category) => {
             const IconComponent = Icons[category.icon as keyof typeof Icons] as any;
             return (
-              <Link key={category.id} to={`/categories/${category.slug}`} className="flex-shrink-0 snap-start">
-                <Card className="p-4 w-[140px] hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer group animate-fade-in">
+              <Link key={category.id} to={`/categories/${category.slug}`}>
+                <Card className="p-3 hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group animate-fade-in">
                   <div className="flex flex-col items-center text-center gap-2">
                     {IconComponent && (
-                      <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110">
-                        <IconComponent className="h-7 w-7 text-primary" />
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110">
+                        <IconComponent className="h-5 w-5 text-primary" />
                       </div>
                     )}
-                    <span className="font-medium text-sm">{category.name}</span>
+                    <span className="font-medium text-xs line-clamp-2">{category.name}</span>
                   </div>
                 </Card>
               </Link>
