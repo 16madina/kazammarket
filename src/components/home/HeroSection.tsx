@@ -4,9 +4,13 @@ import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-marketplace-new.jpg";
 import djassaLogo from "@/assets/djassa-hero-logo.png";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const HeroSection = () => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
   
   return (
     <div className="relative h-[400px] md:h-[500px] overflow-hidden">
@@ -43,12 +47,13 @@ const HeroSection = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={t('hero.search_placeholder')}
               className="pl-10 h-12 bg-white text-foreground"
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  const query = (e.target as HTMLInputElement).value;
-                  window.location.href = `/search?q=${encodeURIComponent(query)}`;
+                if (e.key === "Enter" && searchQuery.trim()) {
+                  navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
                 }
               }}
             />
@@ -56,9 +61,9 @@ const HeroSection = () => {
           <Button 
             className="h-12 px-8 transition-all duration-300 hover:scale-105"
             onClick={() => {
-              const input = document.querySelector('input[placeholder="Rechercher des articles..."]') as HTMLInputElement;
-              const query = input?.value || "";
-              window.location.href = `/search?q=${encodeURIComponent(query)}`;
+              if (searchQuery.trim()) {
+                navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+              }
             }}
           >
             {t('hero.search_button')}
