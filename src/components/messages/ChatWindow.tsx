@@ -461,11 +461,23 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
                     ) : msg.message_type === 'location' ? (
                       <div className="space-y-1">
                         <div className={`rounded-lg p-3 ${isMine ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
+                          <div className="flex items-start gap-2">
+                            <MapPin className="h-4 w-4 mt-0.5 shrink-0" />
                             <div>
-                              <p className="text-sm font-medium">Position partagée</p>
-                              <p className="text-xs opacity-80">{msg.location_name}</p>
+                              <p className="text-sm font-medium">📍 Position partagée</p>
+                              <p className="text-xs opacity-90 break-words">
+                                {msg.location_name || `${msg.location_lat?.toFixed(4)}, ${msg.location_lng?.toFixed(4)}`}
+                              </p>
+                              {msg.location_lat && msg.location_lng && (
+                                <a
+                                  href={`https://www.google.com/maps?q=${msg.location_lat},${msg.location_lng}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs underline opacity-80 hover:opacity-100"
+                                >
+                                  Voir sur la carte
+                                </a>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -520,42 +532,50 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
         <QuickReplies userId={userId} onSelect={(msg) => setMessage(msg)} />
       )}
 
-      {/* Input */}
-      <Card className="p-3 border-t mb-16 md:mb-0">
-        <form onSubmit={handleSend}>
-          <div className="flex items-center gap-2">
-            <MediaUpload onUpload={(url) => sendImageMessage.mutate(url)} userId={userId} />
-            <LocationPicker onSelectLocation={(loc) => sendLocationMessage.mutate(loc)} />
-            {conversation?.listing?.price !== undefined && conversation.listing.price > 0 && (
-              <PriceOfferDialog
-                conversationId={conversationId}
-                listingId={conversation.listing_id}
-                listingPrice={conversation.listing.price}
-                senderId={userId}
-                receiverId={conversation.buyer_id === userId ? conversation.seller_id : conversation.buyer_id}
+      {/* Input - Sticky at bottom */}
+      <div className="sticky bottom-0 left-0 right-0 bg-background border-t pb-16 md:pb-0">
+        <Card className="border-0 shadow-lg rounded-none">
+          <form onSubmit={handleSend} className="p-3">
+            <div className="flex items-center gap-2">
+              <MediaUpload onUpload={(url) => sendImageMessage.mutate(url)} userId={userId} />
+              <LocationPicker onSelectLocation={(loc) => sendLocationMessage.mutate(loc)} />
+              {conversation?.listing?.price !== undefined && conversation.listing.price > 0 && (
+                <PriceOfferDialog
+                  conversationId={conversationId}
+                  listingId={conversation.listing_id}
+                  listingPrice={conversation.listing.price}
+                  senderId={userId}
+                  receiverId={conversation.buyer_id === userId ? conversation.seller_id : conversation.buyer_id}
+                />
+              )}
+              <Input
+                value={message}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  handleTyping();
+                }}
+                placeholder="Tapez votre message..."
+                className="flex-1"
+                disabled={isBlocked}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend(e as any);
+                  }
+                }}
               />
-            )}
-            <Input
-              value={message}
-              onChange={(e) => {
-                setMessage(e.target.value);
-                handleTyping();
-              }}
-              placeholder="Écrire un message..."
-              className="flex-1"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleSend(e as any);
-                }
-              }}
-            />
-            <Button type="submit" size="icon" disabled={!message.trim()} className="h-9 w-9 rounded-full">
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
-        </form>
-      </Card>
+              <Button 
+                type="submit" 
+                size="icon" 
+                disabled={!message.trim() || isBlocked} 
+                className="h-10 w-10 rounded-full shrink-0"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </div>
 
       {/* Block User Dialog */}
       <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>

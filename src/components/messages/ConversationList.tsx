@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +21,7 @@ export const ConversationList = ({
   selectedConversationId,
 }: ConversationListProps) => {
   const [filter, setFilter] = useState<'all' | 'buying' | 'selling'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const { data: conversations, isLoading } = useQuery({
     queryKey: ["conversations", userId],
     queryFn: async () => {
@@ -104,14 +106,37 @@ export const ConversationList = ({
 
   // Filter conversations
   const filteredConversations = conversations.filter((conv: any) => {
-    if (filter === 'buying') return conv.buyer_id === userId;
-    if (filter === 'selling') return conv.seller_id === userId;
+    // Filter by role
+    if (filter === 'buying' && conv.buyer_id !== userId) return false;
+    if (filter === 'selling' && conv.seller_id !== userId) return false;
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const otherUser = conv.buyer_id === userId ? conv.seller : conv.buyer;
+      const matchesUser = otherUser?.full_name?.toLowerCase().includes(query);
+      const matchesListing = conv.listing?.title?.toLowerCase().includes(query);
+      const matchesMessage = conv.lastMessage?.content?.toLowerCase().includes(query);
+      
+      if (!matchesUser && !matchesListing && !matchesMessage) return false;
+    }
+    
     return true;
   });
 
   return (
     <div className="space-y-2">
       <ConversationFilters filter={filter} onFilterChange={setFilter} />
+      
+      {/* Search bar */}
+      <div className="px-4 pb-2">
+        <Input
+          placeholder="Rechercher dans les conversations..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full"
+        />
+      </div>
       {filteredConversations.map((conv: any) => {
         const otherUser = conv.buyer_id === userId ? conv.seller : conv.buyer;
         const initials = otherUser?.full_name
@@ -119,13 +144,14 @@ export const ConversationList = ({
           .map((n: string) => n[0])
           .join("")
           .toUpperCase() || "?";
+        const hasUnread = conv.unreadCount > 0;
 
         return (
           <Card
             key={conv.id}
-            className={`p-4 cursor-pointer transition-all hover:shadow-md ${
-              selectedConversationId === conv.id ? "bg-muted" : ""
-            }`}
+            className={`p-3 cursor-pointer transition-colors hover:bg-accent ${
+              selectedConversationId === conv.id ? "bg-accent" : ""
+            } ${hasUnread ? "border-l-4 border-l-primary" : ""}`}
             onClick={() => onSelectConversation(conv.id)}
           >
             <div className="flex items-start gap-3">
@@ -139,13 +165,23 @@ export const ConversationList = ({
                 {otherUser?.is_online && (
                   <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
                 )}
+                {hasUnread && (
+                  <div className="absolute -top-1 -right-1 h-5 w-5 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-bold">
+                    {conv.unreadCount > 9 ? '9+' : conv.unreadCount}
+                  </div>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">
-                      {otherUser?.full_name || "Utilisateur"}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className={`truncate ${hasUnread ? 'font-bold' : 'font-semibold'}`}>
+                        {otherUser?.full_name || "Utilisateur"}
+                      </p>
+                      {hasUnread && (
+                        <div className="h-2 w-2 bg-primary rounded-full shrink-0" />
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground truncate">
                       {conv.listing?.title}
                     </p>
@@ -157,15 +193,10 @@ export const ConversationList = ({
                         locale: fr,
                       })}
                     </span>
-                    {conv.unreadCount > 0 && (
-                      <Badge variant="destructive" className="text-xs">
-                        {conv.unreadCount}
-                      </Badge>
-                    )}
                   </div>
                 </div>
                 {conv.lastMessage && (
-                  <p className="text-sm text-muted-foreground truncate mt-1">
+                  <p className={`text-sm truncate mt-1 ${hasUnread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
                     {conv.lastMessage.content}
                   </p>
                 )}
