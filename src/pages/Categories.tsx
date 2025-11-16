@@ -5,44 +5,32 @@ import BottomNav from "@/components/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageCircle, Search, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MessageCircle, Search, ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
 import * as Icons from "lucide-react";
+import { useState } from "react";
 
-// Import des images de fallback
-import electroniqueImg from "@/assets/categories/electronique.jpg";
-import meublesImg from "@/assets/categories/meubles.jpg";
-import vetementsEnfantsImg from "@/assets/categories/vetements-enfants.jpg";
-import piecesAutoImg from "@/assets/categories/pieces-auto.jpg";
-import maisonCuisineImg from "@/assets/categories/maison-cuisine.jpg";
-import articlesSportImg from "@/assets/categories/articles-sport.jpg";
-import autresImg from "@/assets/categories/autres.jpg";
-import artImg from "@/assets/categories/art.jpg";
-
-const categoryImages: Record<string, string> = {
-  "electronique": electroniqueImg,
-  "mode": vetementsEnfantsImg,
-  "vehicules": piecesAutoImg,
-  "maison": maisonCuisineImg,
-  "loisirs": articlesSportImg,
-  "services": artImg,
-  "immobilier": meublesImg,
-  "emploi": autresImg,
-};
+interface CategoryWithCount {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string;
+  parent_id: string | null;
+  count: number;
+  subcategories?: CategoryWithCount[];
+}
 
 const Categories = () => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const { data: categoriesWithCount, isLoading } = useQuery({
     queryKey: ["categories-with-count"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
-        .select(`
-          id,
-          name,
-          slug,
-          icon
-        `)
+        .select("*")
         .order("name");
       
       if (error) throw error;
@@ -63,8 +51,44 @@ const Categories = () => {
         })
       );
 
-      return categoriesWithCounts;
+      // Build hierarchical structure
+      const parentCategories = categoriesWithCounts.filter(cat => !cat.parent_id);
+      const childCategories = categoriesWithCounts.filter(cat => cat.parent_id);
+
+      const hierarchical = parentCategories.map(parent => ({
+        ...parent,
+        subcategories: childCategories.filter(child => child.parent_id === parent.id)
+      }));
+
+      // Sort: Gratuit first, then alphabetical, Autres last
+      return hierarchical.sort((a, b) => {
+        if (a.slug === 'gratuit') return -1;
+        if (b.slug === 'gratuit') return 1;
+        if (a.slug === 'autres') return 1;
+        if (b.slug === 'autres') return -1;
+        return a.name.localeCompare(b.name);
+      });
     },
+  });
+
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId);
+      } else {
+        newSet.add(categoryId);
+      }
+      return newSet;
+    });
+  };
+
+  const filteredCategories = categoriesWithCount?.filter(category => {
+    const matchesSearch = category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         category.subcategories?.some(sub => 
+                           sub.name.toLowerCase().includes(searchQuery.toLowerCase())
+                         );
+    return matchesSearch;
   });
 
   return (
@@ -107,57 +131,102 @@ const Categories = () => {
         </div>
       </div>
 
-      {/* Categories Grid */}
+      {/* Search Bar */}
+      <div className="p-4 pb-0">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Rechercher une catégorie..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
+      {/* Categories List */}
       <div className="p-4">
         <h2 className="text-xl font-bold mb-4">Toutes catégories</h2>
         
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
               <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-32 w-full" />
-                <div className="p-3">
-                  <Skeleton className="h-4 w-full" />
-                </div>
+                <Skeleton className="h-16 w-full" />
               </Card>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
-            {categoriesWithCount?.map((category) => {
+          <div className="space-y-3">
+            {filteredCategories?.map((category) => {
               const IconComponent = Icons[category.icon as keyof typeof Icons] as any;
-              const fallbackImage = categoryImages[category.slug] || autresImg;
+              const hasSubcategories = category.subcategories && category.subcategories.length > 0;
+              const isExpanded = expandedCategories.has(category.id);
               
               return (
-                <Card
-                  key={category.id}
-                  className="relative overflow-hidden cursor-pointer group hover:scale-105 transition-transform duration-200 shadow-md"
-                  onClick={() => navigate(`/search?category=${category.id}`)}
-                >
-                  <div className="h-32 relative overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5">
-                    {IconComponent ? (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <IconComponent className="h-16 w-16 text-primary/30 group-hover:text-primary/50 transition-colors" />
+                <Card key={category.id} className="overflow-hidden">
+                  <div
+                    className="flex items-center justify-between p-4 cursor-pointer hover:bg-accent/50 transition-colors"
+                    onClick={() => {
+                      if (hasSubcategories) {
+                        toggleCategory(category.id);
+                      } else {
+                        navigate(`/search?category=${category.id}`);
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      {IconComponent && (
+                        <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <IconComponent className="h-5 w-5 text-primary" />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <p className="font-medium">{category.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {category.count} {category.count === 1 ? 'annonce' : 'annonces'}
+                        </p>
                       </div>
-                    ) : (
-                      <>
-                        <img 
-                          src={fallbackImage} 
-                          alt={category.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                      </>
+                    </div>
+                    {hasSubcategories && (
+                      isExpanded ? (
+                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                      )
                     )}
                   </div>
-                  <div className="p-3 bg-background">
-                    <p className="text-sm font-medium text-center line-clamp-2">
-                      {category.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground text-center mt-1">
-                      {category.count} {category.count === 1 ? 'annonce' : 'annonces'}
-                    </p>
-                  </div>
+
+                  {/* Subcategories */}
+                  {hasSubcategories && isExpanded && (
+                    <div className="border-t bg-accent/20">
+                      {category.subcategories?.map((subcategory) => {
+                        const SubIconComponent = Icons[subcategory.icon as keyof typeof Icons] as any;
+                        
+                        return (
+                          <div
+                            key={subcategory.id}
+                            className="flex items-center justify-between p-3 pl-16 cursor-pointer hover:bg-accent/50 transition-colors border-b last:border-b-0"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/search?category=${subcategory.id}`);
+                            }}
+                          >
+                            <div className="flex items-center gap-3 flex-1">
+                              {SubIconComponent && (
+                                <SubIconComponent className="h-4 w-4 text-primary/70" />
+                              )}
+                              <p className="text-sm">{subcategory.name}</p>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {subcategory.count}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </Card>
               );
             })}
