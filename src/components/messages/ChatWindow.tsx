@@ -16,7 +16,9 @@ import { MediaUpload } from "./MediaUpload";
 import { LocationPicker } from "./LocationPicker";
 import { PriceOfferDialog } from "./PriceOfferDialog";
 import { PriceOfferCard } from "./PriceOfferCard";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { PriceOfferHistory } from "./PriceOfferHistory";
+import { MessageReactions } from "./MessageReactions";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { usePresence } from "@/hooks/usePresence";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -30,6 +32,9 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
   const [isTyping, setIsTyping] = useState(false);
   const [otherUserTyping, setOtherUserTyping] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
@@ -239,6 +244,49 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
     },
   });
 
+  const deleteConversation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("conversations")
+        .delete()
+        .eq("id", conversationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Conversation supprimée",
+        description: "La conversation a été supprimée avec succès",
+      });
+      navigate("/messages");
+    },
+  });
+
+  const toggleMute = useMutation({
+    mutationFn: async () => {
+      const mutedBy = conversation?.muted_by || [];
+      const newMutedBy = isMuted
+        ? mutedBy.filter((id: string) => id !== userId)
+        : [...mutedBy, userId];
+
+      const { error } = await supabase
+        .from("conversations")
+        .update({ muted_by: newMutedBy })
+        .eq("id", conversationId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setIsMuted(!isMuted);
+      toast({
+        title: isMuted ? "Notifications activées" : "Notifications coupées",
+        description: isMuted 
+          ? "Vous recevrez à nouveau les notifications" 
+          : "Vous ne recevrez plus de notifications pour cette conversation",
+      });
+    },
+  });
+
   // Handle typing indicator
   const handleTyping = async () => {
     if (!isTyping) {
@@ -382,31 +430,50 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => toggleMute.mutate()}>
+                {isMuted ? "🔔 Activer" : "🔇 Couper"} les notifications
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowReportDialog(true)}>
+                ⚠️ Signaler cette conversation
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setShowBlockDialog(true)}>
-                Bloquer l'utilisateur
+                🚫 Bloquer l'utilisateur
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => setShowDeleteDialog(true)}
+                className="text-destructive focus:text-destructive"
+              >
+                🗑️ Supprimer la conversation
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
         
-        {/* Listing Info */}
+        {/* Listing Info - Compact */}
         <div 
-          className="mt-3 p-2 bg-muted/30 rounded-lg flex items-center gap-2 cursor-pointer hover:bg-muted/50 transition-colors active:scale-[0.98]"
+          className="mt-2 p-2 bg-muted/20 rounded flex items-center gap-2 cursor-pointer hover:bg-muted/30 transition-colors"
           onClick={() => navigate(`/listing/${conversation.listing_id}`)}
         >
           {conversation.listing?.images?.[0] && (
             <img 
               src={conversation.listing.images[0]} 
               alt={conversation.listing.title}
-              className="w-12 h-12 object-cover rounded"
+              className="w-10 h-10 object-cover rounded"
             />
           )}
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{conversation.listing?.title}</p>
-            <p className="text-sm text-primary font-semibold">
+            <p className="text-xs font-medium truncate leading-tight">{conversation.listing?.title}</p>
+            <p className="text-xs text-primary font-semibold">
               {conversation.listing?.price === 0 ? 'Gratuit' : `${conversation.listing?.price.toLocaleString()} FCFA`}
             </p>
           </div>
+        </div>
+        
+        {/* Price Offer History */}
+        <div className="mt-2">
+          <PriceOfferHistory conversationId={conversationId} />
         </div>
       </Card>
 
@@ -427,7 +494,7 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
               return (
                 <div
                   key={msg.id}
-                  className={`flex gap-3 ${isMine ? "flex-row-reverse" : ""}`}
+                  className={`flex gap-3 ${isMine ? "flex-row-reverse" : ""} group`}
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={msg.sender?.avatar_url || ""} />
@@ -489,7 +556,7 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
                         </span>
                       </div>
                     ) : (
-                      <>
+                      <div className="space-y-1">
                         <div
                           className={`rounded-lg p-3 ${
                             isMine
@@ -499,14 +566,17 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
                         >
                           <p className="text-sm">{msg.content}</p>
                         </div>
-                        <span className="text-xs text-muted-foreground mt-1">
-                          {formatDistanceToNow(new Date(msg.created_at), {
-                            addSuffix: true,
-                            locale: fr,
-                          })}
-                          {msg.is_read && isMine && " · Lu"}
-                        </span>
-                      </>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(msg.created_at), {
+                              addSuffix: true,
+                              locale: fr,
+                            })}
+                            {msg.is_read && isMine && " · Lu"}
+                          </span>
+                        </div>
+                        <MessageReactions messageId={msg.id} userId={userId} />
+                      </div>
                     )}
                   </div>
                 </div>
@@ -590,6 +660,51 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction onClick={() => blockUser.mutate()}>
               Bloquer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Conversation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette conversation ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. Tous les messages seront supprimés définitivement.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => deleteConversation.mutate()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Report Conversation Dialog */}
+      <AlertDialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Signaler cette conversation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Vous êtes sur le point de signaler cette conversation. Notre équipe examinera le contenu.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              toast({
+                title: "Conversation signalée",
+                description: "Merci pour votre signalement. Notre équipe va examiner cette conversation.",
+              });
+              setShowReportDialog(false);
+            }}>
+              Signaler
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

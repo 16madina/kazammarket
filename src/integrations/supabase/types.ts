@@ -92,6 +92,7 @@ export type Database = {
           id: string
           last_message_at: string | null
           listing_id: string
+          muted_by: string[] | null
           seller_id: string
         }
         Insert: {
@@ -100,6 +101,7 @@ export type Database = {
           id?: string
           last_message_at?: string | null
           listing_id: string
+          muted_by?: string[] | null
           seller_id: string
         }
         Update: {
@@ -108,6 +110,7 @@ export type Database = {
           id?: string
           last_message_at?: string | null
           listing_id?: string
+          muted_by?: string[] | null
           seller_id?: string
         }
         Relationships: [
@@ -295,6 +298,45 @@ export type Database = {
           },
           {
             foreignKeyName: "listings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
