@@ -21,6 +21,11 @@ const config: CapacitorConfig = {
       ios: {
         permissions: ["NSCameraUsageDescription", "NSPhotoLibraryUsageDescription"]
       }
+    },
+    NativeBiometric: {
+      ios: {
+        permissions: ["NSFaceIDUsageDescription"]
+      }
     }
   }
 };

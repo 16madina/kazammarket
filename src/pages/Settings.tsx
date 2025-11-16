@@ -47,6 +47,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import { useBiometricAuth } from "@/hooks/useBiometricAuth";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -55,6 +56,13 @@ const Settings = () => {
   const { darkMode, toggleDarkMode } = useDarkMode();
   const { language, setLanguage, t } = useLanguage();
   const { resetOnboarding } = useOnboarding();
+  const { 
+    isAvailable: isBiometricAvailable, 
+    isEnabled: isBiometricEnabled, 
+    enableBiometric, 
+    disableBiometric,
+    getBiometryName 
+  } = useBiometricAuth();
 
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile", userId],
@@ -85,6 +93,14 @@ const Settings = () => {
   const handleToggleDarkMode = () => {
     toggleDarkMode();
     toast.success(`${t('common.mode')} ${!darkMode ? t('common.dark') : t('common.light')} ${t('common.activated')}`);
+  };
+
+  const handleBiometricToggle = async (checked: boolean) => {
+    if (checked) {
+      await enableBiometric();
+    } else {
+      disableBiometric();
+    }
   };
   
   const handleLanguageChange = (lang: "fr" | "en") => {
@@ -262,6 +278,25 @@ const Settings = () => {
               iconColor="bg-orange-500/10"
               iconTextColor="text-orange-600"
             />
+            {isBiometricAvailable && (
+              <>
+                <Separator />
+                <SettingToggle 
+                  icon={Fingerprint} 
+                  label={getBiometryName()}
+                  checked={isBiometricEnabled}
+                  onCheckedChange={async (checked) => {
+                    if (checked) {
+                      await enableBiometric();
+                    } else {
+                      disableBiometric();
+                    }
+                  }}
+                  iconColor="bg-red-500/10"
+                  iconTextColor="text-red-600"
+                />
+              </>
+            )}
             <Separator />
             <SettingItem 
               icon={Shield} 
