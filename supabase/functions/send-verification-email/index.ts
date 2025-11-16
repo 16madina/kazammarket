@@ -33,10 +33,19 @@ const handler = async (req: Request): Promise<Response> => {
       }
     });
 
-    // Generate email verification link
+    // Get the origin from the request headers
+    const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || '';
+    const redirectUrl = `${origin}/email-verified`;
+
+    console.log("Redirect URL:", redirectUrl);
+
+    // Generate email verification link with custom redirect
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'magiclink',
       email: email,
+      options: {
+        redirectTo: redirectUrl
+      }
     });
 
     if (linkError) {
