@@ -10,7 +10,7 @@ import BottomNav from "@/components/BottomNav";
 import { UserListingCard } from "@/components/profile/UserListingCard";
 import { ReviewCard } from "@/components/profile/ReviewCard";
 import { toast } from "sonner";
-import { LogOut, Edit, Settings, Shield, Bell, Share2, ArrowLeft, Users, Star } from "lucide-react";
+import { LogOut, Edit, Settings, Shield, Bell, Share2, ArrowLeft, Users, Star, MapPin, Calendar, Package, TrendingUp, Award, Heart, Receipt, CheckCircle2 } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -154,6 +154,49 @@ const Profile = () => {
     enabled: !!user,
   });
 
+  const { data: favorites } = useQuery({
+    queryKey: ["user-favorites", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("favorites")
+        .select(`
+          *,
+          listings (
+            *,
+            categories (name)
+          )
+        `)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const { data: transactions } = useQuery({
+    queryKey: ["user-transactions", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from("transactions")
+        .select(`
+          *,
+          listings (
+            title,
+            images,
+            categories (name)
+          )
+        `)
+        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
   const activeListings = listings?.filter(l => l.status === "active") || [];
   const soldListings = listings?.filter(l => l.status === "sold") || [];
 
@@ -169,6 +212,16 @@ const Profile = () => {
 
   const fullName = profile?.full_name || user?.user_metadata?.full_name || "Utilisateur";
   const avatarUrl = profile?.avatar_url;
+  
+  const memberSince = profile?.created_at ? new Date(profile.created_at) : null;
+  const monthsSinceMember = memberSince ? Math.floor((Date.now() - memberSince.getTime()) / (1000 * 60 * 60 * 24 * 30)) : 0;
+  
+  // Calculate badges
+  const badges = [];
+  if (profile?.verified_seller) badges.push({ icon: CheckCircle2, label: "Vendeur vérifié", color: "text-blue-500" });
+  if ((profile?.total_sales || 0) >= 10) badges.push({ icon: Award, label: "Vendeur expert", color: "text-yellow-500" });
+  if ((profile?.rating_average || 0) >= 4.5 && (profile?.rating_count || 0) >= 5) badges.push({ icon: Star, label: "Excellent vendeur", color: "text-orange-500" });
+  if (monthsSinceMember >= 12) badges.push({ icon: Calendar, label: "Membre fidèle", color: "text-purple-500" });
 
   return (
     <div className="min-h-screen pb-24 bg-background">
@@ -210,14 +263,82 @@ const Profile = () => {
             )}
           </div>
           
-          <div className="text-center">
-            <h1 className="text-2xl font-bold">{fullName}</h1>
+          <div className="text-center space-y-2">
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="text-2xl font-bold">{fullName}</h1>
+              {profile?.verified_seller && (
+                <CheckCircle2 className="h-6 w-6 text-blue-500 fill-blue-500" />
+              )}
+            </div>
             <p className="text-muted-foreground">{user?.email}</p>
+            {(profile?.city || profile?.country) && (
+              <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span>
+                  {profile.city && profile.country 
+                    ? `${profile.city}, ${profile.country}`
+                    : profile.city || profile.country}
+                </span>
+              </div>
+            )}
+            {memberSince && (
+              <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>Membre depuis {memberSince.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</span>
+              </div>
+            )}
           </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4 w-full max-w-md">
+            <Card className="p-4">
+              <CardContent className="p-0 text-center">
+                <div className="flex flex-col items-center gap-1">
+                  <Package className="h-5 w-5 text-primary" />
+                  <p className="text-2xl font-bold">{activeListings.length}</p>
+                  <p className="text-xs text-muted-foreground">Actives</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="p-4">
+              <CardContent className="p-0 text-center">
+                <div className="flex flex-col items-center gap-1">
+                  <TrendingUp className="h-5 w-5 text-green-500" />
+                  <p className="text-2xl font-bold">{profile?.total_sales || 0}</p>
+                  <p className="text-xs text-muted-foreground">Vendues</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="p-4">
+              <CardContent className="p-0 text-center">
+                <div className="flex flex-col items-center gap-1">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  <p className="text-2xl font-bold">{profile?.rating_average?.toFixed(1) || '0.0'}</p>
+                  <p className="text-xs text-muted-foreground">Note</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Badges */}
+          {badges.length > 0 && (
+            <div className="flex flex-wrap justify-center gap-2 w-full max-w-md">
+              {badges.map((badge, index) => (
+                <div key={index} className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-xs">
+                  <badge.icon className={`h-3 w-3 ${badge.color}`} />
+                  <span>{badge.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div className="w-full max-w-md space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => navigate("/edit-profile")}
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Modifier le profil
               </Button>
@@ -256,24 +377,36 @@ const Profile = () => {
       {/* Tabs */}
       <div className="px-4">
         <Tabs defaultValue="listings" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 mb-4 bg-muted/50 p-1 h-12">
+          <TabsList className="w-full grid grid-cols-5 mb-4 bg-muted/50 p-1 h-12">
             <TabsTrigger 
               value="listings"
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
             >
-              Annonces ({(activeListings.length + soldListings.length) || 0})
+              <Package className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger 
+              value="favorites"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
+            >
+              <Heart className="h-4 w-4" />
+            </TabsTrigger>
+            <TabsTrigger 
+              value="transactions"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
+            >
+              <Receipt className="h-4 w-4" />
             </TabsTrigger>
             <TabsTrigger 
               value="reviews"
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
             >
-              Avis ({reviews?.length || 0})
+              <Star className="h-4 w-4" />
             </TabsTrigger>
             <TabsTrigger 
               value="following"
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
             >
-              Abonnés ({following?.length || 0})
+              <Users className="h-4 w-4" />
             </TabsTrigger>
           </TabsList>
 
@@ -309,16 +442,144 @@ const Profile = () => {
             )}
           </TabsContent>
 
+          <TabsContent value="favorites" className="space-y-4">
+            {!favorites || favorites.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Heart className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg">Aucun favori</p>
+                <p className="text-sm mt-2">Ajoutez des annonces à vos favoris pour les retrouver facilement</p>
+              </div>
+            ) : (
+              favorites.map((favorite: any) => (
+                <Card 
+                  key={favorite.id} 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => navigate(`/listing/${favorite.listing_id}`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                        {favorite.listings?.images?.[0] ? (
+                          <img 
+                            src={favorite.listings.images[0]} 
+                            alt={favorite.listings.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold truncate">{favorite.listings?.title}</h3>
+                        <p className="text-sm text-muted-foreground">{favorite.listings?.categories?.name}</p>
+                        <p className="text-lg font-bold text-primary mt-1">
+                          {favorite.listings?.price.toLocaleString()} {favorite.listings?.currency || 'FCFA'}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="transactions" className="space-y-4">
+            {!transactions || transactions.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="text-lg">Aucune transaction</p>
+                <p className="text-sm mt-2">Votre historique de transactions apparaîtra ici</p>
+              </div>
+            ) : (
+              transactions.map((transaction: any) => (
+                <Card key={transaction.id}>
+                  <CardContent className="p-4">
+                    <div className="flex gap-4">
+                      <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                        {transaction.listings?.images?.[0] ? (
+                          <img 
+                            src={transaction.listings.images[0]} 
+                            alt={transaction.listings.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Package className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold truncate">{transaction.listings?.title}</h3>
+                          {transaction.buyer_id === user?.id ? (
+                            <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">Achat</span>
+                          ) : (
+                            <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Vente</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{transaction.listings?.categories?.name}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-lg font-bold text-primary">
+                            {transaction.amount.toLocaleString()} FCFA
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(transaction.created_at).toLocaleDateString('fr-FR')}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1">
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            transaction.status === 'completed' 
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-yellow-100 text-yellow-700'
+                          }`}>
+                            {transaction.status === 'completed' ? 'Complétée' : 'En cours'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </TabsContent>
+
           <TabsContent value="reviews" className="space-y-4">
             {!reviews || reviews.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
+                <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p className="text-lg">Aucun avis</p>
                 <p className="text-sm mt-2">Les avis de vos acheteurs apparaîtront ici</p>
               </div>
             ) : (
-              reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
-              ))
+              <div className="space-y-4">
+                <div className="bg-muted/50 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-3xl font-bold">{profile?.rating_average?.toFixed(1) || '0.0'}</p>
+                      <div className="flex items-center gap-1 mt-1">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < Math.round(profile?.rating_average || 0)
+                                ? 'text-yellow-500 fill-yellow-500'
+                                : 'text-gray-300'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">{profile?.rating_count || 0} avis</p>
+                    </div>
+                  </div>
+                </div>
+                {reviews.map((review) => (
+                  <ReviewCard key={review.id} review={review} />
+                ))}
+              </div>
             )}
           </TabsContent>
 
