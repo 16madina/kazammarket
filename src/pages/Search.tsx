@@ -14,6 +14,7 @@ import { fr } from "date-fns/locale";
 import BottomNav from "@/components/BottomNav";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { formatPrice } from "@/utils/currency";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Search = () => {
   const navigate = useNavigate();
@@ -298,56 +299,73 @@ const Search = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {listings?.map((listing, index) => (
-            <Card
-              key={listing.id}
-              className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer animate-fade-in"
-              style={{ animationDelay: `${index * 0.05}s` }}
-              onClick={() => (window.location.href = `/listing/${listing.id}`)}
-            >
-              <div className="aspect-square bg-muted relative overflow-hidden">
-                {listing.images?.[0] ? (
-                  <img
-                    src={listing.images[0]}
-                    alt={listing.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    Pas d'image
-                  </div>
-                )}
-                <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
-                  {listing.categories?.name}
-                </Badge>
-              </div>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-2 line-clamp-2">
-                  {listing.title}
-                </h3>
-                <p className="text-2xl font-bold text-primary mb-2">
-                  {listing.price === 0 ? (
-                    <span className="text-green-600">Gratuit</span>
+          {isLoading ? (
+            // Skeleton loading state
+            Array.from({ length: 8 }).map((_, index) => (
+              <Card key={index} className="overflow-hidden">
+                <Skeleton className="aspect-square w-full" />
+                <CardContent className="p-4">
+                  <Skeleton className="h-5 w-full mb-2" />
+                  <Skeleton className="h-7 w-24 mb-2" />
+                  <Skeleton className="h-4 w-32" />
+                </CardContent>
+                <CardFooter className="p-4 pt-0">
+                  <Skeleton className="h-3 w-24" />
+                </CardFooter>
+              </Card>
+            ))
+          ) : (
+            listings?.map((listing, index) => (
+              <Card
+                key={listing.id}
+                className="overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer animate-fade-in"
+                style={{ animationDelay: `${index * 0.05}s` }}
+                onClick={() => (window.location.href = `/listing/${listing.id}`)}
+              >
+                <div className="aspect-square bg-muted relative overflow-hidden">
+                  {listing.images?.[0] ? (
+                    <img
+                      src={listing.images[0]}
+                      alt={listing.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
                   ) : (
-                    formatPrice(listing.price, userProfile?.currency || "FCFA")
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      Pas d'image
+                    </div>
                   )}
-                </p>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>{listing.location}</span>
+                  <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground">
+                    {listing.categories?.name}
+                  </Badge>
                 </div>
-              </CardContent>
-              <CardFooter className="p-4 pt-0 flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="h-3 w-3" />
-                <span>
-                  {formatDistanceToNow(new Date(listing.created_at), {
-                    addSuffix: true,
-                    locale: fr,
-                  })}
-                </span>
-              </CardFooter>
-            </Card>
-          ))}
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-lg mb-2 line-clamp-2">
+                    {listing.title}
+                  </h3>
+                  <p className="text-2xl font-bold text-primary mb-2">
+                    {listing.price === 0 ? (
+                      <span className="text-green-600">Gratuit</span>
+                    ) : (
+                      formatPrice(listing.price, userProfile?.currency || "FCFA")
+                    )}
+                  </p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{listing.location}</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="p-4 pt-0 flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  <span>
+                    {formatDistanceToNow(new Date(listing.created_at), {
+                      addSuffix: true,
+                      locale: fr,
+                    })}
+                  </span>
+                </CardFooter>
+              </Card>
+            ))
+          )}
         </div>
 
         {!isLoading && (!listings || listings.length === 0) && (
