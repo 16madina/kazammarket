@@ -18,6 +18,7 @@ const Publish = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   
   const [formData, setFormData] = useState({
     title: "",
@@ -68,6 +69,63 @@ const Publish = () => {
     }
   }, [profile]);
 
+  // Real-time validation
+  const validateField = (name: string, value: string) => {
+    const newErrors = { ...errors };
+
+    switch (name) {
+      case "title":
+        if (value.length < 10) {
+          newErrors.title = "Le titre doit contenir au moins 10 caractères";
+        } else {
+          delete newErrors.title;
+        }
+        break;
+      case "description":
+        if (value.length < 20) {
+          newErrors.description = "La description doit contenir au moins 20 caractères";
+        } else if (value.length > 500) {
+          newErrors.description = "La description ne peut pas dépasser 500 caractères";
+        } else {
+          delete newErrors.description;
+        }
+        break;
+      case "price":
+        if (!formData.isFree) {
+          const priceNum = parseFloat(value);
+          if (isNaN(priceNum) || priceNum <= 0) {
+            newErrors.price = "Le prix doit être un nombre positif";
+          } else {
+            delete newErrors.price;
+          }
+        } else {
+          delete newErrors.price;
+        }
+        break;
+      case "location":
+        if (value.length < 3) {
+          newErrors.location = "Veuillez entrer une localisation valide";
+        } else {
+          delete newErrors.location;
+        }
+        break;
+      case "category_id":
+        if (!value) {
+          newErrors.category_id = "Veuillez sélectionner une catégorie";
+        } else {
+          delete newErrors.category_id;
+        }
+        break;
+    }
+
+    setErrors(newErrors);
+  };
+
+  const handleInputChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    validateField(name, value);
+  };
+
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
@@ -87,6 +145,22 @@ const Publish = () => {
       toast({
         title: "Erreur",
         description: "Vous devez être connecté pour publier",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate all fields
+    validateField("title", formData.title);
+    validateField("description", formData.description);
+    validateField("price", formData.price);
+    validateField("location", formData.location);
+    validateField("category_id", formData.category_id);
+
+    if (Object.keys(errors).length > 0) {
+      toast({
+        title: "Erreur de validation",
+        description: "Veuillez corriger les erreurs dans le formulaire",
         variant: "destructive",
       });
       return;
@@ -155,12 +229,13 @@ const Publish = () => {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="images">Photos *</Label>
+                <Label htmlFor="images">Photos * (Max 10)</Label>
                 <ImageUploader
                   images={formData.images}
                   onImagesChange={(images) =>
                     setFormData({ ...formData, images })
                   }
+                  maxImages={10}
                 />
               </div>
 
@@ -169,13 +244,14 @@ const Publish = () => {
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
-                  }
+                  onChange={(e) => handleInputChange("title", e.target.value)}
                   placeholder="Ex: iPhone 13 Pro Max 256GB"
                   required
                   maxLength={100}
+                  className={errors.title ? "border-destructive" : formData.title.length >= 10 ? "border-green-500" : ""}
                 />
+                {errors.title && <p className="text-sm text-destructive mt-1">{errors.title}</p>}
+                {formData.title.length > 0 && <p className="text-sm text-muted-foreground mt-1">{formData.title.length} caractères</p>}
               </div>
 
               <div className="space-y-2">
@@ -183,14 +259,15 @@ const Publish = () => {
                 <Textarea
                   id="description"
                   value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
+                  onChange={(e) => handleInputChange("description", e.target.value)}
                   placeholder="Décrivez votre article en détail..."
                   required
                   rows={5}
-                  maxLength={1000}
+                  maxLength={500}
+                  className={errors.description ? "border-destructive" : formData.description.length >= 20 ? "border-green-500" : ""}
                 />
+                {errors.description && <p className="text-sm text-destructive mt-1">{errors.description}</p>}
+                <p className="text-sm text-muted-foreground mt-1">{formData.description.length}/500 caractères</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -198,12 +275,10 @@ const Publish = () => {
                   <Label htmlFor="category">Catégorie *</Label>
                   <Select
                     value={formData.category_id}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, category_id: value })
-                    }
+                    onValueChange={(value) => handleInputChange("category_id", value)}
                     required
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className={errors.category_id ? "border-destructive" : formData.category_id ? "border-green-500" : ""}>
                       <SelectValue placeholder="Choisir une catégorie" />
                     </SelectTrigger>
                     <SelectContent>
@@ -214,6 +289,7 @@ const Publish = () => {
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.category_id && <p className="text-sm text-destructive mt-1">{errors.category_id}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -222,16 +298,15 @@ const Publish = () => {
                     id="price"
                     type="number"
                     value={formData.isFree ? "0" : formData.price}
-                    onChange={(e) =>
-                      setFormData({ ...formData, price: e.target.value })
-                    }
+                    onChange={(e) => handleInputChange("price", e.target.value)}
                     placeholder="50000"
                     required={!formData.isFree}
                     min="0"
                     step="1000"
                     disabled={formData.isFree}
-                    className={formData.isFree ? "bg-muted" : ""}
+                    className={formData.isFree ? "bg-muted" : errors.price ? "border-destructive" : formData.price && parseFloat(formData.price) > 0 ? "border-green-500" : ""}
                   />
+                  {errors.price && <p className="text-sm text-destructive mt-1">{errors.price}</p>}
                 </div>
               </div>
 
@@ -239,9 +314,14 @@ const Publish = () => {
                 <Checkbox
                   id="isFree"
                   checked={formData.isFree}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, isFree: checked as boolean, price: checked ? "0" : "" })
-                  }
+                  onCheckedChange={(checked) => {
+                    setFormData({ ...formData, isFree: checked as boolean, price: checked ? "0" : "" });
+                    if (checked) {
+                      const newErrors = { ...errors };
+                      delete newErrors.price;
+                      setErrors(newErrors);
+                    }
+                  }}
                 />
                 <Label htmlFor="isFree" className="cursor-pointer font-normal">
                   Article gratuit / À donner
@@ -254,13 +334,14 @@ const Publish = () => {
                   <Input
                     id="location"
                     value={formData.location}
-                    onChange={(e) =>
-                      setFormData({ ...formData, location: e.target.value })
-                    }
+                    onChange={(e) => handleInputChange("location", e.target.value)}
                     placeholder="Ex: Dakar, Sénégal"
                     required
                     maxLength={100}
+                    className={errors.location ? "border-destructive" : formData.location.length >= 3 ? "border-green-500" : ""}
                   />
+                  {errors.location && <p className="text-sm text-destructive mt-1">{errors.location}</p>}
+                  <p className="text-xs text-muted-foreground mt-1">Modifiable - Entrez votre ville et pays</p>
                 </div>
 
                 <div className="space-y-2">
