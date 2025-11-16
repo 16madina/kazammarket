@@ -33,9 +33,9 @@ const handler = async (req: Request): Promise<Response> => {
       }
     });
 
-    // Get the origin from the request headers
-    const origin = req.headers.get('origin') || req.headers.get('referer')?.split('/').slice(0, 3).join('/') || '';
-    const redirectUrl = `${origin}/email-verified`;
+    // Use production domain for redirect
+    const productionDomain = 'https://djassamarket.com';
+    const redirectUrl = `${productionDomain}/email-verified`;
 
     console.log("Redirect URL:", redirectUrl);
 
