@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, MessageCircle, Mail, Phone, Paperclip, Clock, Users } from "lucide-react";
 import { toast } from "sonner";
+import BottomNav from "@/components/BottomNav";
 
 const Support = () => {
   const navigate = useNavigate();
@@ -189,6 +190,7 @@ const Support = () => {
           Notre équipe vous répondra dans les plus brefs délais. Pour les urgences, utilisez le chat en direct.
         </p>
       </div>
+      <BottomNav />
     </div>
   );
 };

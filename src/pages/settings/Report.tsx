@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ArrowLeft, Upload, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import BottomNav from "@/components/BottomNav";
 
 const Report = () => {
   const navigate = useNavigate();
@@ -160,6 +161,7 @@ const Report = () => {
           Votre signalement sera examiné par notre équipe sous 24-48h. Pour les urgences, contactez le support directement.
         </p>
       </div>
+      <BottomNav />
     </div>
   );
 };

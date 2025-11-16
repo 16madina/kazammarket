@@ -13,6 +13,7 @@ import { PrivacyPolicy } from "@/components/auth/PrivacyPolicy";
 import { TermsConditions } from "@/components/auth/TermsConditions";
 import { westAfricanCountries } from "@/data/westAfricaData";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import BottomNav from "@/components/BottomNav";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -462,6 +463,7 @@ const Auth = () => {
       {/* Dialogs */}
       <PrivacyPolicy open={showPrivacyPolicy} onOpenChange={setShowPrivacyPolicy} />
       <TermsConditions open={showTermsConditions} onOpenChange={setShowTermsConditions} />
+      <BottomNav />
     </div>
   );
 };

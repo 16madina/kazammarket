@@ -9,6 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import BottomNav from "@/components/BottomNav";
 
 const FAQ = () => {
   const navigate = useNavigate();
@@ -281,6 +282,7 @@ const FAQ = () => {
           </>
         )}
       </div>
+      <BottomNav />
     </div>
   );
 };

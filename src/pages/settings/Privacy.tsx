@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Calendar, Shield } from "lucide-react";
+import BottomNav from "@/components/BottomNav";
 
 const Privacy = () => {
   const navigate = useNavigate();
@@ -142,6 +143,7 @@ const Privacy = () => {
           </CardContent>
         </Card>
       </div>
+      <BottomNav />
     </div>
   );
 };
