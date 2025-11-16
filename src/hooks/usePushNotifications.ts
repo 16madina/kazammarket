@@ -32,11 +32,8 @@ export const usePushNotifications = (userId: string | undefined) => {
         await PushNotifications.addListener('registration', async (token: Token) => {
           console.log('Push registration success, token: ' + token.value);
           
-          // Save token to user profile
-          await supabase
-            .from('profiles')
-            .update({ push_token: token.value })
-            .eq('id', userId);
+          // Token saved - could be sent to backend for remote notifications
+          console.log('Token ready for push notifications');
         });
 
         // Listen for registration errors

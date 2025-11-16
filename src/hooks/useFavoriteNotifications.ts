@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Capacitor } from '@capacitor/core';
-import { PushNotifications } from '@capacitor/push-notifications';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 export const useFavoriteNotifications = (userId: string | undefined) => {
   useEffect(() => {
@@ -16,19 +16,16 @@ export const useFavoriteNotifications = (userId: string | undefined) => {
           event: 'INSERT',
           schema: 'public',
           table: 'favorites',
-          filter: `user_id=neq.${userId}` // Don't notify for own favorites
+          filter: `user_id=neq.${userId}`
         },
         async (payload: any) => {
-          // Get listing details
           const { data: listing } = await supabase
             .from('listings')
             .select('id, title, user_id')
             .eq('id', payload.new.listing_id)
             .single();
 
-          // Only notify the listing owner
           if (listing?.user_id === userId) {
-            // Show local notification
             toast("Nouveau favori", {
               description: `Quelqu'un a ajouté "${listing.title}" à ses favoris`,
               action: {
@@ -37,9 +34,8 @@ export const useFavoriteNotifications = (userId: string | undefined) => {
               }
             });
 
-            // Send push notification on native platforms
             if (Capacitor.isNativePlatform()) {
-              await PushNotifications.schedule({
+              await LocalNotifications.schedule({
                 notifications: [{
                   title: "Nouveau favori",
                   body: `Quelqu'un a ajouté "${listing.title}" à ses favoris`,

@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 interface UnreadMessage {
   conversation_id: string;
@@ -11,12 +13,10 @@ interface UnreadMessage {
 
 export const useUnreadMessages = (userId: string | undefined) => {
   const [unreadCount, setUnreadCount] = useState(0);
-  const { toast } = useToast();
 
   useEffect(() => {
     if (!userId) return;
 
-    // Fonction pour récupérer le nombre de messages non lus
     const fetchUnreadCount = async () => {
       const { data: conversations } = await supabase
         .from('conversations')
@@ -39,7 +39,6 @@ export const useUnreadMessages = (userId: string | undefined) => {
 
     fetchUnreadCount();
 
-    // Écouter les nouveaux messages en temps réel
     const channel = supabase
       .channel('new-messages')
       .on(
@@ -52,16 +51,13 @@ export const useUnreadMessages = (userId: string | undefined) => {
         },
         async (payload) => {
           const newMessage = payload.new as any;
-          
-          // Incrémenter le compteur
           setUnreadCount(prev => prev + 1);
 
-          // Récupérer les infos pour la notification
           const { data: conversation } = await supabase
             .from('conversations')
             .select(`
               *,
-              listing:listing_id(title),
+              listing:listing_id(title, currency),
               buyer:profiles!conversations_buyer_id_fkey(full_name),
               seller:profiles!conversations_seller_id_fkey(full_name)
             `)
@@ -73,23 +69,41 @@ export const useUnreadMessages = (userId: string | undefined) => {
               ? conversation.buyer?.full_name 
               : conversation.seller?.full_name;
 
-            // Afficher une notification toast
+            let notificationTitle = '';
+            let notificationBody = '';
+
             if (newMessage.message_type === 'text') {
-              toast({
-                title: `Nouveau message de ${senderName}`,
-                description: newMessage.content.length > 50 
-                  ? newMessage.content.substring(0, 50) + '...' 
-                  : newMessage.content,
-              });
+              notificationTitle = `Nouveau message de ${senderName}`;
+              notificationBody = newMessage.content.length > 50 
+                ? newMessage.content.substring(0, 50) + '...' 
+                : newMessage.content;
             } else if (newMessage.message_type === 'image') {
-              toast({
-                title: `${senderName} a partagé une image`,
-                description: conversation.listing?.title,
-              });
+              notificationTitle = `${senderName} a partagé une image`;
+              notificationBody = conversation.listing?.title || 'Image partagée';
             } else if (newMessage.message_type === 'location') {
-              toast({
-                title: `${senderName} a partagé une position`,
-                description: newMessage.location_name || 'Position partagée',
+              notificationTitle = `${senderName} a partagé une position`;
+              notificationBody = newMessage.location_name || 'Position partagée';
+            }
+
+            toast(notificationTitle, {
+              description: notificationBody,
+              action: {
+                label: "Voir",
+                onClick: () => window.location.href = `/messages?conversation=${newMessage.conversation_id}`
+              }
+            });
+
+            if (Capacitor.isNativePlatform()) {
+              await LocalNotifications.schedule({
+                notifications: [{
+                  title: notificationTitle,
+                  body: notificationBody,
+                  id: Date.now(),
+                  extra: {
+                    type: 'message',
+                    conversationId: newMessage.conversation_id
+                  }
+                }]
               });
             }
           }
@@ -106,12 +120,11 @@ export const useUnreadMessages = (userId: string | undefined) => {
         async (payload) => {
           const offer = payload.new as any;
           
-          // Récupérer les infos de l'offre
           const { data: conversation } = await supabase
             .from('conversations')
             .select(`
               *,
-              listing:listing_id(title, price),
+              listing:listing_id(title, price, currency),
               buyer:profiles!conversations_buyer_id_fkey(full_name),
               seller:profiles!conversations_seller_id_fkey(full_name)
             `)
@@ -119,14 +132,31 @@ export const useUnreadMessages = (userId: string | undefined) => {
             .single();
 
           if (conversation) {
-            const senderName = conversation.buyer_id === offer.sender_id 
-              ? conversation.buyer?.full_name 
-              : conversation.seller?.full_name;
+            const listing = conversation.listing;
+            const notificationTitle = "Nouvelle offre de prix";
+            const notificationBody = `Offre de ${offer.amount} ${listing?.currency || 'FCFA'} reçue`;
 
-            toast({
-              title: `💰 Nouvelle offre de ${senderName}`,
-              description: `${offer.amount.toLocaleString()} FCFA pour ${conversation.listing?.title}`,
+            toast(notificationTitle, {
+              description: notificationBody,
+              action: {
+                label: "Voir",
+                onClick: () => window.location.href = `/messages?conversation=${offer.conversation_id}`
+              }
             });
+
+            if (Capacitor.isNativePlatform()) {
+              await LocalNotifications.schedule({
+                notifications: [{
+                  title: notificationTitle,
+                  body: notificationBody,
+                  id: Date.now(),
+                  extra: {
+                    type: 'message',
+                    conversationId: offer.conversation_id
+                  }
+                }]
+              });
+            }
           }
         }
       )
@@ -140,8 +170,6 @@ export const useUnreadMessages = (userId: string | undefined) => {
         },
         (payload) => {
           const updatedMessage = payload.new as any;
-          
-          // Si le message a été lu, décrémenter le compteur
           if (updatedMessage.is_read) {
             setUnreadCount(prev => Math.max(0, prev - 1));
           }
@@ -152,25 +180,27 @@ export const useUnreadMessages = (userId: string | undefined) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [userId, toast]);
+  }, [userId]);
 
   const markConversationAsRead = async (conversationId: string) => {
     if (!userId) return;
 
-    const { data: unreadMessages } = await supabase
+    const { data: messages } = await supabase
       .from('messages')
       .select('id')
       .eq('conversation_id', conversationId)
       .eq('receiver_id', userId)
       .eq('is_read', false);
 
-    if (unreadMessages && unreadMessages.length > 0) {
+    if (messages && messages.length > 0) {
       await supabase
         .from('messages')
         .update({ is_read: true })
         .eq('conversation_id', conversationId)
         .eq('receiver_id', userId)
         .eq('is_read', false);
+
+      setUnreadCount(prev => Math.max(0, prev - messages.length));
     }
   };
 
