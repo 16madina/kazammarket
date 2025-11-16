@@ -6,11 +6,12 @@ import { Link } from "react-router-dom";
 
 const CategoryGrid = () => {
   const { data: categories } = useQuery({
-    queryKey: ["categories"],
+    queryKey: ["parent-categories"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("categories")
         .select("*")
+        .is("parent_id", null)
         .order("name");
       if (error) throw error;
       return data;
@@ -25,7 +26,7 @@ const CategoryGrid = () => {
           {categories?.map((category) => {
             const IconComponent = Icons[category.icon as keyof typeof Icons] as any;
             return (
-              <Link key={category.id} to={`/categories/${category.slug}`} className="flex-shrink-0 snap-start">
+              <Link key={category.id} to={`/category/${category.slug}`} className="flex-shrink-0 snap-start">
                 <Card className="p-4 w-[140px] hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer group animate-fade-in">
                   <div className="flex flex-col items-center text-center gap-2">
                     {IconComponent && (
