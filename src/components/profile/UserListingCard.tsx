@@ -47,10 +47,10 @@ export const UserListingCard = ({ listing, onUpdate }: UserListingCardProps) => 
   };
 
   return (
-    <Card className="overflow-hidden">
-      <div className="flex gap-3 p-3">
+    <Card className="overflow-hidden shadow-md border-0 bg-card/50 backdrop-blur-sm transition-all hover:shadow-lg">
+      <div className="flex gap-4 p-4">
         {/* Image */}
-        <div className="relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden bg-muted">
+        <div className="relative w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden bg-muted shadow-sm">
           {listing.images?.[0] ? (
             <img
               src={listing.images[0]}
@@ -58,65 +58,64 @@ export const UserListingCard = ({ listing, onUpdate }: UserListingCardProps) => 
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-              Pas d'image
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+              <span className="text-muted-foreground/50 text-xs">Pas d'image</span>
             </div>
           )}
           {isSold && (
-            <Badge className="absolute top-1 left-1 bg-yellow-500 text-black text-xs px-1">
-              Vendu
-            </Badge>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+              <Badge className="bg-yellow-500 text-black font-semibold px-3 py-1">
+                Vendu
+              </Badge>
+            </div>
           )}
         </div>
 
         {/* Content */}
-        <div className="flex-1 space-y-1">
-          <h3 className="font-semibold text-sm line-clamp-2">
+        <div className="flex-1 min-w-0 space-y-2">
+          <h3 className="font-semibold text-base line-clamp-2">
             {listing.title}
           </h3>
-          <p className="text-lg font-bold text-primary">
+          <p className="text-xl font-bold text-primary">
             {listing.price === 0 ? (
               <span className="text-green-600">Gratuit</span>
             ) : (
               `${listing.price.toLocaleString()} FCFA`
             )}
           </p>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="secondary" className="text-xs py-0">
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-xs px-2 py-0.5 rounded-full">
               {listing.categories?.name}
             </Badge>
-            <span>{listing.views === 1 ? "1 vue" : `${listing.views || 0} vues`}</span>
+            <span className="text-xs text-muted-foreground">
+              {listing.views === 1 ? "1 vue" : `${listing.views || 0} vues`}
+            </span>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <Button
             size="sm"
             variant="outline"
             onClick={() => navigate(`/listing/${listing.id}`)}
-            className="h-7 text-xs px-2"
+            className="h-9 text-xs px-3 rounded-full transition-all hover:scale-105 active:scale-95"
           >
-            <Edit className="h-3 w-3 mr-1" />
-            Modifier
+            <Edit className="h-3 w-3" />
           </Button>
           
           <Button
             size="sm"
             variant={isSold ? "default" : "secondary"}
             onClick={handleToggleStatus}
-            className={`h-7 text-xs px-2 ${isSold ? "" : "bg-orange-500 hover:bg-orange-600 text-white"}`}
+            className={`h-9 text-xs px-3 rounded-full transition-all hover:scale-105 active:scale-95 ${
+              isSold ? "" : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
+            }`}
           >
             {isSold ? (
-              <>
-                <XCircle className="h-3 w-3 mr-1" />
-                Réactiver
-              </>
+              <XCircle className="h-3 w-3" />
             ) : (
-              <>
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Vendu
-              </>
+              <CheckCircle className="h-3 w-3" />
             )}
           </Button>
 
@@ -124,10 +123,9 @@ export const UserListingCard = ({ listing, onUpdate }: UserListingCardProps) => 
             size="sm"
             variant="destructive"
             onClick={handleDelete}
-            className="h-7 text-xs px-2"
+            className="h-9 text-xs px-3 rounded-full transition-all hover:scale-105 active:scale-95"
           >
-            <Trash2 className="h-3 w-3 mr-1" />
-            Supprimer
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       </div>

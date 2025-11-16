@@ -224,241 +224,319 @@ const Profile = () => {
   if (monthsSinceMember >= 12) badges.push({ icon: Calendar, label: "Membre fidèle", color: "text-purple-500" });
 
   return (
-    <div className="min-h-screen pb-24 bg-background">
-      {/* Header */}
-      <div className="bg-background border-b sticky top-0 z-10">
-        <div className="flex items-center justify-between p-4">
+    <div className="min-h-screen pb-24 bg-gradient-to-b from-background to-muted/20">
+      {/* Header with Cover */}
+      <div className="relative">
+        {/* Cover Image */}
+        <div className="h-40 bg-gradient-to-br from-primary/20 via-primary/10 to-accent/20" />
+        
+        {/* Header Actions */}
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate(-1)}
+            className="bg-background/80 backdrop-blur-sm hover:bg-background/90 rounded-full transition-all hover:scale-105 active:scale-95"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg" />
-            <span className="font-bold text-xl">ReVivo</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="bg-background/80 backdrop-blur-sm hover:bg-background/90 rounded-full transition-all hover:scale-105 active:scale-95"
+            >
               <Bell className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="bg-background/80 backdrop-blur-sm hover:bg-background/90 rounded-full transition-all hover:scale-105 active:scale-95"
+            >
               <Share2 className="h-5 w-5" />
             </Button>
+          </div>
+        </div>
+
+        {/* Profile Picture */}
+        <div className="absolute left-1/2 -translate-x-1/2 -bottom-16">
+          <div className="relative">
+            <div className="w-32 h-32 rounded-full overflow-hidden bg-background border-4 border-background shadow-xl">
+              {avatarUrl ? (
+                <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-primary/70">
+                  <span className="text-4xl font-bold text-primary-foreground">
+                    {fullName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+            </div>
+            {profile?.verified_seller && (
+              <div className="absolute bottom-1 right-1 bg-blue-500 rounded-full p-1 border-2 border-background">
+                <CheckCircle2 className="h-5 w-5 text-white" />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Profile Info */}
-      <div className="p-6 space-y-4">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-32 h-32 rounded-full overflow-hidden bg-muted flex items-center justify-center">
-            {avatarUrl ? (
-              <img src={avatarUrl} alt={fullName} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-4xl font-bold text-muted-foreground">
-                {fullName.charAt(0).toUpperCase()}
+      <div className="mt-20 px-6 space-y-6">
+        {/* Name and Location */}
+        <div className="text-center space-y-2 animate-fade-in">
+          <h1 className="text-3xl font-bold">{fullName}</h1>
+          <p className="text-muted-foreground text-sm">{user?.email}</p>
+          {(profile?.city || profile?.country) && (
+            <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4" />
+              <span>
+                {profile.city && profile.country 
+                  ? `${profile.city}, ${profile.country}`
+                  : profile.city || profile.country}
               </span>
-            )}
-          </div>
-          
-          <div className="text-center space-y-2">
-            <div className="flex items-center justify-center gap-2">
-              <h1 className="text-2xl font-bold">{fullName}</h1>
-              {profile?.verified_seller && (
-                <CheckCircle2 className="h-6 w-6 text-blue-500 fill-blue-500" />
-              )}
-            </div>
-            <p className="text-muted-foreground">{user?.email}</p>
-            {(profile?.city || profile?.country) && (
-              <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>
-                  {profile.city && profile.country 
-                    ? `${profile.city}, ${profile.country}`
-                    : profile.city || profile.country}
-                </span>
-              </div>
-            )}
-            {memberSince && (
-              <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>Membre depuis {memberSince.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 w-full max-w-md">
-            <Card className="p-4">
-              <CardContent className="p-0 text-center">
-                <div className="flex flex-col items-center gap-1">
-                  <Package className="h-5 w-5 text-primary" />
-                  <p className="text-2xl font-bold">{activeListings.length}</p>
-                  <p className="text-xs text-muted-foreground">Actives</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="p-4">
-              <CardContent className="p-0 text-center">
-                <div className="flex flex-col items-center gap-1">
-                  <TrendingUp className="h-5 w-5 text-green-500" />
-                  <p className="text-2xl font-bold">{profile?.total_sales || 0}</p>
-                  <p className="text-xs text-muted-foreground">Vendues</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="p-4">
-              <CardContent className="p-0 text-center">
-                <div className="flex flex-col items-center gap-1">
-                  <Star className="h-5 w-5 text-yellow-500" />
-                  <p className="text-2xl font-bold">{profile?.rating_average?.toFixed(1) || '0.0'}</p>
-                  <p className="text-xs text-muted-foreground">Note</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Badges */}
-          {badges.length > 0 && (
-            <div className="flex flex-wrap justify-center gap-2 w-full max-w-md">
-              {badges.map((badge, index) => (
-                <div key={index} className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted text-xs">
-                  <badge.icon className={`h-3 w-3 ${badge.color}`} />
-                  <span>{badge.label}</span>
-                </div>
-              ))}
             </div>
           )}
-
-          <div className="w-full max-w-md space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate("/edit-profile")}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Modifier le profil
-              </Button>
-              <Button 
-                variant="outline" 
-                className="w-full"
-                onClick={() => navigate("/settings")}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Paramètres
-              </Button>
+          {memberSince && (
+            <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+              <Calendar className="h-3 w-3" />
+              <span>Membre depuis {memberSince.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</span>
             </div>
+          )}
+        </div>
 
-            {isAdmin && (
-              <Button 
-                className="w-full bg-gradient-to-r from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-white"
-                onClick={() => navigate("/admin")}
+        {/* Bio Section */}
+        <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm animate-fade-in">
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground text-center italic">
+              {profile?.location || "Aucune bio pour le moment. Présentez-vous à vos futurs acheteurs !"}
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-3 animate-fade-in">
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-primary/10 to-primary/5 hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-primary/20">
+                  <Package className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{activeListings.length}</p>
+                  <p className="text-xs text-muted-foreground">Annonces actives</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-green-500/10 to-green-500/5 hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-green-500/20">
+                  <TrendingUp className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{profile?.total_sales || 0}</p>
+                  <p className="text-xs text-muted-foreground">Articles vendus</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-yellow-500/10 to-yellow-500/5 hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-yellow-500/20">
+                  <Star className="h-6 w-6 text-yellow-600 fill-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{profile?.rating_average?.toFixed(1) || '0.0'}</p>
+                  <p className="text-xs text-muted-foreground">Note moyenne</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg border-0 bg-gradient-to-br from-blue-500/10 to-blue-500/5 hover:shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-blue-500/20">
+                  <Users className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{profile?.followers_count || 0}</p>
+                  <p className="text-xs text-muted-foreground">Abonnés</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Badges */}
+        {badges.length > 0 && (
+          <div className="flex flex-wrap justify-center gap-2 animate-fade-in">
+            {badges.map((badge, index) => (
+              <div 
+                key={index} 
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-muted to-muted/50 shadow-sm text-xs font-medium transition-all hover:scale-105 active:scale-95"
               >
-                <Shield className="h-4 w-4 mr-2" />
-                Panneau d'administration
-              </Button>
-            )}
+                <badge.icon className={`h-4 w-4 ${badge.color}`} />
+                <span>{badge.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
-            <Button
+        {/* Action Buttons */}
+        <div className="space-y-3 animate-fade-in">
+          <div className="grid grid-cols-2 gap-3">
+            <Button 
               variant="outline" 
-              className="w-full"
-              onClick={handleLogout}
+              className="rounded-full h-12 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+              onClick={() => navigate("/edit-profile")}
             >
-              <LogOut className="h-4 w-4 mr-2" />
-              Se déconnecter
+              <Edit className="h-4 w-4 mr-2" />
+              Modifier
+            </Button>
+            <Button 
+              variant="outline" 
+              className="rounded-full h-12 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+              onClick={() => navigate("/settings")}
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Paramètres
             </Button>
           </div>
+
+          {isAdmin && (
+            <Button 
+              className="w-full rounded-full h-12 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+              onClick={() => navigate("/admin")}
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              Panneau d'administration
+            </Button>
+          )}
+
+          <Button
+            variant="outline" 
+            className="w-full rounded-full h-12 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-sm text-destructive border-destructive/20 hover:bg-destructive/10"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Se déconnecter
+          </Button>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="px-4">
+      <div className="px-4 mt-6">
         <Tabs defaultValue="listings" className="w-full">
-          <TabsList className="w-full grid grid-cols-5 mb-4 bg-muted/50 p-1 h-12">
+          <TabsList className="w-full grid grid-cols-5 mb-6 bg-muted/30 backdrop-blur-sm p-1.5 h-14 rounded-2xl shadow-sm">
             <TabsTrigger 
               value="listings"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-xl transition-all data-[state=active]:scale-[1.02] flex flex-col items-center gap-1 py-2"
             >
-              <Package className="h-4 w-4" />
+              <Package className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Annonces</span>
             </TabsTrigger>
             <TabsTrigger 
               value="favorites"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-xl transition-all data-[state=active]:scale-[1.02] flex flex-col items-center gap-1 py-2"
             >
-              <Heart className="h-4 w-4" />
+              <Heart className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Favoris</span>
             </TabsTrigger>
             <TabsTrigger 
               value="transactions"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-xl transition-all data-[state=active]:scale-[1.02] flex flex-col items-center gap-1 py-2"
             >
-              <Receipt className="h-4 w-4" />
+              <Receipt className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Achats</span>
             </TabsTrigger>
             <TabsTrigger 
               value="reviews"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-xl transition-all data-[state=active]:scale-[1.02] flex flex-col items-center gap-1 py-2"
             >
-              <Star className="h-4 w-4" />
+              <Star className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Avis</span>
             </TabsTrigger>
             <TabsTrigger 
               value="following"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm data-[state=active]:font-semibold text-xs"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-md rounded-xl transition-all data-[state=active]:scale-[1.02] flex flex-col items-center gap-1 py-2"
             >
-              <Users className="h-4 w-4" />
+              <Users className="h-5 w-5" />
+              <span className="text-[10px] font-medium">Suivis</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="listings" className="space-y-4">
+          <TabsContent value="listings" className="space-y-4 animate-fade-in">
             {!listings || listings.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <p className="text-lg">Aucune annonce</p>
-                <p className="text-sm mt-2">Commencez à publier vos articles !</p>
-                <Button 
-                  className="mt-4"
-                  onClick={() => navigate("/publish")}
-                >
-                  Publier une annonce
-                </Button>
-              </div>
+              <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
+                <CardContent className="text-center py-16 text-muted-foreground">
+                  <Package className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                  <p className="text-lg font-semibold">Aucune annonce</p>
+                  <p className="text-sm mt-2 mb-6">Commencez à publier vos articles !</p>
+                  <Button 
+                    className="rounded-full px-6 shadow-lg transition-all hover:scale-105 active:scale-95"
+                    onClick={() => navigate("/publish")}
+                  >
+                    <Package className="h-4 w-4 mr-2" />
+                    Publier une annonce
+                  </Button>
+                </CardContent>
+              </Card>
             ) : (
-              <>
-                {activeListings.map((listing) => (
-                  <UserListingCard
+              <div className="space-y-3">
+                {activeListings.map((listing, index) => (
+                  <div 
                     key={listing.id}
-                    listing={listing}
-                    onUpdate={refetchListings}
-                  />
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <UserListingCard
+                      listing={listing}
+                      onUpdate={refetchListings}
+                    />
+                  </div>
                 ))}
-                {soldListings.map((listing) => (
-                  <UserListingCard
+                {soldListings.map((listing, index) => (
+                  <div 
                     key={listing.id}
-                    listing={listing}
-                    onUpdate={refetchListings}
-                  />
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${(activeListings.length + index) * 50}ms` }}
+                  >
+                    <UserListingCard
+                      listing={listing}
+                      onUpdate={refetchListings}
+                    />
+                  </div>
                 ))}
-              </>
+              </div>
             )}
           </TabsContent>
 
-          <TabsContent value="favorites" className="space-y-4">
+          <TabsContent value="favorites" className="space-y-3 animate-fade-in">
             {!favorites || favorites.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Heart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">Aucun favori</p>
-                <p className="text-sm mt-2">Ajoutez des annonces à vos favoris pour les retrouver facilement</p>
-              </div>
+              <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
+                <CardContent className="text-center py-16 text-muted-foreground">
+                  <Heart className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                  <p className="text-lg font-semibold">Aucun favori</p>
+                  <p className="text-sm mt-2">Ajoutez des annonces à vos favoris pour les retrouver facilement</p>
+                </CardContent>
+              </Card>
             ) : (
-              favorites.map((favorite: any) => (
+              favorites.map((favorite: any, index) => (
                 <Card 
                   key={favorite.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  className="cursor-pointer shadow-md border-0 bg-card/50 backdrop-blur-sm transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] animate-fade-in"
+                  style={{ animationDelay: `${index * 50}ms` }}
                   onClick={() => navigate(`/listing/${favorite.listing_id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex gap-4">
-                      <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      <div className="w-24 h-24 rounded-2xl overflow-hidden bg-muted flex-shrink-0 shadow-sm">
                         {favorite.listings?.images?.[0] ? (
                           <img 
                             src={favorite.listings.images[0]} 
@@ -466,18 +544,19 @@ const Profile = () => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Package className="h-8 w-8 text-muted-foreground" />
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                            <Package className="h-10 w-10 text-muted-foreground/50" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate">{favorite.listings?.title}</h3>
-                        <p className="text-sm text-muted-foreground">{favorite.listings?.categories?.name}</p>
-                        <p className="text-lg font-bold text-primary mt-1">
+                        <h3 className="font-semibold truncate text-base">{favorite.listings?.title}</h3>
+                        <p className="text-xs text-muted-foreground mt-1">{favorite.listings?.categories?.name}</p>
+                        <p className="text-xl font-bold text-primary mt-2">
                           {favorite.listings?.price.toLocaleString()} {favorite.listings?.currency || 'FCFA'}
                         </p>
                       </div>
+                      <Heart className="h-5 w-5 text-destructive fill-destructive flex-shrink-0 mt-1" />
                     </div>
                   </CardContent>
                 </Card>
@@ -485,19 +564,25 @@ const Profile = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="transactions" className="space-y-4">
+          <TabsContent value="transactions" className="space-y-3 animate-fade-in">
             {!transactions || transactions.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Receipt className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">Aucune transaction</p>
-                <p className="text-sm mt-2">Votre historique de transactions apparaîtra ici</p>
-              </div>
+              <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
+                <CardContent className="text-center py-16 text-muted-foreground">
+                  <Receipt className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                  <p className="text-lg font-semibold">Aucune transaction</p>
+                  <p className="text-sm mt-2">Votre historique de transactions apparaîtra ici</p>
+                </CardContent>
+              </Card>
             ) : (
-              transactions.map((transaction: any) => (
-                <Card key={transaction.id}>
+              transactions.map((transaction: any, index) => (
+                <Card 
+                  key={transaction.id}
+                  className="shadow-md border-0 bg-card/50 backdrop-blur-sm animate-fade-in"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
                   <CardContent className="p-4">
                     <div className="flex gap-4">
-                      <div className="w-20 h-20 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      <div className="w-24 h-24 rounded-2xl overflow-hidden bg-muted flex-shrink-0 shadow-sm">
                         {transaction.listings?.images?.[0] ? (
                           <img 
                             src={transaction.listings.images[0]} 
@@ -505,37 +590,37 @@ const Profile = () => {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Package className="h-8 w-8 text-muted-foreground" />
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                            <Package className="h-10 w-10 text-muted-foreground/50" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold truncate">{transaction.listings?.title}</h3>
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <h3 className="font-semibold truncate text-base">{transaction.listings?.title}</h3>
                           {transaction.buyer_id === user?.id ? (
-                            <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">Achat</span>
+                            <span className="text-[10px] px-2 py-1 rounded-full bg-blue-500/10 text-blue-700 font-medium whitespace-nowrap">Achat</span>
                           ) : (
-                            <span className="text-xs px-2 py-1 rounded-full bg-green-100 text-green-700">Vente</span>
+                            <span className="text-[10px] px-2 py-1 rounded-full bg-green-500/10 text-green-700 font-medium whitespace-nowrap">Vente</span>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground">{transaction.listings?.categories?.name}</p>
-                        <div className="flex items-center justify-between mt-2">
-                          <p className="text-lg font-bold text-primary">
+                        <p className="text-xs text-muted-foreground">{transaction.listings?.categories?.name}</p>
+                        <div className="flex items-center justify-between mt-3">
+                          <p className="text-xl font-bold text-primary">
                             {transaction.amount.toLocaleString()} FCFA
                           </p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(transaction.created_at).toLocaleDateString('fr-FR')}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1 mt-1">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            transaction.status === 'completed' 
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}>
-                            {transaction.status === 'completed' ? 'Complétée' : 'En cours'}
-                          </span>
+                          <div className="text-right">
+                            <p className="text-[10px] text-muted-foreground">
+                              {new Date(transaction.created_at).toLocaleDateString('fr-FR')}
+                            </p>
+                            <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full mt-1 ${
+                              transaction.status === 'completed' 
+                                ? 'bg-green-500/10 text-green-700'
+                                : 'bg-yellow-500/10 text-yellow-700'
+                            }`}>
+                              {transaction.status === 'completed' ? '✓ Complétée' : '⏱ En cours'}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -545,88 +630,106 @@ const Profile = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="reviews" className="space-y-4">
+          <TabsContent value="reviews" className="space-y-4 animate-fade-in">
             {!reviews || reviews.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">Aucun avis</p>
-                <p className="text-sm mt-2">Les avis de vos acheteurs apparaîtront ici</p>
-              </div>
+              <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
+                <CardContent className="text-center py-16 text-muted-foreground">
+                  <Star className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                  <p className="text-lg font-semibold">Aucun avis</p>
+                  <p className="text-sm mt-2">Les avis de vos acheteurs apparaîtront ici</p>
+                </CardContent>
+              </Card>
             ) : (
               <div className="space-y-4">
-                <div className="bg-muted/50 rounded-lg p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-3xl font-bold">{profile?.rating_average?.toFixed(1) || '0.0'}</p>
-                      <div className="flex items-center gap-1 mt-1">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < Math.round(profile?.rating_average || 0)
-                                ? 'text-yellow-500 fill-yellow-500'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
+                <Card className="shadow-lg border-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/5">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center">
+                          <Star className="h-8 w-8 text-yellow-600 fill-yellow-600" />
+                        </div>
+                        <div>
+                          <p className="text-4xl font-bold">{profile?.rating_average?.toFixed(1) || '0.0'}</p>
+                          <div className="flex items-center gap-1 mt-2">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-5 w-5 ${
+                                  i < Math.round(profile?.rating_average || 0)
+                                    ? 'text-yellow-500 fill-yellow-500'
+                                    : 'text-muted-foreground/20'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold">{profile?.rating_count || 0}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Avis reçus</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm text-muted-foreground">{profile?.rating_count || 0} avis</p>
+                  </CardContent>
+                </Card>
+                <div className="space-y-3">
+                  {reviews.map((review, index) => (
+                    <div 
+                      key={review.id}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <ReviewCard review={review} />
                     </div>
-                  </div>
+                  ))}
                 </div>
-                {reviews.map((review) => (
-                  <ReviewCard key={review.id} review={review} />
-                ))}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="following" className="space-y-4">
+          <TabsContent value="following" className="space-y-3 animate-fade-in">
             {!following || following.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <p className="text-lg">Aucun abonnement</p>
-                <p className="text-sm mt-2">Suivez vos vendeurs préférés pour voir leurs nouvelles annonces</p>
-              </div>
+              <Card className="shadow-lg border-0 bg-card/50 backdrop-blur-sm">
+                <CardContent className="text-center py-16 text-muted-foreground">
+                  <Users className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                  <p className="text-lg font-semibold">Aucun abonnement</p>
+                  <p className="text-sm mt-2">Suivez vos vendeurs préférés pour voir leurs nouvelles annonces</p>
+                </CardContent>
+              </Card>
             ) : (
-              following.map((seller: any) => (
+              following.map((seller: any, index) => (
                 <Card 
                   key={seller.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => {
-                    // Navigate to seller's listings or profile
-                    navigate(`/search?seller=${seller.id}`);
-                  }}
+                  className="cursor-pointer shadow-md border-0 bg-card/50 backdrop-blur-sm transition-all hover:scale-[1.02] hover:shadow-xl active:scale-[0.98] animate-fade-in"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                  onClick={() => navigate(`/seller/${seller.id}`)}
                 >
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
-                      <Avatar className="h-14 w-14">
-                        <AvatarImage src={seller.avatar_url || ""} />
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                          {seller.full_name?.charAt(0).toUpperCase() || "U"}
+                      <Avatar className="h-16 w-16 ring-2 ring-primary/10 shadow-sm">
+                        <AvatarImage src={seller.avatar_url} />
+                        <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-xl font-bold">
+                          {seller.full_name?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      
-                      <div className="flex-1">
-                        <h3 className="font-semibold">{seller.full_name || "Utilisateur"}</h3>
-                        
-                        <div className="flex items-center gap-4 mt-1">
-                          {seller.rating_average > 0 && (
-                            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span>{seller.rating_average.toFixed(1)}</span>
-                              <span className="text-xs">({seller.rating_count})</span>
-                            </div>
-                          )}
-                          
-                          {seller.total_sales > 0 && (
-                            <div className="text-sm text-muted-foreground">
-                              {seller.total_sales} vente{seller.total_sales > 1 ? 's' : ''}
-                            </div>
-                          )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold truncate text-base">{seller.full_name}</h3>
+                        <div className="flex items-center gap-3 mt-2">
+                          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-yellow-500/10">
+                            <Star className="h-3 w-3 text-yellow-600 fill-yellow-600" />
+                            <span className="text-xs font-semibold">{seller.rating_average?.toFixed(1) || '0.0'}</span>
+                            <span className="text-[10px] text-muted-foreground">
+                              ({seller.rating_count || 0})
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/10">
+                            <TrendingUp className="h-3 w-3 text-green-600" />
+                            <span className="text-xs font-semibold text-green-700">
+                              {seller.total_sales || 0} ventes
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <Users className="h-5 w-5 text-primary flex-shrink-0" />
                     </div>
                   </CardContent>
                 </Card>
