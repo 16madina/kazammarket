@@ -35,6 +35,7 @@ import SalesHistory from "./pages/settings/SalesHistory";
 
 import TestCamera from "./pages/TestCamera";
 import AdminPerformance from "./pages/AdminPerformance";
+import EmailVerified from "./pages/EmailVerified";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/email-verified" element={<EmailVerified />} />
           <Route path="/search" element={<Search />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/categories/:slug" element={<CategoryDetail />} />
