@@ -32,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "DJASSA Market <onboarding@resend.dev>",
+        from: "DJASSA Market <no-reply@djassamarket.com>",
         to: [email],
         subject: "Vérifiez votre adresse email - DJASSA Market",
         html: `
