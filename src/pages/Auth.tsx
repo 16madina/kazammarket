@@ -77,7 +77,7 @@ const Auth = () => {
 
         toast({
           title: "Connexion réussie",
-          description: "Bienvenue sur ReVend !",
+          description: "Bienvenue sur ReVenD !",
         });
         navigate("/");
       } else {
@@ -151,7 +151,7 @@ const Auth = () => {
 
         toast({
           title: "Compte créé !",
-          description: "Votre compte a été créé avec succès. Bienvenue sur ReVend !",
+          description: "Votre compte a été créé avec succès. Bienvenue sur ReVenD !",
         });
         navigate("/");
       }
@@ -186,8 +186,8 @@ const Auth = () => {
             </CardTitle>
             <CardDescription>
               {isLogin
-                ? "Connectez-vous à votre compte ReVend"
-                : "Rejoignez la communauté ReVend"}
+                ? "Connectez-vous à votre compte ReVenD"
+                : "Rejoignez la communauté ReVenD"}
             </CardDescription>
           </CardHeader>
           <CardContent>

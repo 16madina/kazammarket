@@ -1,6 +1,6 @@
 {
-  "name": "ReVend - Marketplace de seconde vie",
-  "short_name": "ReVend",
+  "name": "ReVenD - Marketplace de seconde vie",
+  "short_name": "ReVenD",
   "description": "Donnez une seconde vie à vos articles dans l'économie circulaire",
   "start_url": "/",
   "display": "standalone",
