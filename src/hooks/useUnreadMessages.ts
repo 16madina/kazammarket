@@ -107,9 +107,26 @@ export const useUnreadMessages = (userId: string | undefined) => {
           const oldMessage = payload.old as any;
           const newMessage = payload.new as any;
           
-          // Si le message passe de non-lu à lu
+          // Si le message passe de non-lu à lu, recharger le compteur complet
           if (oldMessage.is_read === false && newMessage.is_read === true) {
-            setUnreadCount(prev => Math.max(0, prev - 1));
+            // Recharger le compteur complet pour être sûr
+            const { data: conversations } = await supabase
+              .from('conversations')
+              .select('id')
+              .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+
+            if (conversations) {
+              const conversationIds = conversations.map(c => c.id);
+              
+              const { count } = await supabase
+                .from('messages')
+                .select('*', { count: 'exact', head: true })
+                .in('conversation_id', conversationIds)
+                .eq('receiver_id', userId)
+                .eq('is_read', false);
+
+              setUnreadCount(count || 0);
+            }
           }
         }
       )
@@ -233,5 +250,28 @@ export const useUnreadMessages = (userId: string | undefined) => {
     }
   }, [userId, toast]);
 
-  return { unreadCount, markConversationAsRead, markAllAsRead };
+  // Fonction pour recharger manuellement le compteur
+  const refetchUnreadCount = useCallback(async () => {
+    if (!userId) return;
+
+    const { data: conversations } = await supabase
+      .from('conversations')
+      .select('id')
+      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+
+    if (!conversations) return;
+
+    const conversationIds = conversations.map(c => c.id);
+    
+    const { count } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .in('conversation_id', conversationIds)
+      .eq('receiver_id', userId)
+      .eq('is_read', false);
+
+    setUnreadCount(count || 0);
+  }, [userId]);
+
+  return { unreadCount, markConversationAsRead, markAllAsRead, refetchUnreadCount };
 };

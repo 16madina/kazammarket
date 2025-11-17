@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { Badge } from "@/components/ui/badge";
+import { useEffect } from "react";
 
 const BottomNav = () => {
   const { data: user } = useQuery({
@@ -15,7 +16,14 @@ const BottomNav = () => {
     },
   });
 
-  const { unreadCount } = useUnreadMessages(user?.id);
+  const { unreadCount, refetchUnreadCount } = useUnreadMessages(user?.id);
+
+  // Recharger le compteur quand le composant se monte
+  useEffect(() => {
+    if (user?.id) {
+      refetchUnreadCount();
+    }
+  }, [user?.id, refetchUnreadCount]);
 
   const navItems = [
     { to: "/", icon: Home, label: "Accueil" },
