@@ -495,9 +495,9 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <Card className="p-4 border-b">
+      <Card className="p-4 border-b shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -585,7 +585,7 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
       </Card>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 pb-32 space-y-6">
+      <div className="flex-1 overflow-y-auto overscroll-y-contain p-6 pb-24 space-y-6">
         {isLoading ? (
           <div className="text-center text-muted-foreground">Chargement...</div>
         ) : (
