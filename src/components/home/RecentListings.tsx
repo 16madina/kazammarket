@@ -216,11 +216,6 @@ const RecentListings = () => {
             {getBadges(listing)}
           </div>
         )}
-        {getProximityBadge(listing) && (
-          <div className="absolute top-2 right-2">
-            {getProximityBadge(listing)}
-          </div>
-        )}
       </div>
       <CardContent className="p-4">
         <h3 className="font-semibold text-base mb-2 line-clamp-2 leading-tight">

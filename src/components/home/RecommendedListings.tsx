@@ -128,24 +128,11 @@ const RecommendedListings = () => {
                     Pas d'image
                   </div>
                 )}
-                <div className="absolute top-2 right-2 flex flex-col gap-2 items-end">
+                <div className="absolute top-2 right-2">
                   <Badge className="bg-primary/90 backdrop-blur-sm flex items-center gap-1">
                     <Sparkles className="h-3 w-3" />
                     Recommandé
                   </Badge>
-                  {(() => {
-                    const locationInfo = getLocationPriority(
-                      listing.location,
-                      userProfile?.city || null,
-                      userProfile?.country || null
-                    );
-                    return (
-                      <Badge className={`${getLocationBadgeColor(locationInfo.priority)} backdrop-blur-sm flex items-center gap-1`}>
-                        <MapPin className="h-3 w-3" />
-                        {locationInfo.distance}
-                      </Badge>
-                    );
-                  })()}
                 </div>
               </div>
               <CardContent className="p-4">
