@@ -59,7 +59,8 @@ const BottomNav = () => {
                     />
                     {badge !== undefined && badge > 0 && (
                       <Badge 
-                        className="absolute -top-1.5 -right-1.5 h-4 w-4 flex items-center justify-center p-0 text-[10px] bg-destructive text-destructive-foreground border-2 border-background animate-scale-in shadow-lg"
+                        key={badge}
+                        className="absolute -top-1.5 -right-1.5 h-4 w-4 flex items-center justify-center p-0 text-[10px] bg-destructive text-destructive-foreground border-2 border-background animate-scale-in shadow-lg animate-[pulse_0.5s_ease-in-out]"
                       >
                         {badge > 9 ? '9+' : badge}
                       </Badge>
