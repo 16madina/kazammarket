@@ -9,6 +9,7 @@ import { translateCondition } from "@/utils/translations";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sortListingsByLocation, getLocationPriority, getLocationBadgeColor } from "@/utils/geographicFiltering";
 import { formatPriceWithConversion } from "@/utils/currency";
+import { westAfricanCountries } from "@/data/westAfricaData";
 
 const RecentListings = () => {
   const { t, language } = useLanguage();
@@ -133,7 +134,15 @@ const RecentListings = () => {
   // Si aucune localisation valide, afficher TOUTES les annonces
   const hasValidLocation = !!(userCity?.trim() || userCountry?.trim());
   
-  const displayedListings = hasValidLocation
+  // Vérifier si l'utilisateur est en Afrique de l'Ouest
+  const isUserInWestAfrica = userCountry 
+    ? westAfricanCountries.some(c => 
+        c.name.toLowerCase() === userCountry.toLowerCase()
+      )
+    : false;
+  
+  // Filtrer uniquement si l'utilisateur EST en Afrique de l'Ouest
+  const displayedListings = hasValidLocation && isUserInWestAfrica
     ? listings?.filter(listing => {
         const locationInfo = getLocationPriority(
           listing.location,
@@ -146,9 +155,9 @@ const RecentListings = () => {
                locationInfo.priority === 'same-country' || 
                locationInfo.priority === 'neighboring-country';
       }) || []
-    : listings || []; // Pas de localisation disponible : afficher TOUT
+    : listings || []; // Utilisateur hors Afrique de l'Ouest OU pas de localisation : afficher TOUT
 
-  console.log('📊 Auth:', isAuthenticated, '| Total listings:', listings?.length, '| Displayed listings:', displayedListings.length, '| User location:', userCity, userCountry, '| Has valid location:', hasValidLocation);
+  console.log('📊 Auth:', isAuthenticated, '| Total listings:', listings?.length, '| Displayed listings:', displayedListings.length, '| User location:', userCity, userCountry, '| In West Africa:', isUserInWestAfrica);
 
   const hasDisplayedListings = displayedListings.length > 0;
   const hasUserLocation = !!(userProfile?.city || userProfile?.country);
