@@ -7,9 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin } from "lucide-react";
 import { translateCondition } from "@/utils/translations";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { sortListingsByLocation, getLocationPriority, getLocationBadgeColor } from "@/utils/geographicFiltering";
+import { sortListingsByLocation } from "@/utils/geographicFiltering";
 import { formatPriceWithConversion } from "@/utils/currency";
-import { westAfricanCountries } from "@/data/westAfricaData";
 
 const RecentListings = () => {
   const { t, language } = useLanguage();
@@ -102,7 +101,7 @@ const RecentListings = () => {
   });
   
   const { data: listings, isLoading } = useQuery({
-    queryKey: ["recent-listings", userProfile?.city, userProfile?.country, guestLocation.city, guestLocation.country],
+    queryKey: ["recent-listings", userProfile?.city, userProfile?.country],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("listings")
@@ -124,40 +123,22 @@ const RecentListings = () => {
     staleTime: 1000 * 60 * 5, // Cache pendant 5 minutes
   });
 
-  // RÈGLE : Afficher toutes les annonces du pays de l'utilisateur + pays voisins
-  // - Ordre chronologique (nouvelles annonces en premier)
-  // - Pas de tri par proximité géographique
+  // RÈGLE : Trier les annonces par proximité pour les utilisateurs authentifiés
+  // - Utilisateurs authentifiés avec localisation: tri par proximité (même ville > même pays > pays voisins > autres)
+  // - Utilisateurs non authentifiés ou sans localisation: ordre chronologique par défaut
   const isAuthenticated = !!session?.user;
-  const userCity = userProfile?.city || guestLocation.city || null;
-  const userCountry = userProfile?.country || guestLocation.country || null;
+  const userCity = userProfile?.city || null;
+  const userCountry = userProfile?.country || null;
   
-  // Si aucune localisation valide, afficher TOUTES les annonces
   const hasValidLocation = !!(userCity?.trim() || userCountry?.trim());
   
-  // Vérifier si l'utilisateur est en Afrique de l'Ouest
-  const isUserInWestAfrica = userCountry 
-    ? westAfricanCountries.some(c => 
-        c.name.toLowerCase() === userCountry.toLowerCase()
-      )
-    : false;
-  
-  // Filtrer uniquement si l'utilisateur EST en Afrique de l'Ouest
-  const displayedListings = hasValidLocation && isUserInWestAfrica
-    ? listings?.filter(listing => {
-        const locationInfo = getLocationPriority(
-          listing.location,
-          userCity,
-          userCountry
-        );
-        console.log('🏠 Listing:', listing.title, '| Location:', listing.location, '| User:', userCity, userCountry, '| Priority:', locationInfo.priority);
-        // Afficher toutes les annonces du même pays (toutes villes) + pays voisins
-        return locationInfo.priority === 'same-city' || 
-               locationInfo.priority === 'same-country' || 
-               locationInfo.priority === 'neighboring-country';
-      }) || []
-    : listings || []; // Utilisateur hors Afrique de l'Ouest OU pas de localisation : afficher TOUT
+  // Trier par proximité uniquement pour les utilisateurs authentifiés avec une localisation
+  // Sinon, afficher toutes les annonces dans l'ordre par défaut
+  const displayedListings = isAuthenticated && hasValidLocation
+    ? sortListingsByLocation(listings || [], userCity, userCountry)
+    : listings || [];
 
-  console.log('📊 Auth:', isAuthenticated, '| Total listings:', listings?.length, '| Displayed listings:', displayedListings.length, '| User location:', userCity, userCountry, '| In West Africa:', isUserInWestAfrica);
+  console.log('📊 Auth:', isAuthenticated, '| Total listings:', listings?.length, '| Displayed listings:', displayedListings.length, '| User location:', userCity, userCountry, '| Sorting by proximity:', isAuthenticated && hasValidLocation);
 
   const hasDisplayedListings = displayedListings.length > 0;
   const hasUserLocation = !!(userProfile?.city || userProfile?.country);
@@ -309,15 +290,9 @@ const RecentListings = () => {
         ) : (
           <div className="space-y-8">
             {/* Mobile: 2 colonnes, Tablet: 2 colonnes, Desktop: 3 colonnes, XL: 4 colonnes */}
-            {hasDisplayedListings ? (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {listingsWithAds.map((item, index) => renderItem(item, index))}
-              </div>
-            ) : isAuthenticated && hasUserLocation ? (
-              <div className="text-center py-6 bg-muted/30 rounded-lg border border-border/50">
-                <p className="text-muted-foreground font-medium">{t('listings.no_local')}</p>
-              </div>
-            ) : null}
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {listingsWithAds.map((item, index) => renderItem(item, index))}
+            </div>
           </div>
         )}
       </div>
