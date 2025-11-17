@@ -29,7 +29,7 @@ const Messages = () => {
     },
   });
 
-  const { markConversationAsRead } = useUnreadMessages(user?.id);
+  const { markConversationAsRead, markAllAsRead, unreadCount } = useUnreadMessages(user?.id);
 
   useEffect(() => {
     const convId = searchParams.get("conversation");
@@ -65,16 +65,28 @@ const Messages = () => {
       <div className="max-w-screen-xl mx-auto h-screen flex flex-col">
         {/* Header - Hidden on mobile when chat is open */}
         <div className={`${selectedConversationId ? 'hidden md:block' : 'block'} bg-card border-b border-border p-4`}>
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="md:inline-flex"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-2xl font-bold">Messages</h1>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="md:inline-flex"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <h1 className="text-2xl font-bold">Messages</h1>
+            </div>
+            {unreadCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={markAllAsRead}
+                className="text-sm"
+              >
+                Tout marquer comme lu
+              </Button>
+            )}
           </div>
         </div>
 

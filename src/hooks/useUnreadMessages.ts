@@ -190,5 +190,30 @@ export const useUnreadMessages = (userId: string | undefined) => {
     }
   }, [userId]);
 
-  return { unreadCount, markConversationAsRead };
+  const markAllAsRead = useCallback(async () => {
+    if (!userId) return;
+
+    // Marquer tous les messages non lus comme lus
+    const { error } = await supabase
+      .from('messages')
+      .update({ is_read: true })
+      .eq('receiver_id', userId)
+      .eq('is_read', false);
+
+    if (!error) {
+      setUnreadCount(0);
+      toast({
+        title: "Messages marqués comme lus",
+        description: "Tous vos messages ont été marqués comme lus",
+      });
+    } else {
+      toast({
+        title: "Erreur",
+        description: "Impossible de marquer les messages comme lus",
+        variant: "destructive",
+      });
+    }
+  }, [userId, toast]);
+
+  return { unreadCount, markConversationAsRead, markAllAsRead };
 };
