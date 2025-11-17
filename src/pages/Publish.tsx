@@ -129,16 +129,17 @@ const Publish = () => {
 
     switch (name) {
       case "title":
-        if (value.length < 5) {
-          newErrors.title = "Le titre doit contenir au moins 5 caractères";
+        // Pas de minimum pour le titre
+        if (value.trim().length === 0) {
+          newErrors.title = "Le titre est requis";
         } else {
           delete newErrors.title;
         }
         break;
       case "description":
         const wordCount = value.trim().split(/\s+/).filter(word => word.length > 0).length;
-        if (wordCount < 4) {
-          newErrors.description = `La description doit contenir au moins 4 mots (actuellement: ${wordCount} mots)`;
+        if (wordCount < 5) {
+          newErrors.description = `La description doit contenir au moins 5 mots (actuellement: ${wordCount} mot${wordCount > 1 ? 's' : ''})`;
         } else if (value.length > 1000) {
           newErrors.description = "La description ne peut pas dépasser 1000 caractères";
         } else {
@@ -348,14 +349,14 @@ const Publish = () => {
                   placeholder="Ex: iPhone 13 Pro Max 256GB"
                   required
                   maxLength={100}
-                  className={errors.title ? "border-destructive" : formData.title.length >= 10 ? "border-green-500" : ""}
+                  className={errors.title ? "border-destructive" : ""}
                 />
                 {errors.title && <p className="text-sm text-destructive mt-1">{errors.title}</p>}
                 {formData.title.length > 0 && <p className="text-sm text-muted-foreground mt-1">{formData.title.length} caractères</p>}
               </div>
 
               <div className="space-y-2" data-tutorial="description-input">
-                <Label htmlFor="description">Description * (minimum 20 mots)</Label>
+                <Label htmlFor="description">Description * (minimum 5 mots)</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -364,7 +365,7 @@ const Publish = () => {
                   required
                   rows={5}
                   maxLength={1000}
-                  className={errors.description ? "border-destructive" : formData.description.trim().split(/\s+/).filter(w => w.length > 0).length >= 20 ? "border-green-500" : ""}
+                  className={errors.description ? "border-destructive" : formData.description.trim().split(/\s+/).filter(w => w.length > 0).length >= 5 ? "border-green-500" : ""}
                 />
                 {errors.description && <p className="text-sm text-destructive mt-1">{errors.description}</p>}
                 <p className="text-sm text-muted-foreground mt-1">
