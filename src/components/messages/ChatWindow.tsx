@@ -18,6 +18,7 @@ import { PriceOfferDialog } from "./PriceOfferDialog";
 import { PriceOfferCard } from "./PriceOfferCard";
 import { PriceOfferHistory } from "./PriceOfferHistory";
 import { MessageReactions } from "./MessageReactions";
+import { TypingIndicator } from "./TypingIndicator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { usePresence } from "@/hooks/usePresence";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -690,14 +691,10 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
               );
             })}
             {otherUserTyping && (
-              <div className="flex gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={otherUser?.avatar_url || ""} />
-                </Avatar>
-                <div className="bg-muted rounded-lg p-3">
-                  <p className="text-sm text-muted-foreground italic">En train d'écrire...</p>
-                </div>
-              </div>
+              <TypingIndicator 
+                avatarUrl={otherUser?.avatar_url || ""} 
+                userName={otherUser?.full_name || "Utilisateur"}
+              />
             )}
             <div ref={messagesEndRef} />
           </>
