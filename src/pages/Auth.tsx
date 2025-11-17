@@ -326,7 +326,7 @@ const Auth = () => {
                 <>
                   <ProfileImageUpload
                     value={formData.avatar_url}
-                    onChange={(url) => setFormData({ ...formData, avatar_url: url })}
+                    onChange={(url) => setFormData(prev => ({ ...prev, avatar_url: url }))}
                     disabled={isLoading}
                   />
 
