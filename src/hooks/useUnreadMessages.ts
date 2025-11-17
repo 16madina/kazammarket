@@ -182,30 +182,52 @@ export const useUnreadMessages = (userId: string | undefined) => {
     };
   }, [userId, toast]);
 
-  const markConversationAsRead = useCallback(async (conversationId: string) => {
+  // Fonction pour recharger manuellement le compteur
+  const refetchUnreadCount = useCallback(async () => {
     if (!userId) return;
 
-    // Compter le nombre de messages non lus avant de les marquer
-    const { data: unreadMessages } = await supabase
-      .from('messages')
+    const { data: conversations } = await supabase
+      .from('conversations')
       .select('id')
-      .eq('conversation_id', conversationId)
+      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+
+    if (!conversations) return;
+
+    const conversationIds = conversations.map(c => c.id);
+    
+    const { count } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true })
+      .in('conversation_id', conversationIds)
       .eq('receiver_id', userId)
       .eq('is_read', false);
 
-    if (unreadMessages && unreadMessages.length > 0) {
+    setUnreadCount(count || 0);
+  }, [userId]);
+
+  const markConversationAsRead = useCallback(async (conversationId: string) => {
+    if (!userId) return;
+
+    try {
       // Marquer les messages comme lus
-      await supabase
+      const { error } = await supabase
         .from('messages')
         .update({ is_read: true })
         .eq('conversation_id', conversationId)
         .eq('receiver_id', userId)
         .eq('is_read', false);
+
+      if (error) {
+        console.error('Error marking messages as read:', error);
+        throw error;
+      }
       
-      // Mettre à jour le compteur localement immédiatement
-      setUnreadCount(prev => Math.max(0, prev - unreadMessages.length));
+      // Recharger le compteur complet pour être sûr de la synchronisation
+      await refetchUnreadCount();
+    } catch (error) {
+      console.error('Failed to mark conversation as read:', error);
     }
-  }, [userId]);
+  }, [userId, refetchUnreadCount]);
 
   const markAllAsRead = useCallback(async () => {
     if (!userId) return;
@@ -235,29 +257,6 @@ export const useUnreadMessages = (userId: string | undefined) => {
       });
     }
   }, [userId, toast]);
-
-  // Fonction pour recharger manuellement le compteur
-  const refetchUnreadCount = useCallback(async () => {
-    if (!userId) return;
-
-    const { data: conversations } = await supabase
-      .from('conversations')
-      .select('id')
-      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
-
-    if (!conversations) return;
-
-    const conversationIds = conversations.map(c => c.id);
-    
-    const { count } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .in('conversation_id', conversationIds)
-      .eq('receiver_id', userId)
-      .eq('is_read', false);
-
-    setUnreadCount(count || 0);
-  }, [userId]);
 
   return { unreadCount, markConversationAsRead, markAllAsRead, refetchUnreadCount };
 };
