@@ -29,7 +29,7 @@ const Messages = () => {
     },
   });
 
-  const { markConversationAsRead, markAllAsRead, unreadCount } = useUnreadMessages(user?.id);
+  const { markConversationAsRead, markAllAsRead, unreadCount, refetchUnreadCount } = useUnreadMessages(user?.id);
 
   useEffect(() => {
     const convId = searchParams.get("conversation");
@@ -38,9 +38,18 @@ const Messages = () => {
     }
   }, [searchParams]);
 
+  // Vérification automatique du badge au montage de la page
+  useEffect(() => {
+    if (user?.id) {
+      console.log('[Messages] Page montée, vérification du compteur de messages non lus...');
+      refetchUnreadCount();
+    }
+  }, [user?.id, refetchUnreadCount]);
+
   // Marquer les messages comme lus quand on sélectionne une conversation
   useEffect(() => {
     if (selectedConversationId && user?.id) {
+      console.log('[Messages] Conversation sélectionnée:', selectedConversationId);
       markConversationAsRead(selectedConversationId);
     }
     // markConversationAsRead est mémorisé avec useCallback, sûr de ne pas l'inclure

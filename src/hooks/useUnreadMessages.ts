@@ -184,25 +184,50 @@ export const useUnreadMessages = (userId: string | undefined) => {
 
   // Fonction pour recharger manuellement le compteur
   const refetchUnreadCount = useCallback(async () => {
-    if (!userId) return;
+    if (!userId) {
+      console.log('[refetchUnreadCount] No userId provided');
+      return;
+    }
 
-    const { data: conversations } = await supabase
-      .from('conversations')
-      .select('id')
-      .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+    try {
+      console.log('[refetchUnreadCount] Fetching unread count for user:', userId);
+      
+      const { data: conversations, error: convError } = await supabase
+        .from('conversations')
+        .select('id')
+        .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
 
-    if (!conversations) return;
+      if (convError) {
+        console.error('[refetchUnreadCount] Error fetching conversations:', convError);
+        return;
+      }
 
-    const conversationIds = conversations.map(c => c.id);
-    
-    const { count } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .in('conversation_id', conversationIds)
-      .eq('receiver_id', userId)
-      .eq('is_read', false);
+      if (!conversations || conversations.length === 0) {
+        console.log('[refetchUnreadCount] No conversations found');
+        setUnreadCount(0);
+        return;
+      }
 
-    setUnreadCount(count || 0);
+      const conversationIds = conversations.map(c => c.id);
+      console.log('[refetchUnreadCount] Found', conversationIds.length, 'conversations');
+      
+      const { count, error: countError } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .in('conversation_id', conversationIds)
+        .eq('receiver_id', userId)
+        .eq('is_read', false);
+
+      if (countError) {
+        console.error('[refetchUnreadCount] Error counting unread messages:', countError);
+        return;
+      }
+
+      console.log('[refetchUnreadCount] Unread messages count:', count || 0);
+      setUnreadCount(count || 0);
+    } catch (error) {
+      console.error('[refetchUnreadCount] Unexpected error:', error);
+    }
   }, [userId]);
 
   const markConversationAsRead = useCallback(async (conversationId: string) => {
