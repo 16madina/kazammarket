@@ -26,6 +26,7 @@ const Auth = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsConditions, setShowTermsConditions] = useState(false);
+  const [detectedLocation, setDetectedLocation] = useState<{ city: string | null; country: string | null }>({ city: null, country: null });
 
   const [formData, setFormData] = useState({
     email: "",
@@ -41,6 +42,50 @@ const Auth = () => {
 
   const selectedCountry = allCountries.find((c) => c.code === formData.country);
   const dialCode = selectedCountry?.dialCode || "";
+
+  // Détecter automatiquement la localisation de l'utilisateur
+  useEffect(() => {
+    if (isLogin) return; // Ne détecte que pour l'inscription
+
+    // Utiliser l'API de géolocalisation du navigateur
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            // Utiliser une API de reverse geocoding (OpenStreetMap Nominatim)
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
+            );
+            const data = await response.json();
+            
+            const detectedCity = data.address?.city || data.address?.town || data.address?.village || null;
+            const detectedCountry = data.address?.country || null;
+            
+            setDetectedLocation({ city: detectedCity, country: detectedCountry });
+            
+            // Pré-remplir le pays si détecté
+            if (detectedCountry) {
+              const matchingCountry = allCountries.find(c => 
+                c.name.toLowerCase() === detectedCountry.toLowerCase()
+              );
+              if (matchingCountry) {
+                setFormData(prev => ({
+                  ...prev,
+                  country: matchingCountry.code,
+                  city: detectedCity || ""
+                }));
+              }
+            }
+          } catch (error) {
+            console.error('Error fetching location details:', error);
+          }
+        },
+        (error) => {
+          console.log('Geolocation permission denied or not available:', error);
+        }
+      );
+    }
+  }, [isLogin]);
 
   useEffect(() => {
     // Check if user is already logged in
