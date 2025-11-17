@@ -116,22 +116,16 @@ const RecentListings = () => {
       
       if (error) throw error;
       
-      // Trier par priorité géographique - utiliser le profil si disponible, sinon la localisation invité
-      const city = userProfile?.city || guestLocation.city;
-      const country = userProfile?.country || guestLocation.country;
-      
-      if (city || country) {
-        return sortListingsByLocation(data, city, country);
-      }
-      
+      // Ne PAS trier par priorité géographique - garder l'ordre chronologique
+      // Le filtrage sera fait après pour ne garder que les annonces pertinentes
       return data;
     },
     staleTime: 1000 * 60 * 5, // Cache pendant 5 minutes
   });
 
-  // RÈGLE : Priorité géographique pour tous les utilisateurs (authentifiés ou non)
-  // - Si localisation disponible (profil ou détection auto) : filtrer par région
-  // - Sinon : afficher tous les listings
+  // RÈGLE : Afficher toutes les annonces du pays de l'utilisateur + pays voisins
+  // - Ordre chronologique (nouvelles annonces en premier)
+  // - Pas de tri par proximité géographique
   const isAuthenticated = !!session?.user;
   const userCity = userProfile?.city || guestLocation.city;
   const userCountry = userProfile?.country || guestLocation.country;
@@ -144,7 +138,7 @@ const RecentListings = () => {
           userCountry || null
         );
         console.log('🏠 Listing:', listing.title, '| Location:', listing.location, '| User:', userCity, userCountry, '| Priority:', locationInfo.priority);
-        // Filtrer par même ville, même pays, ou pays voisin
+        // Afficher toutes les annonces du même pays (toutes villes) + pays voisins
         return locationInfo.priority === 'same-city' || 
                locationInfo.priority === 'same-country' || 
                locationInfo.priority === 'neighboring-country';
