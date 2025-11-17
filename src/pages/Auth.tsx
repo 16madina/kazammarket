@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProfileImageUpload } from "@/components/auth/ProfileImageUpload";
 import { PrivacyPolicy } from "@/components/auth/PrivacyPolicy";
 import { TermsConditions } from "@/components/auth/TermsConditions";
-import { westAfricanCountries } from "@/data/westAfricaData";
+import { allCountries } from "@/data/westAfricaData";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
 import djassaLogoAuth from "@/assets/djassa-logo-auth.png";
 
@@ -39,7 +39,7 @@ const Auth = () => {
     avatar_url: null as string | null,
   });
 
-  const selectedCountry = westAfricanCountries.find((c) => c.code === formData.country);
+  const selectedCountry = allCountries.find((c) => c.code === formData.country);
   const dialCode = selectedCountry?.dialCode || "";
 
   useEffect(() => {
@@ -271,7 +271,7 @@ const Auth = () => {
                         <SelectValue placeholder="Sélectionner un pays" />
                       </SelectTrigger>
                       <SelectContent>
-                        {westAfricanCountries.map((country) => (
+                        {allCountries.map((country) => (
                           <SelectItem key={country.code} value={country.code}>
                             <span className="flex items-center gap-2">
                               <span className="text-xl">{country.flag}</span>

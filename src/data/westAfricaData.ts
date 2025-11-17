@@ -6,6 +6,7 @@ export interface Country {
   cities: string[];
 }
 
+// Les 16 pays d'Afrique de l'Ouest UNIQUEMENT
 export const westAfricanCountries: Country[] = [
   {
     code: "BJ",
@@ -295,6 +296,11 @@ export const westAfricanCountries: Country[] = [
       "Dapaong",
     ],
   },
+];
+
+// TOUS les pays (pour les formulaires de sélection)
+export const allCountries: Country[] = [
+  ...westAfricanCountries,
   // Autres pays (par ordre alphabétique)
   { code: "AF", name: "Afghanistan", flag: "🇦🇫", dialCode: "+93", cities: ["Kaboul"] },
   { code: "AL", name: "Albanie", flag: "🇦🇱", dialCode: "+355", cities: ["Tirana"] },
