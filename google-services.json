@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "943261135802",
-    "project_id": "djassa-market",
-    "storage_bucket": "djassa-market.firebasestorage.app"
+    "project_id": "kazam-market",
+    "storage_bucket": "kazam-market.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:943261135802:android:91a94946730bc9c356a383",
         "android_client_info": {
-          "package_name": "com.djassamarket.app"
+          "package_name": "com.kazam.market"
         }
       },
       "oauth_client": [],
