@@ -121,7 +121,7 @@ const Messages = () => {
             {selectedConversationId ? (
               <div className="flex-1 flex flex-col">
                 {/* Mobile back button */}
-                <div className="md:hidden flex items-center gap-2 p-3 border-b border-border bg-card">
+                <div className="md:hidden flex items-center gap-2 p-3 pt-safe border-b border-border bg-card">
                   <Button
                     variant="ghost"
                     size="icon"

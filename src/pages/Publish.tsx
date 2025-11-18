@@ -392,7 +392,7 @@ const Publish = () => {
 
   return (
     <div className="min-h-screen pb-24 bg-muted/30">
-      <div className="max-w-3xl mx-auto p-4 md:p-6">
+      <div className="max-w-3xl mx-auto p-4 md:p-6 pt-safe">
         <Button
           variant="ghost"
           size="icon"

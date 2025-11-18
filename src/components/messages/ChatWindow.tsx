@@ -498,7 +498,7 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <Card className="p-4 border-b shrink-0">
+      <Card className="p-4 pt-safe border-b shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
