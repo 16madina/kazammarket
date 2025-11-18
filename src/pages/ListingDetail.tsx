@@ -262,7 +262,7 @@ const ListingDetail = () => {
                         <Badge className="bg-green-600">Disponible</Badge>
                       )}
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-bold mb-2">{listing.title}</h1>
+                    <h1 className="text-xl md:text-2xl font-bold mb-2">{listing.title}</h1>
                     <div className="flex flex-wrap items-center gap-3 text-xs md:text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3.5 w-3.5 shrink-0" />
@@ -302,7 +302,7 @@ const ListingDetail = () => {
                 )}
 
                 <div className="pt-4 border-t">
-                  <div className="text-3xl font-bold mb-4">
+                  <div className="text-2xl font-bold mb-4">
                     {listing.price === 0 ? (
                       <span className="text-green-600">Gratuit</span>
                     ) : (
