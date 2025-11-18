@@ -91,19 +91,22 @@ export const LocationPicker = ({ onSelectLocation }: LocationPickerProps) => {
           <DialogTitle>Partager votre position</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p className="text-sm text-muted-foreground">
-            Partagez votre position actuelle pour faciliter la rencontre
-          </p>
+          <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg">
+            <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <p className="text-sm text-muted-foreground">
+              Partagez votre position actuelle pour faciliter la rencontre
+            </p>
+          </div>
           <Button
             onClick={getCurrentLocation}
             disabled={loading}
-            className="w-full"
+            className="w-full relative"
           >
             {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Obtention de la position...
-              </>
+              <div className="flex items-center justify-center gap-2 animate-fade-in">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span className="animate-pulse">Localisation en cours...</span>
+              </div>
             ) : (
               <>
                 <MapPin className="h-4 w-4 mr-2" />
