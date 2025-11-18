@@ -4,11 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin } from "lucide-react";
+import { MapPin, Navigation } from "lucide-react";
 import { translateCondition } from "@/utils/translations";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sortListingsByLocation, getLocationPriority } from "@/utils/geographicFiltering";
 import { formatPriceWithConversion } from "@/utils/currency";
+import { getUserLocation, geocodeLocation, calculateDistance, formatDistance } from "@/utils/distanceCalculation";
 
 const RecentListings = () => {
   const { t, language } = useLanguage();
@@ -17,6 +18,19 @@ const RecentListings = () => {
     const stored = localStorage.getItem('guestLocation');
     return stored ? JSON.parse(stored) : { city: null, country: null };
   });
+  
+  const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [listingDistances, setListingDistances] = useState<{ [key: string]: number }>({});
+
+  // Get user's coordinates
+  useEffect(() => {
+    getUserLocation().then(coords => {
+      if (coords) {
+        setUserCoordinates(coords);
+        console.log('📍 User coordinates:', coords);
+      }
+    });
+  }, []);
 
   // Détecter automatiquement la localisation pour les visiteurs
   useEffect(() => {
@@ -30,7 +44,12 @@ const RecentListings = () => {
           try {
             // Utiliser une API de reverse geocoding (OpenStreetMap Nominatim)
             const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
+              `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`,
+              {
+                headers: {
+                  'User-Agent': 'DjassaMarket/1.0'
+                }
+              }
             );
             const data = await response.json();
             
@@ -122,6 +141,38 @@ const RecentListings = () => {
     },
     staleTime: 1000 * 60 * 5, // Cache pendant 5 minutes
   });
+
+  // Calculate distances for listings
+  useEffect(() => {
+    if (!userCoordinates || !listings) return;
+
+    const calculateDistances = async () => {
+      const distances: { [key: string]: number } = {};
+      
+      for (const listing of listings) {
+        if (!listing.location) continue;
+        
+        try {
+          const listingCoords = await geocodeLocation(listing.location);
+          if (listingCoords) {
+            const distance = calculateDistance(
+              userCoordinates.lat,
+              userCoordinates.lng,
+              listingCoords.lat,
+              listingCoords.lng
+            );
+            distances[listing.id] = distance;
+          }
+        } catch (error) {
+          console.error(`Error calculating distance for ${listing.location}:`, error);
+        }
+      }
+      
+      setListingDistances(distances);
+    };
+
+    calculateDistances();
+  }, [userCoordinates, listings]);
 
   // RÈGLE : Trier les annonces par proximité pour les utilisateurs authentifiés
   // - Utilisateurs authentifiés avec localisation: tri par proximité (même ville > même pays > pays voisins > autres)
@@ -230,9 +281,17 @@ const RecentListings = () => {
             formatPriceWithConversion(listing.price, listing.currency || "FCFA", userProfile?.currency || "FCFA")
           )}
         </p>
-        <div className="flex items-center gap-1.5 text-sm text-muted-foreground/70">
-          <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-          <span className="line-clamp-1">{listing.location}</span>
+        <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground/70">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="line-clamp-1">{listing.location}</span>
+          </div>
+          {listingDistances[listing.id] !== undefined && (
+            <div className="flex items-center gap-1 text-primary font-medium shrink-0">
+              <Navigation className="h-3.5 w-3.5" />
+              <span className="text-xs">{formatDistance(listingDistances[listing.id])}</span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
