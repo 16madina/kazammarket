@@ -22,16 +22,6 @@ const RecentListings = () => {
   const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [listingDistances, setListingDistances] = useState<{ [key: string]: number }>({});
 
-  // Get user's coordinates
-  useEffect(() => {
-    getUserLocation().then(coords => {
-      if (coords) {
-        setUserCoordinates(coords);
-        console.log('📍 User coordinates:', coords);
-      }
-    });
-  }, []);
-
   // Détecter automatiquement la localisation pour les visiteurs
   useEffect(() => {
     // Si déjà détectée, ne pas redemander
@@ -141,6 +131,37 @@ const RecentListings = () => {
     },
     staleTime: 1000 * 60 * 5, // Cache pendant 5 minutes
   });
+
+  // Get user's coordinates from browser geolocation or user profile
+  useEffect(() => {
+    const getCoordinates = async () => {
+      // Try browser geolocation first
+      const browserCoords = await getUserLocation();
+      if (browserCoords) {
+        setUserCoordinates(browserCoords);
+        console.log('📍 User coordinates (browser):', browserCoords);
+        return;
+      }
+
+      // Fallback: use user profile location
+      if (userProfile?.city && userProfile?.country) {
+        const locationString = `${userProfile.city}, ${userProfile.country}`;
+        const profileCoords = await geocodeLocation(locationString);
+        if (profileCoords) {
+          setUserCoordinates(profileCoords);
+          console.log('📍 User coordinates (profile):', profileCoords);
+        }
+      } else if (userProfile?.country) {
+        const profileCoords = await geocodeLocation(userProfile.country);
+        if (profileCoords) {
+          setUserCoordinates(profileCoords);
+          console.log('📍 User coordinates (country):', profileCoords);
+        }
+      }
+    };
+
+    getCoordinates();
+  }, [userProfile?.city, userProfile?.country]);
 
   // Calculate distances for listings
   useEffect(() => {
