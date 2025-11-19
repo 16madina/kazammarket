@@ -15,12 +15,12 @@ const Header = ({ isAuthenticated }: HeaderProps) => {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-safe">
-      <div className="container flex h-14 items-center justify-between px-4">
+      <div className="container flex h-12 items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <img 
             src={kazamLogo} 
             alt="KAZAM Market" 
-            className="h-16 md:h-20 cursor-pointer transition-all duration-300 hover:scale-105"
+            className="h-20 md:h-24 cursor-pointer transition-all duration-300 hover:scale-105"
           />
         </div>
 
