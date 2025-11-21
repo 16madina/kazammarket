@@ -30,9 +30,9 @@ const handler = async (req: Request): Promise<Response> => {
         "Authorization": `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "DJASSA Market <no-reply@djassamarket.com>",
+        from: "DJASSA <no-reply@djassamarket.com>",
         to: [email],
-        subject: "Bienvenue sur DJASSA Market ! 🎉",
+        subject: "Bienvenue sur DJASSA ! 🎉",
       html: `
         <!DOCTYPE html>
         <html>
@@ -181,7 +181,7 @@ const handler = async (req: Request): Promise<Response> => {
             <div class="email-container">
               <div class="header">
                 <div class="logo-container">
-                  <img src="https://djassamarket.com/djassa-logo-email.png" alt="DJASSA Market" class="logo" />
+                  <img src="https://djassamarket.com/djassa-logo-email.png" alt="DJASSA" class="logo" />
                 </div>
               </div>
               
@@ -189,7 +189,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <h1 class="welcome-title">Félicitations ${userName} ! 🎉</h1>
                 
                 <p class="welcome-text">
-                  Votre compte <strong style="color: #704214;">DJASSA Market</strong> est maintenant <strong>vérifié et actif</strong> !
+                  Votre compte <strong style="color: #704214;">DJASSA</strong> est maintenant <strong>vérifié et actif</strong> !
                 </p>
 
                 <div class="features-box">
@@ -247,7 +247,7 @@ const handler = async (req: Request): Promise<Response> => {
               
               <div class="footer">
                 <p class="footer-text">
-                  <strong style="color: #704214;">DJASSA Market</strong><br>
+                  <strong style="color: #704214;">DJASSA</strong><br>
                   Votre marketplace pour l'économie circulaire<br>
                   Ensemble pour un avenir durable 🌍
                 </p>
@@ -257,7 +257,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <a href="https://djassamarket.com/settings/terms" class="footer-link">CGU</a>
                 </p>
                 <p class="copyright">
-                  © ${new Date().getFullYear()} DJASSA Market. Tous droits réservés.
+                  © ${new Date().getFullYear()} DJASSA. Tous droits réservés.
                 </p>
               </div>
             </div>
