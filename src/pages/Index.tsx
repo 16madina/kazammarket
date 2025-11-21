@@ -11,6 +11,8 @@ import RecommendedSheet from "@/components/home/RecommendedSheet";
 import BottomNav from "@/components/BottomNav";
 import { OnboardingWelcome } from "@/components/onboarding/OnboardingWelcome";
 import { useOnboarding } from "@/hooks/useOnboarding";
+import { Button } from "@/components/ui/button";
+import { MapIcon } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -40,6 +42,14 @@ const Index = () => {
       <div className="px-4 py-4 flex justify-start gap-2">
         <FilterSheet />
         <RecommendedSheet />
+        <Button
+          variant="outline"
+          onClick={() => navigate("/map")}
+          className="gap-2"
+        >
+          <MapIcon className="h-4 w-4" />
+          Voir la carte
+        </Button>
       </div>
       <RecentListings />
       

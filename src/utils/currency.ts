@@ -152,3 +152,6 @@ export const formatPriceWithConversion = (
   // Prix converti en gras, prix original discret
   return `${convertedPrice}`;
 };
+
+// Alias pour la compatibilité
+export const formatCurrency = formatPrice;

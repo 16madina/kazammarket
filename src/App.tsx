@@ -41,6 +41,7 @@ import SellerBadgesInfo from "./pages/settings/SellerBadges";
 import TestCamera from "./pages/TestCamera";
 import AdminPerformance from "./pages/AdminPerformance";
 import EmailVerified from "./pages/EmailVerified";
+import MapView from "./pages/MapView";
 
 const queryClient = new QueryClient();
 
@@ -104,41 +105,9 @@ const App = () => {
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/test-camera" element={<TestCamera />} />
           <Route path="/admin/performance" element={<AdminPerformance />} />
+          <Route path="/map" element={<MapView />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/email-verified" element={<EmailVerified />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/categories/:slug" element={<CategoryDetail />} />
-              <Route path="/listing/:id" element={<ListingDetail />} />
-              <Route path="/seller/:id" element={<SellerPublicProfile />} />
-              <Route path="/publish" element={<Publish />} />
-              <Route path="/messages" element={<Messages />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/edit-profile" element={<EditProfile />} />
-              <Route path="/favorites" element={<Favorites />} />
-              <Route path="/help" element={<Help />} />
-              <Route path="/account-management" element={<AccountManagement />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/settings/faq" element={<FAQ />} />
-              <Route path="/settings/support" element={<Support />} />
-              <Route path="/settings/report" element={<Report />} />
-              <Route path="/settings/terms" element={<Terms />} />
-              <Route path="/settings/privacy" element={<Privacy />} />
-              <Route path="/settings/change-password" element={<ChangePassword />} />
-              <Route path="/settings/two-factor" element={<TwoFactor />} />
-              <Route path="/settings/profile-visibility" element={<ProfileVisibility />} />
-              <Route path="/settings/blocked-users" element={<BlockedUsers />} />
-              <Route path="/settings/sales-history" element={<SalesHistory />} />
-              <Route path="/settings/community-guidelines" element={<CommunityGuidelines />} />
-              <Route path="/settings/seller-badges" element={<SellerBadgesInfo />} />
-              <Route path="/transactions" element={<Transactions />} />
-              <Route path="/admin/performance" element={<AdminPerformance />} />
-              <Route path="/test-camera" element={<TestCamera />} />
-              <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </BrowserRouter>
