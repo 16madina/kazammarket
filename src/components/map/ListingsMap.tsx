@@ -45,7 +45,7 @@ export const ListingsMap = ({
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    const mapboxToken = 'pk.eyJ1IjoibWFkaW5hZGlhbGxvIiwiYSI6ImNtaTk0MGFqeDA4ZTUya3BwdWRjem9taWEifQ.lk8PZBhucJrtRbd7xENEuw';
+    const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
     
     if (!mapboxToken) {
       console.error('Mapbox token not configured');
