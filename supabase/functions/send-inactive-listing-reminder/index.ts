@@ -145,7 +145,7 @@ const handler = async (req: Request): Promise<Response> => {
             <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
               <div style="background: linear-gradient(135deg, #704214 0%, #8B5A2B 100%); padding: 40px 30px; text-align: center;">
                 <div style="background-color: white; padding: 20px; border-radius: 15px; display: inline-block;">
-                  <img src="https://djassamarket.com/djassa-logo-email.png" alt="DJASSA Market" style="max-width: 200px; height: auto;" />
+                  <img src="https://djassamarket.com/djassa-logo-email.png" alt="DJASSA" style="max-width: 200px; height: auto;" />
                 </div>
               </div>
               
@@ -187,11 +187,11 @@ const handler = async (req: Request): Promise<Response> => {
               
               <div style="background: #f9f9f9; padding: 30px; text-align: center; border-top: 2px solid #704214;">
                 <p style="color: #666; font-size: 13px; line-height: 1.6; margin-bottom: 15px;">
-                  <strong style="color: #704214;">DJASSA Market</strong><br>
+                  <strong style="color: #704214;">DJASSA</strong><br>
                   Votre marketplace pour l'économie circulaire
                 </p>
                 <p style="color: #999; font-size: 11px;">
-                  © ${new Date().getFullYear()} DJASSA Market. Tous droits réservés.
+                  © ${new Date().getFullYear()} DJASSA. Tous droits réservés.
                 </p>
               </div>
             </div>
@@ -206,7 +206,7 @@ const handler = async (req: Request): Promise<Response> => {
           "Authorization": `Bearer ${RESEND_API_KEY}`,
         },
         body: JSON.stringify({
-          from: "DJASSA Market <no-reply@djassamarket.com>",
+          from: "DJASSA <no-reply@djassamarket.com>",
           to: [userEmail],
           subject: `📢 ${listings.length > 1 ? `${listings.length} annonces inactives` : 'Annonce inactive'} - Mettez à jour pour plus de visibilité`,
           html: emailHtml,

@@ -30,7 +30,7 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
         <div className="relative animate-scale-in">
           <img
             src={djassaLogo}
-            alt="DJASSA Market"
+            alt="DJASSA"
             className="w-80 md:w-96 drop-shadow-2xl"
             style={{ 
               imageRendering: 'crisp-edges',
