@@ -248,11 +248,11 @@ export const ListingsMap = ({
           'circle-color': [
             'step',
             ['get', 'point_count'],
-            'hsl(var(--primary))',
+            '#8B4513', // Brun chaud pour < 10
             10,
-            'hsl(var(--accent))',
+            '#CD853F', // Peru pour 10-30
             30,
-            'hsl(var(--destructive))'
+            '#D2691E'  // Chocolate pour > 30
           ],
           'circle-radius': [
             'step',
@@ -291,7 +291,7 @@ export const ListingsMap = ({
         source: 'listings',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-color': 'hsl(var(--primary))',
+          'circle-color': '#8B4513', // Brun chaud
           'circle-radius': 12,
           'circle-stroke-width': 3,
           'circle-stroke-color': '#fff'
