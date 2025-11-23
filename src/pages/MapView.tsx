@@ -20,6 +20,15 @@ import { calculateDistance } from "@/utils/distanceCalculation";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 
 const MapView = () => {
   const navigate = useNavigate();
@@ -29,6 +38,8 @@ const MapView = () => {
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [distanceFilterEnabled, setDistanceFilterEnabled] = useState(false);
   const [heatmapMode, setHeatmapMode] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [distanceOpen, setDistanceOpen] = useState(false);
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
@@ -126,103 +137,121 @@ const MapView = () => {
                 Carte des annonces
               </h1>
               <p className="text-xs text-muted-foreground">
-                {listings?.length || 0} annonces disponibles
+                {listings?.length || 0} annonces
               </p>
             </div>
           </div>
         </div>
 
-        {/* Filtres */}
-        <div className="px-4 pb-4 space-y-3">
-          {/* Mode de visualisation */}
-          <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-muted-foreground" />
-                <Label htmlFor="heatmap-mode" className="text-sm font-medium cursor-pointer">
-                  Mode carte de chaleur
-                </Label>
-              </div>
-              <Switch
-                id="heatmap-mode"
-                checked={heatmapMode}
-                onCheckedChange={setHeatmapMode}
-              />
-            </div>
-            {heatmapMode && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Les zones rouges indiquent une forte concentration d'annonces
-              </p>
-            )}
-          </Card>
+        {/* Filtres compacts en icônes */}
+        <div className="px-4 pb-3 flex items-center gap-2">
+          {/* Bouton Heatmap */}
+          <Button
+            variant={heatmapMode ? "default" : "outline"}
+            size="sm"
+            onClick={() => setHeatmapMode(!heatmapMode)}
+            className="h-9"
+          >
+            <Layers className="h-4 w-4" />
+          </Button>
 
-          {/* Filtre catégorie */}
-          <Card className="p-3">
-            <div className="flex items-center gap-3">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Toutes les catégories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes les catégories</SelectItem>
-                  {categories?.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </Card>
+          {/* Bouton Catégories */}
+          <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 gap-2">
+                <Filter className="h-4 w-4" />
+                {selectedCategory !== "all" && (
+                  <Badge variant="secondary" className="h-5 px-1 text-xs">1</Badge>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[400px]">
+              <SheetHeader>
+                <SheetTitle>Filtrer par catégorie</SheetTitle>
+                <SheetDescription>
+                  Sélectionnez une catégorie pour filtrer les annonces
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Toutes les catégories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Toutes les catégories</SelectItem>
+                    {categories?.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </SheetContent>
+          </Sheet>
 
-          {/* Filtre distance */}
-          <Card className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Rayon de recherche</span>
+          {/* Bouton Distance */}
+          <Sheet open={distanceOpen} onOpenChange={setDistanceOpen}>
+            <SheetTrigger asChild>
+              <Button 
+                variant={distanceFilterEnabled ? "default" : "outline"} 
+                size="sm" 
+                className="h-9 gap-2"
+              >
+                <MapPin className="h-4 w-4" />
+                {distanceFilterEnabled && (
+                  <span className="text-xs">{maxDistance}km</span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[400px]">
+              <SheetHeader>
+                <SheetTitle>Filtre par distance</SheetTitle>
+                <SheetDescription>
+                  Afficher les annonces dans un rayon autour de vous
+                </SheetDescription>
+              </SheetHeader>
+              <div className="mt-6 space-y-6">
+                {!distanceFilterEnabled ? (
+                  <div className="text-center space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Activez votre position pour filtrer par distance
+                    </p>
+                    <Button
+                      onClick={handleGetUserLocation}
+                      disabled={isLoadingLocation}
+                      className="w-full"
+                    >
+                      <Locate className="h-4 w-4 mr-2" />
+                      {isLoadingLocation ? "Chargement..." : "Activer ma position"}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Distance maximale</span>
+                      <span className="text-lg font-bold text-primary">{maxDistance} km</span>
+                    </div>
+                    <Slider
+                      value={[maxDistance]}
+                      onValueChange={(value) => setMaxDistance(value[0])}
+                      min={1}
+                      max={100}
+                      step={1}
+                      className="w-full"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() => setDistanceFilterEnabled(false)}
+                      className="w-full"
+                    >
+                      Désactiver le filtre
+                    </Button>
+                  </div>
+                )}
               </div>
-              {!distanceFilterEnabled ? (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleGetUserLocation}
-                  disabled={isLoadingLocation}
-                  className="h-8"
-                >
-                  <Locate className="h-3 w-3 mr-1" />
-                  {isLoadingLocation ? "..." : "Ma position"}
-                </Button>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setDistanceFilterEnabled(false)}
-                  className="h-8 text-xs"
-                >
-                  Désactiver
-                </Button>
-              )}
-            </div>
-            
-            {distanceFilterEnabled && userLocation && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Distance max:</span>
-                  <span className="font-medium text-primary">{maxDistance} km</span>
-                </div>
-                <Slider
-                  value={[maxDistance]}
-                  onValueChange={(value) => setMaxDistance(value[0])}
-                  min={1}
-                  max={100}
-                  step={1}
-                  className="w-full"
-                />
-              </div>
-            )}
-          </Card>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 
