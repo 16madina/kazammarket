@@ -5,7 +5,7 @@ interface OnboardingState {
   firstPublishCompleted: boolean;
 }
 
-const ONBOARDING_KEY = 'djassa_onboarding';
+const ONBOARDING_KEY = 'bazaram_onboarding';
 
 export const useOnboarding = () => {
   const [state, setState] = useState<OnboardingState>(() => {
