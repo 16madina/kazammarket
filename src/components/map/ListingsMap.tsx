@@ -128,15 +128,17 @@ export const ListingsMap = ({
   }, [centerLat, centerLng, zoom]);
 
   useEffect(() => {
-    if (!map.current || !mapLoaded || !listings || listings.length === 0) return;
+    if (!map.current || !listings || listings.length === 0) return;
 
     const mapInstance = map.current;
 
-    // Supprimer les anciennes sources et couches si elles existent
-    if (mapInstance.getLayer('clusters')) mapInstance.removeLayer('clusters');
-    if (mapInstance.getLayer('cluster-count')) mapInstance.removeLayer('cluster-count');
-    if (mapInstance.getLayer('unclustered-point')) mapInstance.removeLayer('unclustered-point');
-    if (mapInstance.getSource('listings')) mapInstance.removeSource('listings');
+    // Attendre que la carte soit chargée avant d'ajouter des sources
+    const addListingsToMap = () => {
+      // Supprimer les anciennes sources et couches si elles existent
+      if (mapInstance.getLayer('clusters')) mapInstance.removeLayer('clusters');
+      if (mapInstance.getLayer('cluster-count')) mapInstance.removeLayer('cluster-count');
+      if (mapInstance.getLayer('unclustered-point')) mapInstance.removeLayer('unclustered-point');
+      if (mapInstance.getSource('listings')) mapInstance.removeSource('listings');
 
     // Supprimer les anciens marqueurs
     markersRef.current.forEach(marker => marker.remove());
@@ -311,7 +313,21 @@ export const ListingsMap = ({
         duration: 1000
       });
     }
-  }, [listings, mapLoaded]);
+    };
+
+    // Si la carte est déjà chargée, ajouter directement
+    if (mapInstance.isStyleLoaded()) {
+      addListingsToMap();
+    } else {
+      // Sinon, attendre que le style soit chargé
+      mapInstance.once('style.load', addListingsToMap);
+    }
+
+    return () => {
+      // Cleanup: retirer l'event listener si le composant est démonté avant le chargement
+      mapInstance.off('style.load', addListingsToMap);
+    };
+  }, [listings]);
 
   return (
     <div className="relative w-full h-full">
