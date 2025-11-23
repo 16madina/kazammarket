@@ -12,7 +12,8 @@ import { ProfileImageUpload } from "@/components/auth/ProfileImageUpload";
 import { PrivacyPolicy } from "@/components/auth/PrivacyPolicy";
 import { TermsConditions } from "@/components/auth/TermsConditions";
 import { allCountries } from "@/data/westAfricaData";
-import { Eye, EyeOff, ArrowLeft, MapPin } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, MapPin, Chrome } from "lucide-react";
+import { FaFacebook } from "react-icons/fa";
 import bazaramMarketLogo from "@/assets/bazaram-market-logo.png";
 
 const Auth = () => {
@@ -176,6 +177,28 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  const handleOAuthSignIn = async (provider: 'google' | 'facebook') => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) throw error;
+    } catch (error: any) {
+      console.error("OAuth error:", error);
+      toast({
+        title: "Erreur",
+        description: error.message || "Erreur lors de la connexion",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -321,6 +344,41 @@ const Auth = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* OAuth Buttons */}
+            <div className="space-y-3 mb-6">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() => handleOAuthSignIn('google')}
+                disabled={isLoading}
+              >
+                <Chrome className="h-5 w-5" />
+                Continuer avec Google
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full gap-2"
+                onClick={() => handleOAuthSignIn('facebook')}
+                disabled={isLoading}
+              >
+                <FaFacebook className="h-5 w-5 text-[#1877F2]" />
+                Continuer avec Facebook
+              </Button>
+            </div>
+
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Ou continuer avec email
+                </span>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {!isLogin && (
                 <>
