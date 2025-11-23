@@ -26,11 +26,22 @@ const HeroSection = () => {
           <h1 className="text-2xl md:text-4xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-0">
             Bienvenue sur
           </h1>
-          <img 
-            src={bazaramMarketLogo} 
-            alt="BAZARAM MARKET" 
-            className="h-24 md:h-40 w-auto object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
-          />
+          <div className="relative">
+            <img 
+              src={bazaramMarketLogo} 
+              alt="BAZARAM MARKET" 
+              className="h-24 md:h-40 w-auto object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] relative z-10"
+            />
+            {/* Effet de brillance animé */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_3s_ease-in-out_infinite] -z-0" 
+                 style={{ 
+                   backgroundSize: '200% 100%',
+                   animation: 'shimmer 3s ease-in-out infinite'
+                 }} 
+            />
+            {/* Effet de lueur dégradée */}
+            <div className="absolute inset-0 blur-2xl bg-gradient-to-r from-warm-earth/40 via-warm-gold/40 to-warm-terra/40 -z-10 animate-pulse" />
+          </div>
         </div>
         <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl animate-fade-in" style={{
         animationDelay: "0.2s"
