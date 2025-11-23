@@ -7,6 +7,25 @@ import { X, Navigation, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { formatCurrency } from '@/utils/currency';
 
+type GeoJSONFeature = {
+  type: 'Feature';
+  geometry: {
+    type: 'Point';
+    coordinates: [number, number];
+  };
+  properties: {
+    id: string;
+    title: string;
+    price: number;
+    currency: string;
+    images: string[];
+    location: string;
+    categoryName?: string;
+    profileName?: string;
+    profileAvatar?: string;
+  };
+};
+
 interface Listing {
   id: string;
   title: string;
@@ -109,93 +128,190 @@ export const ListingsMap = ({
   }, [centerLat, centerLng, zoom]);
 
   useEffect(() => {
-    if (!map.current || !listings || listings.length === 0) return;
+    if (!map.current || !mapLoaded || !listings || listings.length === 0) return;
+
+    const mapInstance = map.current;
+
+    // Supprimer les anciennes sources et couches si elles existent
+    if (mapInstance.getLayer('clusters')) mapInstance.removeLayer('clusters');
+    if (mapInstance.getLayer('cluster-count')) mapInstance.removeLayer('cluster-count');
+    if (mapInstance.getLayer('unclustered-point')) mapInstance.removeLayer('unclustered-point');
+    if (mapInstance.getSource('listings')) mapInstance.removeSource('listings');
 
     // Supprimer les anciens marqueurs
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    const bounds = new mapboxgl.LngLatBounds();
-    let hasValidBounds = false;
+    // Créer les features GeoJSON
+    const features: GeoJSONFeature[] = listings
+      .filter(listing => listing.latitude && listing.longitude)
+      .map(listing => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [listing.longitude!, listing.latitude!]
+        },
+        properties: {
+          id: listing.id,
+          title: listing.title,
+          price: listing.price,
+          currency: listing.currency,
+          images: listing.images || [],
+          location: listing.location,
+          categoryName: listing.categories?.name,
+          profileName: listing.profiles?.full_name,
+          profileAvatar: listing.profiles?.avatar_url
+        }
+      }));
 
-    // Ajouter les nouveaux marqueurs avec coordonnées réelles
-    listings.forEach((listing) => {
-      // Ignorer les annonces sans coordonnées GPS
-      if (!listing.latitude || !listing.longitude) {
-        console.log(`Annonce ignorée (pas de coordonnées): ${listing.title}`);
-        return;
+    if (features.length === 0) return;
+
+    // Ajouter la source avec clustering
+    mapInstance.addSource('listings', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: features
+      },
+      cluster: true,
+      clusterMaxZoom: 14,
+      clusterRadius: 50
+    });
+
+    // Couche pour les clusters
+    mapInstance.addLayer({
+      id: 'clusters',
+      type: 'circle',
+      source: 'listings',
+      filter: ['has', 'point_count'],
+      paint: {
+        'circle-color': [
+          'step',
+          ['get', 'point_count'],
+          'hsl(var(--primary))',
+          10,
+          'hsl(var(--accent))',
+          30,
+          'hsl(var(--destructive))'
+        ],
+        'circle-radius': [
+          'step',
+          ['get', 'point_count'],
+          20,
+          10,
+          30,
+          30,
+          40
+        ],
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#fff'
       }
+    });
 
-      const lng = listing.longitude;
-      const lat = listing.latitude;
+    // Texte du compteur dans les clusters
+    mapInstance.addLayer({
+      id: 'cluster-count',
+      type: 'symbol',
+      source: 'listings',
+      filter: ['has', 'point_count'],
+      layout: {
+        'text-field': '{point_count_abbreviated}',
+        'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+        'text-size': 14
+      },
+      paint: {
+        'text-color': '#ffffff'
+      }
+    });
 
-      // Créer un élément personnalisé pour le marqueur
-      const el = document.createElement('div');
-      el.className = 'custom-marker';
-      el.style.width = '40px';
-      el.style.height = '40px';
-      el.style.borderRadius = '50%';
-      el.style.backgroundColor = 'hsl(var(--primary))';
-      el.style.border = '3px solid white';
-      el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-      el.style.cursor = 'pointer';
-      el.style.display = 'flex';
-      el.style.alignItems = 'center';
-      el.style.justifyContent = 'center';
-      el.style.color = 'white';
-      el.style.fontSize = '18px';
-      el.style.fontWeight = 'bold';
-      el.innerHTML = '📍';
+    // Couche pour les marqueurs individuels
+    mapInstance.addLayer({
+      id: 'unclustered-point',
+      type: 'circle',
+      source: 'listings',
+      filter: ['!', ['has', 'point_count']],
+      paint: {
+        'circle-color': 'hsl(var(--primary))',
+        'circle-radius': 12,
+        'circle-stroke-width': 3,
+        'circle-stroke-color': '#fff'
+      }
+    });
 
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.2)';
-        el.style.transition = 'transform 0.2s';
+    // Click sur cluster: zoomer
+    mapInstance.on('click', 'clusters', (e) => {
+      const features = mapInstance.queryRenderedFeatures(e.point, {
+        layers: ['clusters']
       });
-
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
+      
+      if (!features.length) return;
+      
+      const clusterId = features[0].properties?.cluster_id;
+      const source = mapInstance.getSource('listings') as mapboxgl.GeoJSONSource;
+      
+      source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err) return;
+        
+        const coordinates = (features[0].geometry as any).coordinates;
+        mapInstance.easeTo({
+          center: coordinates,
+          zoom: zoom
+        });
       });
+    });
 
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat([lng, lat])
-        .addTo(map.current!);
-
-      el.addEventListener('click', () => {
+    // Click sur marqueur individuel: afficher la carte
+    mapInstance.on('click', 'unclustered-point', (e) => {
+      if (!e.features || !e.features[0]) return;
+      
+      const props = e.features[0].properties;
+      const listing = listings.find(l => l.id === props?.id);
+      
+      if (listing) {
         setSelectedListing(listing);
-        map.current?.flyTo({
-          center: [lng, lat],
+        const coordinates = (e.features[0].geometry as any).coordinates.slice();
+        mapInstance.flyTo({
+          center: coordinates,
           zoom: 14,
           duration: 1000
         });
-      });
+      }
+    });
 
-      markersRef.current.push(marker);
-      bounds.extend([lng, lat]);
-      hasValidBounds = true;
+    // Curseur pointer sur clusters et marqueurs
+    mapInstance.on('mouseenter', 'clusters', () => {
+      mapInstance.getCanvas().style.cursor = 'pointer';
+    });
+    mapInstance.on('mouseleave', 'clusters', () => {
+      mapInstance.getCanvas().style.cursor = '';
+    });
+    mapInstance.on('mouseenter', 'unclustered-point', () => {
+      mapInstance.getCanvas().style.cursor = 'pointer';
+    });
+    mapInstance.on('mouseleave', 'unclustered-point', () => {
+      mapInstance.getCanvas().style.cursor = '';
     });
 
     // Ajuster la vue pour montrer tous les marqueurs
-    if (hasValidBounds) {
-      if (listings.length === 1) {
-        // Une seule annonce: centrer dessus
-        const listing = listings[0];
-        if (listing.latitude && listing.longitude) {
-          map.current.flyTo({
-            center: [listing.longitude, listing.latitude],
-            zoom: 13,
-            duration: 1000
-          });
-        }
-      } else {
-        // Plusieurs annonces: adapter les limites
-        map.current.fitBounds(bounds, {
-          padding: { top: 80, bottom: 280, left: 50, right: 50 },
-          maxZoom: 13,
-          duration: 1000
-        });
-      }
+    const bounds = new mapboxgl.LngLatBounds();
+    features.forEach(feature => {
+      bounds.extend(feature.geometry.coordinates as [number, number]);
+    });
+
+    if (features.length === 1) {
+      mapInstance.flyTo({
+        center: features[0].geometry.coordinates as [number, number],
+        zoom: 13,
+        duration: 1000
+      });
+    } else {
+      mapInstance.fitBounds(bounds, {
+        padding: { top: 80, bottom: 280, left: 50, right: 50 },
+        maxZoom: 13,
+        duration: 1000
+      });
     }
-  }, [listings]);
+  }, [listings, mapLoaded]);
 
   return (
     <div className="relative w-full h-full">

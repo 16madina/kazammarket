@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ListingsMap } from "@/components/map/ListingsMap";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Filter, MapIcon } from "lucide-react";
+import { ArrowLeft, Filter, MapIcon, MapPin, Locate } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,10 +15,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+import { calculateDistance } from "@/utils/distanceCalculation";
+import { toast } from "sonner";
 
 const MapView = () => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [maxDistance, setMaxDistance] = useState<number>(50); // km
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [distanceFilterEnabled, setDistanceFilterEnabled] = useState(false);
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
@@ -34,7 +41,33 @@ const MapView = () => {
     },
   });
 
-  const { data: listings, isLoading } = useQuery({
+  // Obtenir la position de l'utilisateur
+  const handleGetUserLocation = () => {
+    setIsLoadingLocation(true);
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          setDistanceFilterEnabled(true);
+          setIsLoadingLocation(false);
+          toast.success("Position obtenue");
+        },
+        (error) => {
+          console.error('Erreur géolocalisation:', error);
+          toast.error("Impossible d'obtenir votre position");
+          setIsLoadingLocation(false);
+        }
+      );
+    } else {
+      toast.error("Géolocalisation non disponible");
+      setIsLoadingLocation(false);
+    }
+  };
+
+  const { data: allListings, isLoading } = useQuery({
     queryKey: ["map-listings", selectedCategory],
     queryFn: async () => {
       let query = supabase
@@ -61,6 +94,20 @@ const MapView = () => {
     },
   });
 
+  // Filtrer par distance si activé
+  const listings = distanceFilterEnabled && userLocation && allListings
+    ? allListings.filter(listing => {
+        if (!listing.latitude || !listing.longitude) return false;
+        const distance = calculateDistance(
+          userLocation.lat,
+          userLocation.lng,
+          listing.latitude,
+          listing.longitude
+        );
+        return distance <= maxDistance;
+      })
+    : allListings;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -83,7 +130,8 @@ const MapView = () => {
         </div>
 
         {/* Filtres */}
-        <div className="px-4 pb-4">
+        <div className="px-4 pb-4 space-y-3">
+          {/* Filtre catégorie */}
           <Card className="p-3">
             <div className="flex items-center gap-3">
               <Filter className="h-4 w-4 text-muted-foreground" />
@@ -101,6 +149,54 @@ const MapView = () => {
                 </SelectContent>
               </Select>
             </div>
+          </Card>
+
+          {/* Filtre distance */}
+          <Card className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Rayon de recherche</span>
+              </div>
+              {!distanceFilterEnabled ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleGetUserLocation}
+                  disabled={isLoadingLocation}
+                  className="h-8"
+                >
+                  <Locate className="h-3 w-3 mr-1" />
+                  {isLoadingLocation ? "..." : "Ma position"}
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setDistanceFilterEnabled(false)}
+                  className="h-8 text-xs"
+                >
+                  Désactiver
+                </Button>
+              )}
+            </div>
+            
+            {distanceFilterEnabled && userLocation && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Distance max:</span>
+                  <span className="font-medium text-primary">{maxDistance} km</span>
+                </div>
+                <Slider
+                  value={[maxDistance]}
+                  onValueChange={(value) => setMaxDistance(value[0])}
+                  min={1}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+            )}
           </Card>
         </div>
       </div>
