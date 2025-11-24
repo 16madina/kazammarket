@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.81.1';
-import { Resend } from 'npm:resend@2.0.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -69,100 +68,113 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Initialize Resend
-    const resend = new Resend(Deno.env.get('RESEND_API_KEY'));
+    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
     console.log('Sending email to:', email);
     console.log('Subject:', subject);
 
-    // Send email using Resend
-    const emailResponse = await resend.emails.send({
-      from: 'BAZARAM Admin <onboarding@resend.dev>',
-      to: [email],
-      subject: subject,
-      html: `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <style>
-              body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-                background-color: #f5f5f5;
-                margin: 0;
-                padding: 20px;
-              }
-              .container {
-                max-width: 600px;
-                margin: 0 auto;
-                background-color: #ffffff;
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                overflow: hidden;
-              }
-              .header {
-                background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-                padding: 30px 20px;
-                text-align: center;
-              }
-              .header img {
-                height: 50px;
-                margin-bottom: 10px;
-              }
-              .header h1 {
-                color: #ffffff;
-                margin: 0;
-                font-size: 24px;
-              }
-              .content {
-                padding: 30px 20px;
-                color: #333333;
-                line-height: 1.6;
-              }
-              .content p {
-                margin: 0 0 15px 0;
-              }
-              .footer {
-                background-color: #f8f8f8;
-                padding: 20px;
-                text-align: center;
-                font-size: 12px;
-                color: #666666;
-              }
-              .button {
-                display: inline-block;
-                padding: 12px 30px;
-                background-color: #8B4513;
-                color: #ffffff;
-                text-decoration: none;
-                border-radius: 4px;
-                margin: 20px 0;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>BAZARAM</h1>
-                <p style="color: #ffffff; margin: 0; font-size: 14px;">Message de l'équipe BAZARAM</p>
+    // Send email using Resend API
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: 'BAZARAM Admin <no-reply@bazarammarket.com>',
+        to: [email],
+        subject: subject,
+        html: `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                body {
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+                  background-color: #f5f5f5;
+                  margin: 0;
+                  padding: 20px;
+                }
+                .container {
+                  max-width: 600px;
+                  margin: 0 auto;
+                  background-color: #ffffff;
+                  border-radius: 8px;
+                  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                  overflow: hidden;
+                }
+                .header {
+                  background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+                  padding: 30px 20px;
+                  text-align: center;
+                }
+                .header img {
+                  height: 50px;
+                  margin-bottom: 10px;
+                }
+                .header h1 {
+                  color: #ffffff;
+                  margin: 0;
+                  font-size: 24px;
+                }
+                .content {
+                  padding: 30px 20px;
+                  color: #333333;
+                  line-height: 1.6;
+                }
+                .content p {
+                  margin: 0 0 15px 0;
+                }
+                .footer {
+                  background-color: #f8f8f8;
+                  padding: 20px;
+                  text-align: center;
+                  font-size: 12px;
+                  color: #666666;
+                }
+                .button {
+                  display: inline-block;
+                  padding: 12px 30px;
+                  background-color: #8B4513;
+                  color: #ffffff;
+                  text-decoration: none;
+                  border-radius: 4px;
+                  margin: 20px 0;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>BAZARAM</h1>
+                  <p style="color: #ffffff; margin: 0; font-size: 14px;">Message de l'équipe BAZARAM</p>
+                </div>
+                <div class="content">
+                  ${message.split('\n').map((line: string) => `<p>${line}</p>`).join('')}
+                </div>
+                <div class="footer">
+                  <p>© ${new Date().getFullYear()} BAZARAM. Tous droits réservés.</p>
+                  <p>Ce message vous a été envoyé par l'équipe d'administration de BAZARAM.</p>
+                </div>
               </div>
-              <div class="content">
-                ${message.split('\n').map((line: string) => `<p>${line}</p>`).join('')}
-              </div>
-              <div class="footer">
-                <p>© ${new Date().getFullYear()} BAZARAM. Tous droits réservés.</p>
-                <p>Ce message vous a été envoyé par l'équipe d'administration de BAZARAM.</p>
-              </div>
-            </div>
-          </body>
-        </html>
-      `,
+            </body>
+          </html>
+        `,
+      }),
     });
 
-    console.log('Email sent successfully:', emailResponse);
+    const data = await emailResponse.json();
+
+    if (!emailResponse.ok) {
+      console.error('Error sending email:', data);
+      throw new Error(data.error || 'Failed to send email');
+    }
+
+    console.log('Email sent successfully:', data);
 
     return new Response(
-      JSON.stringify({ success: true, data: emailResponse }),
+      JSON.stringify({ success: true, data }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
