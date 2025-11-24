@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,6 +30,8 @@ const Admin = () => {
   const [emailSubject, setEmailSubject] = useState("");
   const [emailMessage, setEmailMessage] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState<string>("custom");
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [showBulkEmailDialog, setShowBulkEmailDialog] = useState(false);
 
   // Email templates
   const emailTemplates = {
@@ -104,7 +107,7 @@ const Admin = () => {
     checkAuth();
   }, [navigate]);
 
-  // Fetch all users with their emails
+  // Fetch all users
   const { data: users, refetch: refetchUsers } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
@@ -115,7 +118,6 @@ const Admin = () => {
       
       if (profilesError) throw profilesError;
 
-      // Fetch user emails from edge function
       const { data: session } = await supabase.auth.getSession();
       if (!session.session) {
         return profilesData;
@@ -146,7 +148,6 @@ const Admin = () => {
           }
         });
 
-        // Merge profile data with emails
         return profilesData?.map(profile => ({
           ...profile,
           email: emailMap.get(profile.id) || null
@@ -177,7 +178,7 @@ const Admin = () => {
     enabled: isAdmin,
   });
 
-  // Fetch categories for filtering
+  // Fetch all categories
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: async () => {
@@ -201,11 +202,10 @@ const Admin = () => {
           *,
           listings(id, title, images, price)
         `)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false});
       
       if (error) throw error;
       
-      // Fetch reporter profiles separately
       if (data && data.length > 0) {
         const reporterIds = data.map(r => r.reporter_id);
         const { data: profilesData } = await supabase
@@ -226,18 +226,16 @@ const Admin = () => {
     enabled: isAdmin,
   });
 
-  // Filtered data using useMemo for performance
+  // Filtered users
   const filteredUsers = useMemo(() => {
     if (!users) return [];
     
     return users.filter(user => {
-      // Search filter
       const matchesSearch = userSearch === "" || 
         user.full_name?.toLowerCase().includes(userSearch.toLowerCase()) ||
         user.phone?.includes(userSearch) ||
         (user as any).email?.toLowerCase().includes(userSearch.toLowerCase());
       
-      // Status filter
       const matchesStatus = userStatusFilter === "all" ||
         (userStatusFilter === "banned" && user.is_banned) ||
         (userStatusFilter === "active" && !user.is_banned) ||
@@ -247,20 +245,18 @@ const Admin = () => {
     });
   }, [users, userSearch, userStatusFilter]);
 
+  // Filtered listings
   const filteredListings = useMemo(() => {
     if (!listings) return [];
     
     return listings.filter(listing => {
-      // Search filter
       const matchesSearch = listingSearch === "" ||
         listing.title?.toLowerCase().includes(listingSearch.toLowerCase()) ||
         listing.description?.toLowerCase().includes(listingSearch.toLowerCase());
       
-      // Status filter
       const matchesStatus = listingStatusFilter === "all" ||
         listing.moderation_status === listingStatusFilter;
       
-      // Category filter
       const matchesCategory = listingCategoryFilter === "all" ||
         listing.category_id === listingCategoryFilter;
       
@@ -268,17 +264,14 @@ const Admin = () => {
     });
   }, [listings, listingSearch, listingStatusFilter, listingCategoryFilter]);
 
+  // Filtered reports
   const filteredReports = useMemo(() => {
     if (!reports) return [];
     
     return reports.filter(report => {
-      // Status filter
       const matchesStatus = reportStatusFilter === "all" || report.status === reportStatusFilter;
-      
-      // Reason filter
       const matchesReason = reportReasonFilter === "all" || report.reason === reportReasonFilter;
       
-      // Search filter (by listing title or reporter name)
       const searchLower = reportSearch.toLowerCase();
       const matchesSearch = reportSearch === "" || 
         report.listings?.title?.toLowerCase().includes(searchLower) ||
@@ -288,6 +281,7 @@ const Admin = () => {
     });
   }, [reports, reportStatusFilter, reportReasonFilter, reportSearch]);
 
+  // Ban user
   const handleBanUser = async (userId: string) => {
     const { error } = await supabase
       .from("profiles")
@@ -308,6 +302,7 @@ const Admin = () => {
     setBanReason("");
   };
 
+  // Unban user
   const handleUnbanUser = async (userId: string) => {
     const { error } = await supabase
       .from("profiles")
@@ -327,6 +322,7 @@ const Admin = () => {
     refetchUsers();
   };
 
+  // Approve listing
   const handleApproveListing = async (listingId: string) => {
     const { error } = await supabase
       .from("listings")
@@ -346,6 +342,7 @@ const Admin = () => {
     refetchListings();
   };
 
+  // Reject listing
   const handleRejectListing = async (listingId: string, notes: string) => {
     const { error } = await supabase
       .from("listings")
@@ -367,10 +364,12 @@ const Admin = () => {
     refetchListings();
   };
 
+  // Send message (placeholder)
   const handleSendMessage = async (userId: string) => {
     toast.info("Fonctionnalité de messagerie à implémenter avec un service externe");
   };
 
+  // Send single email
   const handleSendEmail = async (email: string, subject: string, message: string) => {
     try {
       const { data: session } = await supabase.auth.getSession();
@@ -402,10 +401,84 @@ const Admin = () => {
     }
   };
 
+  // Send bulk email
+  const handleBulkEmail = async () => {
+    if (!emailSubject.trim() || !emailMessage.trim()) {
+      toast.error("Veuillez remplir le sujet et le message");
+      return;
+    }
+
+    if (selectedUsers.length === 0) {
+      toast.error("Veuillez sélectionner au moins un utilisateur");
+      return;
+    }
+
+    try {
+      const { data: session } = await supabase.auth.getSession();
+      if (!session.session) {
+        toast.error("Session expirée");
+        return;
+      }
+
+      const selectedUserData = users?.filter(u => selectedUsers.includes(u.id)) || [];
+      const emailPromises = selectedUserData
+        .filter(u => (u as any).email)
+        .map(u => 
+          fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-admin-email`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${session.session.access_token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ 
+                email: (u as any).email, 
+                subject: emailSubject, 
+                message: emailMessage 
+              }),
+            }
+          )
+        );
+
+      await Promise.all(emailPromises);
+
+      toast.success(`Email envoyé à ${selectedUsers.length} utilisateur(s)`);
+      setShowBulkEmailDialog(false);
+      setEmailSubject("");
+      setEmailMessage("");
+      setSelectedTemplate("custom");
+      setSelectedUsers([]);
+    } catch (error) {
+      console.error('Error sending bulk emails:', error);
+      toast.error("Erreur lors de l'envoi des emails");
+    }
+  };
+
+  // Toggle user selection
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  // Toggle all users selection
+  const toggleAllUsers = () => {
+    if (selectedUsers.length === filteredUsers.length && filteredUsers.length > 0) {
+      setSelectedUsers([]);
+    } else {
+      setSelectedUsers(filteredUsers.map(u => u.id));
+    }
+  };
+
+  // Send SMS (placeholder)
   const handleSendSMS = async (phone: string) => {
     toast.info(`SMS à envoyer au: ${phone}`);
   };
 
+  // Resolve report
   const handleResolveReport = async (reportId: string) => {
     const { error } = await supabase
       .from("reports")
@@ -425,6 +498,7 @@ const Admin = () => {
     refetchReports();
   };
 
+  // Dismiss report
   const handleDismissReport = async (reportId: string, notes: string) => {
     const { error } = await supabase
       .from("reports")
@@ -458,7 +532,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Utilisateurs
@@ -483,7 +557,6 @@ const Admin = () => {
 
           {/* Users Tab */}
           <TabsContent value="users" className="space-y-4">
-            {/* Filters */}
             <Card>
               <CardContent className="pt-6">
                 <div className="flex flex-col md:flex-row gap-3">
@@ -507,13 +580,31 @@ const Admin = () => {
                       <SelectItem value="verified">Vérifiés</SelectItem>
                     </SelectContent>
                   </Select>
+                  {selectedUsers.length > 0 && (
+                    <Button
+                      onClick={() => setShowBulkEmailDialog(true)}
+                      className="w-full md:w-auto"
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Envoyer email ({selectedUsers.length})
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Tous les utilisateurs ({filteredUsers.length} / {users?.length || 0})</CardTitle>
+                {filteredUsers.length > 0 && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={toggleAllUsers}
+                  >
+                    {selectedUsers.length === filteredUsers.length ? "Désélectionner tout" : "Sélectionner tout"}
+                  </Button>
+                )}
               </CardHeader>
               <CardContent className="space-y-3">
                 {filteredUsers.length === 0 ? (
@@ -521,217 +612,285 @@ const Admin = () => {
                 ) : (
                   filteredUsers.map((profile) => (
                     <Card key={profile.id} className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-semibold">{profile.full_name || "Utilisateur"}</h3>
-                          {profile.is_banned && (
-                            <Badge variant="destructive">Banni</Badge>
-                          )}
-                          {profile.email_verified && (
-                            <Badge variant="default" className="bg-green-600">Vérifié</Badge>
-                          )}
-                        </div>
-                        <div className="text-sm text-muted-foreground mt-1 space-y-1">
-                          <p className="flex items-center gap-2">
-                            <Mail className="h-3 w-3" />
-                            {(profile as any).email || "Email non disponible"}
-                          </p>
-                          {profile.phone && (
-                            <p className="flex items-center gap-2">
-                              <Phone className="h-3 w-3" />
-                              {profile.phone}
-                            </p>
-                          )}
-                          <p>Localisation: {profile.city}, {profile.country}</p>
-                          <p>Inscrit: {new Date(profile.created_at).toLocaleDateString()}</p>
-                          <p>Ventes: {profile.total_sales || 0}</p>
-                          <p>Note: {profile.rating_average || 0}/5 ({profile.rating_count || 0} avis)</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => navigate(`/seller/${profile.id}`)}
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          Voir
-                        </Button>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button size="sm" variant="outline" onClick={() => setSelectedUser(profile)}>
-                              <MessageSquare className="h-3 w-3 mr-1" />
-                              Message
+                      <div className="flex items-start gap-3">
+                        <Checkbox
+                          checked={selectedUsers.includes(profile.id)}
+                          onCheckedChange={() => toggleUserSelection(profile.id)}
+                          className="mt-1"
+                        />
+                        <div className="flex items-start justify-between flex-1">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold">{profile.full_name || "Utilisateur"}</h3>
+                              {profile.is_banned && (
+                                <Badge variant="destructive">Banni</Badge>
+                              )}
+                              {profile.email_verified && (
+                                <Badge variant="default" className="bg-green-600">Vérifié</Badge>
+                              )}
+                            </div>
+                            <div className="text-sm text-muted-foreground mt-1 space-y-1">
+                              <p className="flex items-center gap-2">
+                                <Mail className="h-3 w-3" />
+                                {(profile as any).email || "Email non disponible"}
+                              </p>
+                              {profile.phone && (
+                                <p className="flex items-center gap-2">
+                                  <Phone className="h-3 w-3" />
+                                  {profile.phone}
+                                </p>
+                              )}
+                              <p>Localisation: {profile.city}, {profile.country}</p>
+                              <p>Inscrit: {new Date(profile.created_at).toLocaleDateString()}</p>
+                              <p>Ventes: {profile.total_sales || 0}</p>
+                              <p>Note: {profile.rating_average || 0}/5 ({profile.rating_count || 0} avis)</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            {/* User action buttons */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => navigate(`/seller/${profile.id}`)}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Voir
                             </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Envoyer un message</DialogTitle>
-                            </DialogHeader>
-                            <Textarea
-                              placeholder="Votre message..."
-                              value={messageContent}
-                              onChange={(e) => setMessageContent(e.target.value)}
-                            />
-                            <DialogFooter>
-                              <Button onClick={() => handleSendMessage(profile.id)}>
-                                Envoyer
-                              </Button>
-                            </DialogFooter>
-                          </DialogContent>
-                        </Dialog>
-                        {profile.phone && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleSendSMS(profile.phone)}
-                          >
-                            SMS
-                          </Button>
-                        )}
-                        {(profile as any).email && (
-                          <Dialog>
-                            <DialogTrigger asChild>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button size="sm" variant="outline" onClick={() => setSelectedUser(profile)}>
+                                  <MessageSquare className="h-3 w-3 mr-1" />
+                                  Message
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Envoyer un message</DialogTitle>
+                                </DialogHeader>
+                                <Textarea
+                                  placeholder="Votre message..."
+                                  value={messageContent}
+                                  onChange={(e) => setMessageContent(e.target.value)}
+                                />
+                                <DialogFooter>
+                                  <Button onClick={() => handleSendMessage(profile.id)}>
+                                    Envoyer
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                            {profile.phone && (
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
-                                  setSelectedUser(profile);
-                                  setSelectedTemplate("custom");
-                                  setEmailSubject("");
-                                  setEmailMessage("");
-                                }}
+                                onClick={() => handleSendSMS(profile.phone)}
                               >
-                                <Mail className="h-3 w-3 mr-1" />
-                                Email
+                                SMS
                               </Button>
-                            </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
-                              <DialogHeader>
-                                <DialogTitle>Envoyer un email</DialogTitle>
-                                <DialogDescription>
-                                  Envoyer un email à {(profile as any).email}
-                                </DialogDescription>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <div>
-                                  <label className="text-sm font-medium mb-1 block">Template</label>
-                                  <Select 
-                                    value={selectedTemplate} 
-                                    onValueChange={(value) => {
-                                      setSelectedTemplate(value);
-                                      const template = emailTemplates[value as keyof typeof emailTemplates];
-                                      setEmailSubject(template.subject);
-                                      setEmailMessage(template.message);
+                            )}
+                            {(profile as any).email && (
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setSelectedUser(profile);
+                                      setSelectedTemplate("custom");
+                                      setEmailSubject("");
+                                      setEmailMessage("");
                                     }}
                                   >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Choisir un template" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="custom">✍️ Email personnalisé</SelectItem>
-                                      <SelectItem value="welcome">👋 Bienvenue</SelectItem>
-                                      <SelectItem value="verification_reminder">✅ Rappel de vérification</SelectItem>
-                                      <SelectItem value="listing_approved">✓ Annonce approuvée</SelectItem>
-                                      <SelectItem value="listing_rejected">✗ Annonce rejetée</SelectItem>
-                                      <SelectItem value="promotion">🎉 Promotion</SelectItem>
-                                      <SelectItem value="inactive_user">💤 Utilisateur inactif</SelectItem>
-                                      <SelectItem value="warning">⚠️ Avertissement</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium mb-1 block">Sujet</label>
-                                  <Input
-                                    placeholder="Sujet de l'email..."
-                                    value={emailSubject}
-                                    onChange={(e) => setEmailSubject(e.target.value)}
-                                  />
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium mb-1 block">Message</label>
-                                  <Textarea
-                                    placeholder="Votre message..."
-                                    value={emailMessage}
-                                    onChange={(e) => setEmailMessage(e.target.value)}
-                                    rows={8}
-                                    className="font-mono text-sm"
-                                  />
-                                </div>
-                              </div>
-                              <DialogFooter>
-                                <Button 
-                                  onClick={() => {
-                                    handleSendEmail((profile as any).email, emailSubject, emailMessage);
-                                    setSelectedTemplate("custom");
-                                    setEmailSubject("");
-                                    setEmailMessage("");
-                                  }}
-                                  disabled={!emailSubject || !emailMessage}
-                                >
-                                  Envoyer
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                        )}
-                        {profile.is_banned ? (
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={() => handleUnbanUser(profile.id)}
-                          >
-                            Débannir
-                          </Button>
-                        ) : (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="destructive">
-                                <Ban className="h-3 w-3 mr-1" />
-                                Bannir
+                                    <Mail className="h-3 w-3 mr-1" />
+                                    Email
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                  <DialogHeader>
+                                    <DialogTitle>Envoyer un email</DialogTitle>
+                                    <DialogDescription>
+                                      Envoyer un email à {(profile as any).email}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <label className="text-sm font-medium mb-1 block">Template</label>
+                                      <Select 
+                                        value={selectedTemplate} 
+                                        onValueChange={(value) => {
+                                          setSelectedTemplate(value);
+                                          const template = emailTemplates[value as keyof typeof emailTemplates];
+                                          setEmailSubject(template.subject);
+                                          setEmailMessage(template.message);
+                                        }}
+                                      >
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Choisir un template" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="custom">✍️ Email personnalisé</SelectItem>
+                                          <SelectItem value="welcome">👋 Bienvenue</SelectItem>
+                                          <SelectItem value="verification_reminder">✅ Rappel de vérification</SelectItem>
+                                          <SelectItem value="listing_approved">✓ Annonce approuvée</SelectItem>
+                                          <SelectItem value="listing_rejected">✗ Annonce rejetée</SelectItem>
+                                          <SelectItem value="promotion">🎉 Promotion</SelectItem>
+                                          <SelectItem value="inactive_user">💤 Utilisateur inactif</SelectItem>
+                                          <SelectItem value="warning">⚠️ Avertissement</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium mb-1 block">Sujet</label>
+                                      <Input
+                                        placeholder="Sujet de l'email..."
+                                        value={emailSubject}
+                                        onChange={(e) => setEmailSubject(e.target.value)}
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium mb-1 block">Message</label>
+                                      <Textarea
+                                        placeholder="Votre message..."
+                                        value={emailMessage}
+                                        onChange={(e) => setEmailMessage(e.target.value)}
+                                        rows={8}
+                                        className="font-mono text-sm"
+                                      />
+                                    </div>
+                                  </div>
+                                  <DialogFooter>
+                                    <Button 
+                                      onClick={() => {
+                                        handleSendEmail((profile as any).email, emailSubject, emailMessage);
+                                        setSelectedTemplate("custom");
+                                        setEmailSubject("");
+                                        setEmailMessage("");
+                                      }}
+                                      disabled={!emailSubject || !emailMessage}
+                                    >
+                                      Envoyer
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                            )}
+                            {profile.is_banned ? (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={() => handleUnbanUser(profile.id)}
+                              >
+                                Débannir
                               </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Bannir l'utilisateur</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Cette action bannira l'utilisateur. Indiquez la raison:
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <Input
-                                placeholder="Raison du bannissement..."
-                                value={banReason}
-                                onChange={(e) => setBanReason(e.target.value)}
-                              />
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleBanUser(profile.id)}>
-                                  Confirmer
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        )}
+                            ) : (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button size="sm" variant="destructive">
+                                    <Ban className="h-3 w-3 mr-1" />
+                                    Bannir
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Bannir l'utilisateur</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Cette action bannira l'utilisateur. Indiquez la raison:
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <Input
+                                    placeholder="Raison du bannissement..."
+                                    value={banReason}
+                                    onChange={(e) => setBanReason(e.target.value)}
+                                  />
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleBanUser(profile.id)}>
+                                      Confirmer
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </Card>
+                    </Card>
                   ))
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* Bulk Email Dialog */}
+          <Dialog open={showBulkEmailDialog} onOpenChange={setShowBulkEmailDialog}>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Envoyer un email en masse ({selectedUsers.length} utilisateur(s))</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Template</label>
+                  <Select value={selectedTemplate} onValueChange={(value) => {
+                    setSelectedTemplate(value);
+                    if (value && value !== 'custom') {
+                      const template = emailTemplates[value as keyof typeof emailTemplates];
+                      setEmailSubject(template.subject);
+                      setEmailMessage(template.message);
+                    }
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner un template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="custom">✍️ Email personnalisé</SelectItem>
+                      <SelectItem value="welcome">👋 Bienvenue</SelectItem>
+                      <SelectItem value="verification_reminder">✅ Rappel de vérification</SelectItem>
+                      <SelectItem value="listing_approved">✓ Annonce approuvée</SelectItem>
+                      <SelectItem value="listing_rejected">✗ Annonce rejetée</SelectItem>
+                      <SelectItem value="promotion">🎉 Promotion</SelectItem>
+                      <SelectItem value="inactive_user">💤 Utilisateur inactif</SelectItem>
+                      <SelectItem value="warning">⚠️ Avertissement</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Sujet</label>
+                  <Input
+                    value={emailSubject}
+                    onChange={(e) => setEmailSubject(e.target.value)}
+                    placeholder="Sujet de l'email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Message</label>
+                  <Textarea
+                    value={emailMessage}
+                    onChange={(e) => setEmailMessage(e.target.value)}
+                    placeholder="Contenu de l'email"
+                    rows={10}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowBulkEmailDialog(false)}>
+                  Annuler
+                </Button>
+                <Button onClick={handleBulkEmail}>
+                  Envoyer à {selectedUsers.length} utilisateur(s)
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           {/* Listings Tab */}
           <TabsContent value="listings" className="space-y-4">
-            {/* Filters */}
             <Card>
               <CardContent className="pt-6">
                 <div className="flex flex-col md:flex-row gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Rechercher par titre..."
+                      placeholder="Rechercher par titre ou description..."
                       value={listingSearch}
                       onChange={(e) => setListingSearch(e.target.value)}
                       className="pl-10"
@@ -754,8 +913,10 @@ const Admin = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Toutes</SelectItem>
-                      {categories?.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                      {categories?.map(category => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -765,107 +926,73 @@ const Admin = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Toutes les annonces ({filteredListings.length} / {listings?.length || 0})</CardTitle>
+                <CardTitle>Annonces ({filteredListings.length} / {listings?.length || 0})</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {filteredListings.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Aucune annonce trouvée</p>
                 ) : (
-                  filteredListings.map((listing) => (
-                    <Card key={listing.id} className="p-3">
-                    <div className="flex gap-3">
-                      <img
-                        src={listing.images?.[0] || "/placeholder.svg"}
-                        alt={listing.title}
-                        className="w-16 h-16 object-cover rounded-md"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm truncate">{listing.title}</h3>
-                            <p className="text-sm font-bold text-primary">
-                              {listing.price > 0 ? `${listing.price.toLocaleString()} FCFA` : "Gratuit"}
-                            </p>
-                            <div className="flex gap-1 mt-1 flex-wrap">
-                              <Badge className="text-xs py-0" variant={
-                                listing.moderation_status === "approved" ? "default" :
-                                listing.moderation_status === "rejected" ? "destructive" :
-                                "secondary"
-                              }>
-                                {listing.moderation_status === "approved" ? "Approuvé" :
-                                 listing.moderation_status === "rejected" ? "Rejeté" :
-                                 "En attente"}
-                              </Badge>
-                              <Badge className="text-xs py-0" variant="outline">{listing.categories?.name}</Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Par: {listing.profiles?.full_name || "Utilisateur"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Vues: {listing.views === 1 ? "1 vue" : `${listing.views || 0} vues`} | Créé: {new Date(listing.created_at).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-1 shrink-0">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 px-2"
-                              onClick={() => navigate(`/listing/${listing.id}`)}
-                            >
-                              <Eye className="h-3 w-3 mr-1" />
-                              Voir
-                            </Button>
-                            {listing.moderation_status !== "approved" && (
-                              <Button
-                                size="sm"
-                                variant="default"
-                                className="h-8 px-2"
-                                onClick={() => handleApproveListing(listing.id)}
-                              >
-                                <CheckCircle className="h-3 w-3 mr-1" />
+                  filteredListings.map(listing => (
+                    <Card key={listing.id} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold">{listing.title}</h3>
+                          <p className="text-sm text-muted-foreground">{listing.description}</p>
+                          <p className="text-sm mt-1">Catégorie: {listing.categories?.name || "N/A"}</p>
+                          <p className="text-sm mt-1">Prix: {listing.price} €</p>
+                          <p className="text-sm mt-1">Statut: {listing.moderation_status}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          {listing.moderation_status === "pending" && (
+                            <>
+                              <Button size="sm" variant="outline" onClick={() => handleApproveListing(listing.id)}>
+                                <CheckCircle className="h-4 w-4 mr-1" />
                                 Approuver
                               </Button>
-                            )}
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button size="sm" variant="destructive" className="h-8 px-2" onClick={() => setSelectedListing(listing)}>
-                                  <XCircle className="h-3 w-3 mr-1" />
-                                  Rejeter
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent>
-                                <DialogHeader>
-                                  <DialogTitle>Rejeter l'annonce</DialogTitle>
-                                  <DialogDescription>
-                                    Indiquez la raison du rejet:
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <Textarea
-                                  placeholder="Raison du rejet..."
-                                  value={messageContent}
-                                  onChange={(e) => setMessageContent(e.target.value)}
-                                />
-                                <DialogFooter>
-                                  <Button
-                                    variant="destructive"
-                                    onClick={() => {
-                                      if (selectedListing) {
-                                        handleRejectListing(selectedListing.id, messageContent);
-                                        setMessageContent("");
-                                      }
-                                    }}
-                                  >
-                                    Confirmer le rejet
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button size="sm" variant="destructive">
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                    Rejeter
                                   </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          </div>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Rejeter l'annonce</DialogTitle>
+                                    <DialogDescription>Indiquez la raison du rejet</DialogDescription>
+                                  </DialogHeader>
+                                  <Textarea
+                                    placeholder="Raison du rejet..."
+                                    value={messageContent}
+                                    onChange={(e) => setMessageContent(e.target.value)}
+                                    rows={6}
+                                  />
+                                  <DialogFooter>
+                                    <Button variant="outline" onClick={() => setMessageContent("")}>
+                                      Annuler
+                                    </Button>
+                                    <Button
+                                      onClick={() => {
+                                        handleRejectListing(listing.id, messageContent);
+                                        setMessageContent("");
+                                      }}
+                                      disabled={!messageContent.trim()}
+                                    >
+                                      Confirmer
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                            </>
+                          )}
+                          <Button size="sm" variant="outline" onClick={() => navigate(`/listing/${listing.id}`)}>
+                            <Eye className="h-4 w-4 mr-1" />
+                            Voir
+                          </Button>
                         </div>
                       </div>
-                    </div>
-                  </Card>
-                ))
+                    </Card>
+                  ))
                 )}
               </CardContent>
             </Card>
@@ -873,14 +1000,13 @@ const Admin = () => {
 
           {/* Reports Tab */}
           <TabsContent value="reports" className="space-y-4">
-            {/* Filters */}
             <Card>
               <CardContent className="pt-6">
                 <div className="flex flex-col md:flex-row gap-3">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Rechercher par titre ou signaleur..."
+                      placeholder="Rechercher par titre d'annonce ou nom du signalant..."
                       value={reportSearch}
                       onChange={(e) => setReportSearch(e.target.value)}
                       className="pl-10"
@@ -903,11 +1029,9 @@ const Admin = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Toutes</SelectItem>
-                      <SelectItem value="inappropriate">Inapproprié</SelectItem>
-                      <SelectItem value="scam">Arnaque</SelectItem>
                       <SelectItem value="spam">Spam</SelectItem>
-                      <SelectItem value="fake">Contrefait</SelectItem>
-                      <SelectItem value="misleading">Trompeur</SelectItem>
+                      <SelectItem value="inappropriate">Inapproprié</SelectItem>
+                      <SelectItem value="fraud">Fraude</SelectItem>
                       <SelectItem value="other">Autre</SelectItem>
                     </SelectContent>
                   </Select>
@@ -917,140 +1041,91 @@ const Admin = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>Tous les signalements ({filteredReports.length} / {reports?.length || 0})</CardTitle>
+                <CardTitle>Signalements ({filteredReports.length} / {reports?.length || 0})</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {filteredReports.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">Aucun signalement trouvé</p>
                 ) : (
-                  filteredReports.map((report) => (
-                    <Card key={report.id} className="p-3">
-                    <div className="flex gap-3">
-                      <img
-                        src={report.listings?.images?.[0] || "/placeholder.svg"}
-                        alt={report.listings?.title}
-                        className="w-16 h-16 object-cover rounded-md"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm truncate">{report.listings?.title}</h3>
-                            <p className="text-sm font-bold text-primary">
-                              {report.listings?.price > 0 ? `${report.listings.price.toLocaleString()} FCFA` : "Gratuit"}
-                            </p>
-                            <div className="flex gap-1 mt-1 flex-wrap">
-                              <Badge className="text-xs py-0" variant={
-                                report.status === "resolved" ? "default" :
-                                report.status === "dismissed" ? "secondary" :
-                                report.status === "reviewing" ? "outline" :
-                                "destructive"
-                              }>
-                                {report.status === "resolved" ? "Résolu" :
-                                 report.status === "dismissed" ? "Rejeté" :
-                                 report.status === "reviewing" ? "En cours" :
-                                 "En attente"}
-                              </Badge>
-                              <Badge className="text-xs py-0" variant="outline">
-                                {report.reason === "inappropriate" ? "Contenu inapproprié" :
-                                 report.reason === "scam" ? "Arnaque" :
-                                 report.reason === "spam" ? "Spam" :
-                                 report.reason === "fake" ? "Contrefait" :
-                                 report.reason === "misleading" ? "Trompeur" :
-                                 "Autre"}
-                              </Badge>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Signalé par: {report.reporter_profile?.full_name || "Utilisateur"}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {new Date(report.created_at).toLocaleDateString()} à {new Date(report.created_at).toLocaleTimeString()}
-                            </p>
-                            <div className="mt-1 p-2 bg-muted rounded-md">
-                              <p className="text-xs"><strong>Détails:</strong> {report.description}</p>
-                            </div>
-                          </div>
-                          <div className="flex flex-col gap-1 ml-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 px-2 text-xs"
-                              onClick={() => navigate(`/listing/${report.listing_id}`)}
-                            >
-                              <Eye className="h-3 w-3 mr-1" />
-                              Voir annonce
-                            </Button>
-                            {report.status === "pending" && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  className="h-8 px-2 text-xs"
-                                  onClick={() => handleResolveReport(report.id)}
-                                >
-                                  <CheckCircle className="h-3 w-3 mr-1" />
-                                  Résoudre
-                                </Button>
-                                <Dialog>
-                                  <DialogTrigger asChild>
-                                    <Button size="sm" variant="outline" className="h-8 px-2 text-xs">
-                                      <XCircle className="h-3 w-3 mr-1" />
-                                      Rejeter
+                  filteredReports.map(report => (
+                    <Card key={report.id} className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold">{report.listings?.title || "Annonce inconnue"}</h3>
+                          <p className="text-sm text-muted-foreground mt-1">Raison: {report.reason}</p>
+                          <p className="text-sm text-muted-foreground mt-1">Statut: {report.status}</p>
+                          <p className="text-sm text-muted-foreground mt-1">Signalé par: {report.reporter_profile?.full_name || "Inconnu"}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          {report.status === "pending" && (
+                            <>
+                              <Button size="sm" variant="outline" onClick={() => handleResolveReport(report.id)}>
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Résoudre
+                              </Button>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button size="sm" variant="destructive">
+                                    <XCircle className="h-4 w-4 mr-1" />
+                                    Rejeter
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Rejeter le signalement</DialogTitle>
+                                    <DialogDescription>Indiquez la raison du rejet</DialogDescription>
+                                  </DialogHeader>
+                                  <Textarea
+                                    placeholder="Notes pour le rejet..."
+                                    value={messageContent}
+                                    onChange={(e) => setMessageContent(e.target.value)}
+                                    rows={6}
+                                  />
+                                  <DialogFooter>
+                                    <Button variant="outline" onClick={() => setMessageContent("")}>
+                                      Annuler
                                     </Button>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>Rejeter le signalement</DialogTitle>
-                                      <DialogDescription>
-                                        Indiquez pourquoi ce signalement n'est pas valide:
-                                      </DialogDescription>
-                                    </DialogHeader>
-                                    <Textarea
-                                      placeholder="Notes administratives..."
-                                      value={messageContent}
-                                      onChange={(e) => setMessageContent(e.target.value)}
-                                    />
-                                    <DialogFooter>
-                                      <Button
-                                        variant="outline"
-                                        onClick={() => {
-                                          handleDismissReport(report.id, messageContent);
-                                          setMessageContent("");
-                                        }}
-                                      >
-                                        Confirmer le rejet
-                                      </Button>
-                                    </DialogFooter>
-                                  </DialogContent>
-                                </Dialog>
-                              </>
-                            )}
-                          </div>
+                                    <Button
+                                      onClick={() => {
+                                        handleDismissReport(report.id, messageContent);
+                                        setMessageContent("");
+                                      }}
+                                      disabled={!messageContent.trim()}
+                                    >
+                                      Confirmer
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                            </>
+                          )}
+                          <Button size="sm" variant="outline" onClick={() => navigate(`/listing/${report.listings?.id}`)}>
+                            <Eye className="h-4 w-4 mr-1" />
+                            Voir annonce
+                          </Button>
                         </div>
                       </div>
-                    </div>
                     </Card>
                   ))
-                )}
-                {(!reports || reports.length === 0) && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Aucun signalement pour le moment
-                  </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Reminders Tab */}
-          <TabsContent value="reminders">
+          <TabsContent value="reminders" className="space-y-4">
             <InactiveListingsReminder />
           </TabsContent>
 
-          <TabsContent value="ads">
+          {/* Ads Tab */}
+          <TabsContent value="ads" className="space-y-4">
             <AdBannerManagement />
           </TabsContent>
         </Tabs>
       </div>
       <BottomNav />
+      <InactiveListingsReminder />
+      <AdBannerManagement />
     </div>
   );
 };
