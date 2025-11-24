@@ -1,4 +1,4 @@
-# Liste de vérification avant déploiement DJASSA
+# Liste de vérification avant déploiement BAZARAM
 
 ## ✅ Correctifs appliqués
 
@@ -20,9 +20,9 @@
   - ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION
 
 ### 3. Cohérence de marque
-- [x] "ReVivo" remplacé par "DJASSA" dans :
+- [x] "ReVivo" remplacé par "BAZARAM" dans :
   - Settings.tsx (partage de l'application)
-  - Help.tsx (email de support : support@djassamarket.com)
+  - Help.tsx (email de support : support@bazaram.com)
 
 ### 4. URLs de confirmation email
 - [x] URL de confirmation cohérente : `/email-verified` dans les edge functions et le frontend

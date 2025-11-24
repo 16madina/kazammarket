@@ -1,6 +1,6 @@
-# ✅ Checklist complète pour soumettre DJASSA aux stores
+# ✅ Checklist complète pour soumettre BAZARAM aux stores
 
-Cette checklist vous guide étape par étape pour soumettre DJASSA sur l'App Store (iOS) et le Play Store (Android).
+Cette checklist vous guide étape par étape pour soumettre BAZARAM sur l'App Store (iOS) et le Play Store (Android).
 
 ## 📋 Pré-requis généraux
 

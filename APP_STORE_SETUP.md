@@ -1,10 +1,10 @@
 # Configuration des métadonnées pour iOS et Android
 
-Ce guide vous aide à configurer toutes les métadonnées nécessaires pour publier DJASSA sur l'App Store (iOS) et le Play Store (Android).
+Ce guide vous aide à configurer toutes les métadonnées nécessaires pour publier BAZARAM sur l'App Store (iOS) et le Play Store (Android).
 
 ## 📱 Informations de base de l'application
 
-- **Nom de l'app** : DJASSA
+- **Nom de l'app** : BAZARAM
 - **Package ID** : `app.lovable.fdde6a57c0ea45b0bd6d4e42d3d22471`
 - **Version** : 1.0.0
 - **Description courte** : Marketplace de petites annonces pour l'Afrique de l'Ouest
