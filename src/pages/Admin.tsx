@@ -28,6 +28,43 @@ const Admin = () => {
   const [banReason, setBanReason] = useState("");
   const [emailSubject, setEmailSubject] = useState("");
   const [emailMessage, setEmailMessage] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("custom");
+
+  // Email templates
+  const emailTemplates = {
+    custom: {
+      subject: "",
+      message: ""
+    },
+    welcome: {
+      subject: "Bienvenue sur BAZARAM !",
+      message: "Bonjour,\n\nNous sommes ravis de vous accueillir sur BAZARAM, votre marketplace pour l'économie circulaire.\n\nN'hésitez pas à explorer nos fonctionnalités et à publier vos premières annonces.\n\nSi vous avez des questions, notre équipe est là pour vous aider.\n\nCordialement,\nL'équipe BAZARAM"
+    },
+    verification_reminder: {
+      subject: "Vérifiez votre compte BAZARAM",
+      message: "Bonjour,\n\nNous avons remarqué que votre compte n'est pas encore vérifié.\n\nLa vérification de votre compte vous permet de:\n- Publier des annonces\n- Contacter les vendeurs\n- Bénéficier de la confiance des autres utilisateurs\n\nMerci de vérifier votre adresse email dès que possible.\n\nCordialement,\nL'équipe BAZARAM"
+    },
+    listing_approved: {
+      subject: "Votre annonce a été approuvée",
+      message: "Bonjour,\n\nBonne nouvelle ! Votre annonce a été approuvée par notre équipe de modération.\n\nElle est maintenant visible par tous les utilisateurs de BAZARAM.\n\nNous vous souhaitons une excellente vente !\n\nCordialement,\nL'équipe BAZARAM"
+    },
+    listing_rejected: {
+      subject: "Votre annonce nécessite des modifications",
+      message: "Bonjour,\n\nVotre annonce a été examinée par notre équipe de modération.\n\nMalheureusement, elle ne respecte pas certaines de nos conditions d'utilisation.\n\nMerci de la modifier et de la republier.\n\nN'hésitez pas à nous contacter si vous avez des questions.\n\nCordialement,\nL'équipe BAZARAM"
+    },
+    promotion: {
+      subject: "Profitez de nos nouveautés !",
+      message: "Bonjour,\n\nNous avons de grandes nouvelles à partager avec vous !\n\nDécouvrez les dernières fonctionnalités de BAZARAM et profitez d'une expérience encore meilleure.\n\nConnectez-vous dès maintenant pour en savoir plus.\n\nCordialement,\nL'équipe BAZARAM"
+    },
+    inactive_user: {
+      subject: "Vous nous manquez sur BAZARAM",
+      message: "Bonjour,\n\nCela fait un moment que nous ne vous avons pas vu sur BAZARAM.\n\nDe nouvelles annonces sont publiées chaque jour, et votre communauté vous attend !\n\nRevenez découvrir les dernières offres et republier vos annonces.\n\nÀ très bientôt,\nL'équipe BAZARAM"
+    },
+    warning: {
+      subject: "Avertissement concernant votre compte",
+      message: "Bonjour,\n\nNous avons détecté un comportement non conforme à nos conditions d'utilisation sur votre compte.\n\nMerci de prendre connaissance de nos règles et de les respecter.\n\nEn cas de récidive, votre compte pourrait être suspendu.\n\nCordialement,\nL'équipe BAZARAM"
+    }
+  };
   
   // Filter states
   const [userSearch, setUserSearch] = useState("");
@@ -561,6 +598,7 @@ const Admin = () => {
                                 variant="outline"
                                 onClick={() => {
                                   setSelectedUser(profile);
+                                  setSelectedTemplate("custom");
                                   setEmailSubject("");
                                   setEmailMessage("");
                                 }}
@@ -569,7 +607,7 @@ const Admin = () => {
                                 Email
                               </Button>
                             </DialogTrigger>
-                            <DialogContent>
+                            <DialogContent className="max-w-2xl">
                               <DialogHeader>
                                 <DialogTitle>Envoyer un email</DialogTitle>
                                 <DialogDescription>
@@ -577,6 +615,32 @@ const Admin = () => {
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="space-y-4">
+                                <div>
+                                  <label className="text-sm font-medium mb-1 block">Template</label>
+                                  <Select 
+                                    value={selectedTemplate} 
+                                    onValueChange={(value) => {
+                                      setSelectedTemplate(value);
+                                      const template = emailTemplates[value as keyof typeof emailTemplates];
+                                      setEmailSubject(template.subject);
+                                      setEmailMessage(template.message);
+                                    }}
+                                  >
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Choisir un template" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="custom">✍️ Email personnalisé</SelectItem>
+                                      <SelectItem value="welcome">👋 Bienvenue</SelectItem>
+                                      <SelectItem value="verification_reminder">✅ Rappel de vérification</SelectItem>
+                                      <SelectItem value="listing_approved">✓ Annonce approuvée</SelectItem>
+                                      <SelectItem value="listing_rejected">✗ Annonce rejetée</SelectItem>
+                                      <SelectItem value="promotion">🎉 Promotion</SelectItem>
+                                      <SelectItem value="inactive_user">💤 Utilisateur inactif</SelectItem>
+                                      <SelectItem value="warning">⚠️ Avertissement</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
                                 <div>
                                   <label className="text-sm font-medium mb-1 block">Sujet</label>
                                   <Input
@@ -591,7 +655,8 @@ const Admin = () => {
                                     placeholder="Votre message..."
                                     value={emailMessage}
                                     onChange={(e) => setEmailMessage(e.target.value)}
-                                    rows={6}
+                                    rows={8}
+                                    className="font-mono text-sm"
                                   />
                                 </div>
                               </div>
@@ -599,6 +664,7 @@ const Admin = () => {
                                 <Button 
                                   onClick={() => {
                                     handleSendEmail((profile as any).email, emailSubject, emailMessage);
+                                    setSelectedTemplate("custom");
                                     setEmailSubject("");
                                     setEmailMessage("");
                                   }}
