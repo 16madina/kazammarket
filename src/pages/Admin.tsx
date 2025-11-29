@@ -1110,25 +1110,25 @@ const Admin = () => {
                                 </p>
                               </div>
                             </div>
-                            <div className="flex flex-col gap-1.5 ml-4 min-w-[140px]">
+                            <div className="flex flex-col gap-1.5 ml-2 min-w-[120px]">
                               {report.listings?.id && (
                                 <Button 
                                   size="sm" 
                                   variant="outline" 
                                   onClick={() => navigate(`/listing/${report.listings.id}`)}
-                                  className="h-8 text-xs px-2"
+                                  className="h-7 text-[10px] px-2"
                                 >
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  Voir annonce
+                                  <Eye className="h-3 w-3 mr-0.5" />
+                                  Voir
                                 </Button>
                               )}
                               {report.status === "pending" && (
                                 <>
                                   <AlertDialog>
                                     <AlertDialogTrigger asChild>
-                                      <Button size="sm" variant="destructive" className="h-8 text-xs px-2">
-                                        <Ban className="h-3 w-3 mr-1" />
-                                        Supprimer + Bannir
+                                      <Button size="sm" variant="destructive" className="h-7 text-[10px] px-2">
+                                        <Ban className="h-3 w-3 mr-0.5" />
+                                        Sup. + Ban
                                       </Button>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
@@ -1198,16 +1198,16 @@ const Admin = () => {
                                     size="sm" 
                                     variant="outline"
                                     onClick={() => handleResolveReport(report.id)}
-                                    className="h-8 text-xs px-2"
+                                    className="h-7 text-[10px] px-2"
                                   >
-                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    <CheckCircle className="h-3 w-3 mr-0.5" />
                                     Résoudre
                                   </Button>
                                   
                                   <Dialog>
                                     <DialogTrigger asChild>
-                                      <Button size="sm" variant="ghost" className="h-8 text-xs px-2">
-                                        <XCircle className="h-3 w-3 mr-1" />
+                                      <Button size="sm" variant="ghost" className="h-7 text-[10px] px-2">
+                                        <XCircle className="h-3 w-3 mr-0.5" />
                                         Rejeter
                                       </Button>
                                     </DialogTrigger>
