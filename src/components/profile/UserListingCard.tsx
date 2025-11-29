@@ -5,6 +5,7 @@ import { Edit, Trash2, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useHaptics } from "@/hooks/useHaptics";
 
 interface UserListingCardProps {
   listing: any;
@@ -14,24 +15,29 @@ interface UserListingCardProps {
 export const UserListingCard = ({ listing, onUpdate }: UserListingCardProps) => {
   const navigate = useNavigate();
   const isSold = listing.status === "sold";
+  const haptics = useHaptics();
 
   const handleDelete = async () => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer cette annonce ?")) return;
 
+    haptics.heavy();
     const { error } = await supabase
       .from("listings")
       .delete()
       .eq("id", listing.id);
 
     if (error) {
+      haptics.error();
       toast.error("Erreur lors de la suppression");
     } else {
+      haptics.success();
       toast.success("Annonce supprimée");
       onUpdate();
     }
   };
 
   const handleToggleStatus = async () => {
+    haptics.medium();
     const newStatus = isSold ? "active" : "sold";
     const { error } = await supabase
       .from("listings")
@@ -39,8 +45,10 @@ export const UserListingCard = ({ listing, onUpdate }: UserListingCardProps) => 
       .eq("id", listing.id);
 
     if (error) {
+      haptics.error();
       toast.error("Erreur lors de la modification");
     } else {
+      haptics.success();
       toast.success(isSold ? "Annonce réactivée" : "Annonce marquée comme vendue");
       onUpdate();
     }

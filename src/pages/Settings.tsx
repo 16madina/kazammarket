@@ -11,6 +11,7 @@ import BottomNav from "@/components/BottomNav";
 import { toast } from "sonner";
 import { useDarkMode } from "@/hooks/useDarkMode";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useHaptics } from "@/hooks/useHaptics";
 import {
   User,
   Heart,
@@ -56,8 +57,9 @@ const Settings = () => {
   const { darkMode, toggleDarkMode } = useDarkMode();
   const { language, setLanguage, t } = useLanguage();
   const { resetOnboarding } = useOnboarding();
+  const haptics = useHaptics();
   const { 
-    isAvailable: isBiometricAvailable, 
+    isAvailable: isBiometricAvailable,
     isEnabled: isBiometricEnabled, 
     enableBiometric, 
     disableBiometric,
@@ -91,11 +93,13 @@ const Settings = () => {
   }, []);
 
   const handleToggleDarkMode = () => {
+    haptics.light();
     toggleDarkMode();
     toast.success(`${t('common.mode')} ${!darkMode ? t('common.dark') : t('common.light')} ${t('common.activated')}`);
   };
 
   const handleBiometricToggle = async (checked: boolean) => {
+    haptics.light();
     if (checked) {
       await enableBiometric();
     } else {
@@ -145,10 +149,13 @@ const Settings = () => {
   };
 
   const handleLogout = async () => {
+    haptics.medium();
     const { error } = await supabase.auth.signOut();
     if (error) {
+      haptics.error();
       toast.error("Erreur lors de la déconnexion");
     } else {
+      haptics.success();
       toast.success("Déconnexion réussie");
       navigate("/auth");
     }

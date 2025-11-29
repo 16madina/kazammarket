@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useHaptics } from "@/hooks/useHaptics";
 
 interface ReportDialogProps {
   listingId: string;
@@ -27,23 +28,28 @@ export const ReportDialog = ({ listingId, trigger }: ReportDialogProps) => {
   const [reason, setReason] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
+  const haptics = useHaptics();
 
   const handleSubmit = async () => {
     if (!reason) {
+      haptics.warning();
       toast.error("Veuillez sélectionner une raison");
       return;
     }
 
     if (description.trim().length < 10) {
+      haptics.warning();
       toast.error("Veuillez fournir plus de détails (minimum 10 caractères)");
       return;
     }
 
     setLoading(true);
+    haptics.medium();
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        haptics.error();
         toast.error("Vous devez être connecté pour signaler");
         return;
       }
@@ -57,11 +63,13 @@ export const ReportDialog = ({ listingId, trigger }: ReportDialogProps) => {
 
       if (error) {
         if (error.code === "23505") {
+          haptics.warning();
           toast.error("Vous avez déjà signalé cette annonce");
         } else {
           throw error;
         }
       } else {
+        haptics.success();
         toast.success("Signalement envoyé. Nous examinerons cette annonce rapidement.");
         setOpen(false);
         setReason("");
@@ -69,6 +77,7 @@ export const ReportDialog = ({ listingId, trigger }: ReportDialogProps) => {
       }
     } catch (error) {
       console.error("Error reporting listing:", error);
+      haptics.error();
       toast.error("Erreur lors de l'envoi du signalement");
     } finally {
       setLoading(false);

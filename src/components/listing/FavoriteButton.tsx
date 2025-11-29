@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useHaptics } from "@/hooks/useHaptics";
 
 interface FavoriteButtonProps {
   listingId: string;
@@ -13,6 +14,7 @@ export const FavoriteButton = ({ listingId }: FavoriteButtonProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const haptics = useHaptics();
 
   const { data: user } = useQuery({
     queryKey: ["user"],
@@ -59,6 +61,7 @@ export const FavoriteButton = ({ listingId }: FavoriteButtonProps) => {
       }
     },
     onSuccess: () => {
+      haptics.medium();
       queryClient.invalidateQueries({ queryKey: ["favorite", listingId, user?.id] });
       toast({
         title: favorite ? "Retiré des favoris" : "Ajouté aux favoris",
@@ -68,6 +71,7 @@ export const FavoriteButton = ({ listingId }: FavoriteButtonProps) => {
       });
     },
     onError: (error: Error) => {
+      haptics.error();
       toast({
         title: "Erreur",
         description: error.message === "Non authentifié"
