@@ -364,9 +364,36 @@ const Admin = () => {
     refetchListings();
   };
 
-  // Send message (placeholder)
+  // Send message to user via system notification
   const handleSendMessage = async (userId: string) => {
-    toast.info("Fonctionnalité de messagerie à implémenter avec un service externe");
+    if (!messageContent.trim()) {
+      toast.error("Veuillez saisir un message");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('system_notifications')
+        .insert({
+          user_id: userId,
+          title: '📩 Message de l\'équipe BAZARAM',
+          message: messageContent,
+          notification_type: 'admin_message',
+          is_read: false,
+          metadata: {
+            from: 'Admin BAZARAM',
+            sent_at: new Date().toISOString()
+          }
+        });
+
+      if (error) throw error;
+
+      toast.success("Message envoyé avec succès");
+      setMessageContent("");
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error("Erreur lors de l'envoi du message");
+    }
   };
 
   // Send single email
@@ -659,7 +686,10 @@ const Admin = () => {
                             </Button>
                             <Dialog>
                               <DialogTrigger asChild>
-                                <Button size="sm" variant="outline" onClick={() => setSelectedUser(profile)} className="h-8 text-xs px-2">
+                                <Button size="sm" variant="outline" onClick={() => {
+                                  setSelectedUser(profile);
+                                  setMessageContent("");
+                                }} className="h-8 text-xs px-2">
                                   <MessageSquare className="h-3 w-3 mr-1" />
                                   Message
                                 </Button>
@@ -667,11 +697,15 @@ const Admin = () => {
                               <DialogContent>
                                 <DialogHeader>
                                   <DialogTitle>Envoyer un message</DialogTitle>
+                                  <DialogDescription>
+                                    Message envoyé par Admin BAZARAM dans les notifications de l'utilisateur
+                                  </DialogDescription>
                                 </DialogHeader>
                                 <Textarea
                                   placeholder="Votre message..."
                                   value={messageContent}
                                   onChange={(e) => setMessageContent(e.target.value)}
+                                  rows={6}
                                 />
                                 <DialogFooter>
                                   <Button onClick={() => handleSendMessage(profile.id)}>
