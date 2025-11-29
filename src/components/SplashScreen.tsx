@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import bazaramSplashLogo from "@/assets/bazaram-splash-logo.png";
+import { useHaptics } from "@/hooks/useHaptics";
+import { useSplashSound } from "@/hooks/useSplashSound";
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -7,17 +9,29 @@ interface SplashScreenProps {
 
 const SplashScreen = ({ onFinish }: SplashScreenProps) => {
   const [fadeOut, setFadeOut] = useState(false);
+  const haptics = useHaptics();
+  const { playStartupSound } = useSplashSound();
 
   useEffect(() => {
+    // 🔊 Startup sound immediately
+    playStartupSound();
+    
+    // 📳 Welcome vibration (medium)
+    haptics.medium();
+
     const timer = setTimeout(() => {
       setFadeOut(true);
+      
+      // 📳 Success vibration when splash finishes
+      haptics.success();
+      
       setTimeout(() => {
         onFinish();
       }, 600);
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [onFinish]);
+  }, [onFinish, haptics, playStartupSound]);
 
   return (
     <div
