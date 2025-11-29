@@ -2,7 +2,7 @@
 
 ## 📸 Images générées
 
-Ce dossier contient les captures d'écran et visuels promotionnels pour DJASSA :
+Ce dossier contient les captures d'écran et visuels promotionnels pour BAZARAM :
 
 ### Captures d'écran disponibles
 

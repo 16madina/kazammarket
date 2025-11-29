@@ -228,11 +228,15 @@ const Help = () => {
               </div>
             </Button>
 
-            <Button variant="outline" className="w-full justify-start gap-3">
+            <Button 
+              onClick={() => window.location.href = 'mailto:bazarammarket@gmail.com'}
+              variant="outline" 
+              className="w-full justify-start gap-3"
+            >
               <Mail className="h-5 w-5" />
               <div className="text-left">
                 <div className="font-medium">Email</div>
-                <div className="text-xs text-muted-foreground">support@bazaram.com • Réponse sous 24h</div>
+                <div className="text-xs text-muted-foreground">bazarammarket@gmail.com • Réponse sous 24h</div>
               </div>
             </Button>
           </div>
