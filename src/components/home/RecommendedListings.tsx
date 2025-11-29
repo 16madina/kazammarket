@@ -4,12 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
-import { Sparkles, MapPin } from "lucide-react";
+import { Sparkles, MapPin, Navigation } from "lucide-react";
 import { getLocationPriority, getLocationBadgeColor } from "@/utils/geographicFiltering";
 import { formatPriceWithConversion } from "@/utils/currency";
+import { useState, useEffect } from "react";
+import { getUserLocation, calculateDistance, formatDistance } from "@/utils/distanceCalculation";
 
 const RecommendedListings = () => {
   const navigate = useNavigate();
+  const [userCoordinates, setUserCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const [listingDistances, setListingDistances] = useState<{ [key: string]: number }>({});
 
   const { data: user } = useQuery({
     queryKey: ["user"],
@@ -85,6 +89,42 @@ const RecommendedListings = () => {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  // Get user's coordinates
+  useEffect(() => {
+    const getCoordinates = async () => {
+      const coords = await getUserLocation();
+      if (coords) {
+        setUserCoordinates(coords);
+      }
+    };
+    getCoordinates();
+  }, []);
+
+  // Calculate distances for recommendations using stored GPS coordinates
+  useEffect(() => {
+    if (!userCoordinates || !recommendations) return;
+
+    const distances: { [key: string]: number } = {};
+    
+    for (const listing of recommendations) {
+      if (listing.latitude && listing.longitude) {
+        try {
+          const distance = calculateDistance(
+            userCoordinates.lat,
+            userCoordinates.lng,
+            Number(listing.latitude),
+            Number(listing.longitude)
+          );
+          distances[listing.id] = distance;
+        } catch (error) {
+          console.error(`Error calculating distance for listing ${listing.id}:`, error);
+        }
+      }
+    }
+    
+    setListingDistances(distances);
+  }, [userCoordinates, recommendations]);
+
   if (!user || !recommendations || recommendations.length === 0) {
     return null;
   }
@@ -142,9 +182,18 @@ const RecommendedListings = () => {
                 <p className="text-base font-bold text-primary">
                   {formatPriceWithConversion(listing.price, listing.currency || "FCFA", userProfile?.currency || "FCFA")}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {listing.location}
-                </p>
+                <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground mt-2">
+                  <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                    <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                    <span className="line-clamp-1">{listing.location}</span>
+                  </div>
+                  {listingDistances[listing.id] !== undefined && (
+                    <div className="flex items-center gap-1 text-primary font-medium shrink-0">
+                      <Navigation className="h-3.5 w-3.5" />
+                      <span className="text-xs">{formatDistance(listingDistances[listing.id])}</span>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}

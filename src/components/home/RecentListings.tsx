@@ -182,36 +182,30 @@ const RecentListings = () => {
     getCoordinates();
   }, [userProfile?.city, userProfile?.country, guestLocation.city, guestLocation.country]);
 
-  // Calculate distances for listings
+  // Calculate distances for listings using stored GPS coordinates
   useEffect(() => {
     if (!userCoordinates || !listings) return;
 
-    const calculateDistances = async () => {
-      const distances: { [key: string]: number } = {};
-      
-      for (const listing of listings) {
-        if (!listing.location) continue;
-        
+    const distances: { [key: string]: number } = {};
+    
+    for (const listing of listings) {
+      // Use stored GPS coordinates if available
+      if (listing.latitude && listing.longitude) {
         try {
-          const listingCoords = await geocodeLocation(listing.location);
-          if (listingCoords) {
-            const distance = calculateDistance(
-              userCoordinates.lat,
-              userCoordinates.lng,
-              listingCoords.lat,
-              listingCoords.lng
-            );
-            distances[listing.id] = distance;
-          }
+          const distance = calculateDistance(
+            userCoordinates.lat,
+            userCoordinates.lng,
+            Number(listing.latitude),
+            Number(listing.longitude)
+          );
+          distances[listing.id] = distance;
         } catch (error) {
-          console.error(`Error calculating distance for ${listing.location}:`, error);
+          console.error(`Error calculating distance for listing ${listing.id}:`, error);
         }
       }
-      
-      setListingDistances(distances);
-    };
-
-    calculateDistances();
+    }
+    
+    setListingDistances(distances);
   }, [userCoordinates, listings]);
 
   // RÈGLE : Trier les annonces par proximité pour les utilisateurs avec localisation (authentifiés ou invités)
