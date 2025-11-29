@@ -20,7 +20,7 @@ const Header = ({ isAuthenticated }: HeaderProps) => {
           <img 
             src={bazaramLogo} 
             alt="BAZARAM" 
-            className="h-16 w-auto cursor-pointer transition-all duration-300 hover:scale-105 object-contain dark:invert"
+            className="h-16 w-auto cursor-pointer transition-all duration-300 hover:scale-105 object-contain dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]"
             onClick={() => navigate("/")}
           />
         </div>
