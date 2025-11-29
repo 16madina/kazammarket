@@ -5,34 +5,69 @@ import { useSplashSound } from "@/hooks/useSplashSound";
 
 interface SplashScreenProps {
   onFinish: () => void;
+  isShortVersion?: boolean;
 }
 
-const SplashScreen = ({ onFinish }: SplashScreenProps) => {
+const SplashScreen = ({ onFinish, isShortVersion = false }: SplashScreenProps) => {
   const [fadeOut, setFadeOut] = useState(false);
   const haptics = useHaptics();
   const { playStartupSound } = useSplashSound();
 
+  const duration = isShortVersion ? 500 : 2500;
+  const fadeOutDuration = isShortVersion ? 300 : 600;
+
   useEffect(() => {
-    // 🔊 Startup sound immediately
-    playStartupSound();
-    
-    // 📳 Welcome vibration (medium)
-    haptics.medium();
+    // Play sound and haptics based on version
+    if (!isShortVersion) {
+      playStartupSound();
+      haptics.medium();
+    } else {
+      haptics.light();
+    }
 
     const timer = setTimeout(() => {
       setFadeOut(true);
       
-      // 📳 Success vibration when splash finishes
-      haptics.success();
+      // Success haptic only for full version
+      if (!isShortVersion) {
+        haptics.success();
+      }
       
       setTimeout(() => {
         onFinish();
-      }, 600);
-    }, 2500);
+      }, fadeOutDuration);
+    }, duration);
 
     return () => clearTimeout(timer);
-  }, [onFinish, haptics, playStartupSound]);
+  }, [onFinish, haptics, playStartupSound, isShortVersion, duration, fadeOutDuration]);
 
+  // Short version: simplified splash with quick fade
+  if (isShortVersion) {
+    return (
+      <div
+        className={`fixed inset-0 z-50 flex items-center justify-center overflow-hidden transition-opacity duration-300 ${
+          fadeOut ? "opacity-0" : "opacity-100"
+        }`}
+        style={{
+          background: "linear-gradient(135deg, hsl(25, 45%, 35%) 0%, hsl(30, 40%, 50%) 100%)",
+        }}
+      >
+        <div className="animate-fade-in">
+          <img
+            src={bazaramSplashLogo}
+            alt="BAZARAM MARKET"
+            className="w-64 md:w-80 drop-shadow-2xl object-contain"
+            style={{ 
+              imageRendering: 'crisp-edges',
+              WebkitFontSmoothing: 'antialiased',
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Full version: complete splash with animations
   return (
     <div
       className={`fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden transition-opacity duration-600 ${

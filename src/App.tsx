@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import SplashScreen from "./components/SplashScreen";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { usePushNotifications } from "./hooks/usePushNotifications";
+import { useSplashPreference } from "./hooks/useSplashPreference";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Categories from "./pages/Categories";
@@ -46,6 +47,7 @@ import MapView from "./pages/MapView";
 const queryClient = new QueryClient();
 
 const App = () => {
+  const { isReturningUser, markFullSplashSeen } = useSplashPreference();
   const [showSplash, setShowSplash] = useState(() => {
     // Vérifier si le splash a déjà été montré dans cette session
     const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
@@ -56,12 +58,21 @@ const App = () => {
   usePushNotifications();
 
   const handleSplashFinish = () => {
+    // Mark as seen in localStorage only if it was the full version
+    if (!isReturningUser) {
+      markFullSplashSeen();
+    }
     sessionStorage.setItem('hasSeenSplash', 'true');
     setShowSplash(false);
   };
 
   if (showSplash) {
-    return <SplashScreen onFinish={handleSplashFinish} />;
+    return (
+      <SplashScreen 
+        onFinish={handleSplashFinish} 
+        isShortVersion={isReturningUser}
+      />
+    );
   }
 
   return (
