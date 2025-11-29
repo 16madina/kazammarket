@@ -34,7 +34,7 @@ All colors MUST be HSL.
 
     /* Muted - Beige doux */
     --muted: 35 30% 90%;
-    --muted-foreground: 20 15% 40%;
+    --muted-foreground: 20 20% 30%;
 
     /* Accent - Or/Caramel */
     --accent: 35 55% 55%;
@@ -75,7 +75,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 100%;
 
     --muted: 20 20% 18%;
-    --muted-foreground: 30 10% 60%;
+    --muted-foreground: 30 12% 70%;
 
     --accent: 35 55% 55%;
     --accent-foreground: 0 0% 100%;

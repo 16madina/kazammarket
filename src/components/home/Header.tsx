@@ -30,7 +30,7 @@ const Header = ({ isAuthenticated }: HeaderProps) => {
             variant="ghost"
             size="sm"
             onClick={toggleDarkMode}
-            className="gap-2"
+            className="gap-2 min-h-[44px] min-w-[44px]"
             aria-label="Changer de thème"
           >
             {darkMode ? (

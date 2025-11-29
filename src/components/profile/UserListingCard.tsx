@@ -54,7 +54,7 @@ export const UserListingCard = ({ listing, onUpdate }: UserListingCardProps) => 
           {listing.images?.[0] ? (
             <img
               src={listing.images[0]}
-              alt={listing.title}
+              alt={`${listing.title} - ${listing.categories?.name || 'produit'} ${listing.price === 0 ? 'gratuit' : `à ${listing.price} FCFA`}${listing.status === 'sold' ? ' (vendu)' : ''}`}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -99,7 +99,8 @@ export const UserListingCard = ({ listing, onUpdate }: UserListingCardProps) => 
             size="sm"
             variant="outline"
             onClick={() => navigate(`/listing/${listing.id}`)}
-            className="h-9 text-xs px-3 rounded-full transition-all hover:scale-105 active:scale-95"
+            className="min-h-[44px] text-xs px-3 rounded-full transition-all hover:scale-105 active:scale-95"
+            aria-label="Voir l'annonce"
           >
             <Edit className="h-3 w-3" />
           </Button>
@@ -108,9 +109,10 @@ export const UserListingCard = ({ listing, onUpdate }: UserListingCardProps) => 
             size="sm"
             variant={isSold ? "default" : "secondary"}
             onClick={handleToggleStatus}
-            className={`h-9 text-xs px-3 rounded-full transition-all hover:scale-105 active:scale-95 ${
+            className={`min-h-[44px] text-xs px-3 rounded-full transition-all hover:scale-105 active:scale-95 ${
               isSold ? "" : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
             }`}
+            aria-label={isSold ? "Réactiver l'annonce" : "Marquer comme vendu"}
           >
             {isSold ? (
               <XCircle className="h-3 w-3" />
@@ -123,7 +125,8 @@ export const UserListingCard = ({ listing, onUpdate }: UserListingCardProps) => 
             size="sm"
             variant="destructive"
             onClick={handleDelete}
-            className="h-9 text-xs px-3 rounded-full transition-all hover:scale-105 active:scale-95"
+            className="min-h-[44px] text-xs px-3 rounded-full transition-all hover:scale-105 active:scale-95"
+            aria-label="Supprimer l'annonce"
           >
             <Trash2 className="h-3 w-3" />
           </Button>

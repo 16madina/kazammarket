@@ -80,7 +80,7 @@ export const FavoriteButton = ({ listingId }: FavoriteButtonProps) => {
 
   if (!isAuthChecked || isLoading) {
     return (
-      <Button variant="outline" size="icon" disabled className="h-9 w-9">
+      <Button variant="outline" size="icon" disabled className="min-h-[44px] min-w-[44px]" aria-label="Chargement des favoris">
         <Heart className="h-4 w-4" />
       </Button>
     );
@@ -92,7 +92,8 @@ export const FavoriteButton = ({ listingId }: FavoriteButtonProps) => {
       size="icon"
       onClick={() => toggleFavorite.mutate()}
       disabled={toggleFavorite.isPending}
-      className="h-9 w-9"
+      className="min-h-[44px] min-w-[44px]"
+      aria-label={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
     >
       <Heart
         className={`h-4 w-4 transition-colors ${

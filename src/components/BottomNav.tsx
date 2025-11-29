@@ -53,11 +53,12 @@ const BottomNav = () => {
               to={to}
               className="flex-1"
               activeClassName=""
+              aria-label={label}
             >
               {({ isActive }) => (
                 <div
                   className={cn(
-                    "flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-2xl transition-all duration-200",
+                    "flex flex-col items-center justify-center gap-0.5 py-1 px-1.5 rounded-2xl transition-all duration-200 min-h-[44px]",
                     "hover:scale-105 active:scale-90 active:bg-primary/20",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-warm"

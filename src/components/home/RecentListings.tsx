@@ -289,7 +289,7 @@ const RecentListings = () => {
         {listing.images?.[0] ? (
           <img
             src={listing.images[0]}
-            alt={listing.title}
+            alt={`${listing.title} - ${listing.categories?.name || 'produit'} ${listing.condition ? `en état ${translateCondition(listing.condition, language)}` : ''} à ${listing.location} ${listing.price === 0 ? 'gratuit' : `pour ${listing.price} FCFA`}`}
             loading="lazy"
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             style={{ objectPosition: 'center' }}

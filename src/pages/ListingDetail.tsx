@@ -225,7 +225,8 @@ const ListingDetail = () => {
           variant="ghost"
           size="icon"
           onClick={() => navigate(-1)}
-          className="mb-4 mt-2"
+          className="mb-4 mt-2 min-h-[44px] min-w-[44px]"
+          aria-label="Retour"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
@@ -236,7 +237,10 @@ const ListingDetail = () => {
             {/* Gallery */}
             <Card>
               <CardContent className="p-4">
-                <ImageGallery images={listing.images || []} title={listing.title} />
+                <ImageGallery 
+                  images={listing.images || []} 
+                  title={`Image de ${listing.title} - ${listing.categories?.name || 'produit'} à ${listing.location}`} 
+                />
               </CardContent>
             </Card>
 
@@ -287,7 +291,8 @@ const ListingDetail = () => {
                       variant="outline" 
                       size="icon"
                       onClick={() => setShareDialogOpen(true)}
-                      className="relative h-9 w-9"
+                      className="relative min-h-[44px] min-w-[44px]"
+                      aria-label="Partager cette annonce"
                     >
                       <Share2 className="h-4 w-4" />
                     </Button>

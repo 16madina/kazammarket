@@ -162,7 +162,7 @@ export const SystemNotifications = () => {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative min-h-[44px] min-w-[44px]" aria-label={`Notifications${unreadCount > 0 ? ` - ${unreadCount} ${unreadCount === 1 ? 'nouvelle' : 'nouvelles'}` : ''}`}>
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge 

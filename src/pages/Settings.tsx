@@ -223,7 +223,8 @@ const Settings = () => {
           variant="ghost"
           size="icon"
           onClick={() => navigate(-1)}
-          className="rounded-full"
+          className="rounded-full min-h-[44px] min-w-[44px]"
+          aria-label="Retour"
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
