@@ -567,58 +567,34 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
         </div>
         
         {/* Listing Info & History - Compact Layout */}
-        <div className="mt-3 space-y-2">
-          <div className="flex items-start gap-2">
-            {/* Listing Image as clickable link */}
+        <div className="mt-3">
+          <div className="space-y-2">
+            {/* Listing Title and Price */}
             <button
               onClick={() => navigate(`/listing/${conversation.listing_id}`)}
-              className="shrink-0 relative group"
+              className="text-left w-full group"
             >
-              {conversation.listing?.images?.[0] ? (
-                <img 
-                  src={conversation.listing.images[0]} 
-                  alt={conversation.listing.title}
-                  className="w-16 h-16 object-cover rounded border-2 border-border group-hover:border-primary transition-colors"
-                />
-              ) : (
-                <div className="w-16 h-16 bg-muted rounded border-2 border-border flex items-center justify-center">
-                  <ExternalLink className="h-6 w-6 text-muted-foreground" />
-                </div>
-              )}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors rounded flex items-center justify-center">
-                <ExternalLink className="h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
+              <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+                {conversation.listing?.title}
+              </p>
+              <p className="text-sm text-primary font-semibold">
+                {conversation.listing?.price === 0 ? 'Gratuit' : `${conversation.listing?.price.toLocaleString()} FCFA`}
+              </p>
             </button>
             
-            {/* Listing Info */}
-            <div className="flex-1 min-w-0 space-y-1">
-              <button
+            {/* Buttons Row */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => navigate(`/listing/${conversation.listing_id}`)}
-                className="text-left w-full group"
+                className="h-7 text-xs px-3 gap-1.5"
               >
-                <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
-                  {conversation.listing?.title}
-                </p>
-                <p className="text-sm text-primary font-semibold">
-                  {conversation.listing?.price === 0 ? 'Gratuit' : `${conversation.listing?.price.toLocaleString()} FCFA`}
-                </p>
-              </button>
+                <ExternalLink className="h-3.5 w-3.5" />
+                Voir
+              </Button>
               
-              <div className="flex items-center gap-2">
-                {/* Price Offer History */}
-                <PriceOfferHistory conversationId={conversationId} />
-                
-                {/* Link to listing */}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(`/listing/${conversation.listing_id}`)}
-                  className="h-6 text-xs px-2 gap-1"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  Voir
-                </Button>
-              </div>
+              <PriceOfferHistory conversationId={conversationId} />
             </div>
           </div>
         </div>
