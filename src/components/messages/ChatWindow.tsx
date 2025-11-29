@@ -574,7 +574,7 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
               onClick={() => navigate(`/listing/${conversation.listing_id}`)}
               className="text-left w-full group"
             >
-              <p className="text-sm font-medium truncate group-hover:text-primary transition-colors">
+              <p className="text-sm font-medium max-w-[200px] truncate overflow-hidden text-ellipsis whitespace-nowrap group-hover:text-primary transition-colors">
                 {conversation.listing?.title}
               </p>
               <p className="text-sm text-primary font-semibold">
