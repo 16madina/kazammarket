@@ -59,7 +59,7 @@ const HeroSection = () => {
                 alt="AYOKA" 
                 className="h-32 md:h-56 w-auto object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] dark:drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]"
               />
-              <p className="text-4xl md:text-6xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] -mt-2 md:-mt-4 ml-[20%]">
+              <p className="text-4xl md:text-6xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] -mt-6 md:-mt-10 ml-[23%]">
                 Market
               </p>
             </div>
