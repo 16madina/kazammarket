@@ -60,8 +60,8 @@ const Admin = () => {
       message: "Bonjour,\n\nNous avons de grandes nouvelles à partager avec vous !\n\nDécouvrez les dernières fonctionnalités de BAZARAM et profitez d'une expérience encore meilleure.\n\nConnectez-vous dès maintenant pour en savoir plus.\n\nCordialement,\nL'équipe BAZARAM"
     },
     inactive_user: {
-      subject: "Vous nous manquez sur BAZARAM",
-      message: "Bonjour,\n\nCela fait un moment que nous ne vous avons pas vu sur BAZARAM.\n\nDe nouvelles annonces sont publiées chaque jour, et votre communauté vous attend !\n\nRevenez découvrir les dernières offres et republier vos annonces.\n\nÀ très bientôt,\nL'équipe BAZARAM"
+      subject: "Vous nous manquez sur AYOKA MARKET",
+      message: "Bonjour,\n\nCela fait un moment que nous ne vous avons pas vu sur AYOKA MARKET.\n\nDe nouvelles annonces sont publiées chaque jour, et votre communauté vous attend !\n\nRevenez découvrir les dernières offres et republier vos annonces.\n\nÀ très bientôt,\nL'équipe AYOKA MARKET"
     },
     warning: {
       subject: "Avertissement concernant votre compte",
