@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useWebPushNotifications } from '@/hooks/useWebPushNotifications';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
-import { Capacitor } from '@capacitor/core';
 
 interface NotificationPermissionPromptProps {
   onDismiss?: () => void;
@@ -13,10 +12,12 @@ interface NotificationPermissionPromptProps {
 export const NotificationPermissionPrompt = ({ onDismiss }: NotificationPermissionPromptProps) => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
-  const isNative = Capacitor.isNativePlatform();
-  const webNotifications = useWebPushNotifications();
   const nativeNotifications = usePushNotifications();
+  const webNotifications = useWebPushNotifications();
+
+  const isNative = nativeNotifications.isNative;
 
   useEffect(() => {
     // Check if we should show the prompt
@@ -33,6 +34,12 @@ export const NotificationPermissionPrompt = ({ onDismiss }: NotificationPermissi
       return;
     }
 
+    // For native apps, check permission status
+    if (isNative && nativeNotifications.permissionStatus === 'denied') {
+      setShowPrompt(false);
+      return;
+    }
+
     // For web, check permission status
     if (!isNative && webNotifications.isPermissionGranted) {
       setShowPrompt(false);
@@ -45,19 +52,24 @@ export const NotificationPermissionPrompt = ({ onDismiss }: NotificationPermissi
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [isNative, nativeNotifications.isRegistered, webNotifications.isPermissionGranted]);
+  }, [isNative, nativeNotifications.isRegistered, nativeNotifications.permissionStatus, webNotifications.isPermissionGranted]);
 
   const handleAccept = async () => {
-    if (isNative) {
-      // Native notification permission is handled automatically
-      setShowPrompt(false);
-    } else {
-      const granted = await webNotifications.requestPermission();
-      if (granted) {
-        setShowPrompt(false);
+    setIsLoading(true);
+    
+    try {
+      if (isNative) {
+        await nativeNotifications.requestPermission();
+      } else {
+        await webNotifications.requestPermission();
       }
+    } catch (error) {
+      console.error('Error requesting notification permission:', error);
+    } finally {
+      setIsLoading(false);
+      setShowPrompt(false);
+      localStorage.setItem('ayoka_notification_prompt_seen', 'true');
     }
-    localStorage.setItem('ayoka_notification_prompt_seen', 'true');
   };
 
   const handleDismiss = () => {
@@ -69,7 +81,7 @@ export const NotificationPermissionPrompt = ({ onDismiss }: NotificationPermissi
 
   if (!showPrompt || dismissed) return null;
 
-  // Don't show if notifications aren't supported
+  // Don't show if notifications aren't supported on web
   if (!isNative && !webNotifications.isSupported) return null;
 
   return (
@@ -99,10 +111,10 @@ export const NotificationPermissionPrompt = ({ onDismiss }: NotificationPermissi
             <Button
               size="sm"
               onClick={handleAccept}
-              disabled={webNotifications.isLoading}
+              disabled={isLoading}
               className="flex-1"
             >
-              {webNotifications.isLoading ? 'Activation...' : 'Activer'}
+              {isLoading ? 'Activation...' : 'Activer'}
             </Button>
             <Button
               size="sm"

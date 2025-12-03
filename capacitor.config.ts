@@ -47,6 +47,21 @@ const config: CapacitorConfig = {
     PushNotifications: {
       presentationOptions: ["badge", "sound", "alert"]
     }
+  },
+  ios: {
+    // iOS specific configuration
+    contentInset: 'automatic',
+    allowsLinkPreview: true,
+    scrollEnabled: true,
+    // Push notification configuration
+    // Note: APNs requires proper certificates and provisioning profiles
+    // configured in Xcode and Apple Developer Portal
+  },
+  android: {
+    // Android specific configuration
+    allowMixedContent: true,
+    captureInput: true,
+    webContentsDebuggingEnabled: false
   }
 };
 
