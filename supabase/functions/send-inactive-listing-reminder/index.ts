@@ -144,8 +144,8 @@ const handler = async (req: Request): Promise<Response> => {
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
               <div style="background: linear-gradient(135deg, #704214 0%, #8B5A2B 100%); padding: 40px 30px; text-align: center;">
-                <div style="background-color: white; padding: 20px; border-radius: 15px; display: inline-block;">
-                  <img src="https://ayokamarket.com/ayoka-logo-email.png" alt="AYOKA MARKET" style="max-width: 200px; height: auto;" />
+                <div style="background-color: white; padding: 20px 30px; border-radius: 15px; display: inline-block;">
+                  <h2 style="color: #704214; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">AYOKA MARKET</h2>
                 </div>
               </div>
               

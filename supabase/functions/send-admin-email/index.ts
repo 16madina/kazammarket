@@ -147,11 +147,10 @@ Deno.serve(async (req) => {
             <body>
               <div class="container">
                 <div class="header">
-                  <div style="background-color: white; padding: 20px; border-radius: 15px; display: inline-block;">
-                    <img src="https://ayokamarket.com/ayoka-logo-email.png" alt="AYOKA MARKET" style="max-width: 200px; height: auto;" onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<h2 style=\'color: #704214; margin: 0;\'>AYOKA MARKET</h2>';" />
+                  <div style="background-color: white; padding: 20px 30px; border-radius: 15px; display: inline-block;">
+                    <h2 style="color: #704214; margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 1px;">AYOKA MARKET</h2>
                   </div>
-                  <h1>AYOKA MARKET</h1>
-                  <p style="color: #ffffff; margin: 0; font-size: 14px;">Message de l'équipe AYOKA MARKET</p>
+                  <p style="color: #ffffff; margin: 15px 0 0 0; font-size: 14px;">Message de l'équipe AYOKA MARKET</p>
                 </div>
                 <div class="content">
                   ${message.split('\n').map((line: string) => `<p>${line}</p>`).join('')}
