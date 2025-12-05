@@ -1,7 +1,7 @@
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import ayokaMarketLogo from "@/assets/ayoka-logo.png";
+import ayokaMarketLogo from "@/assets/ayoka-market-final-logo.png";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
@@ -52,13 +52,8 @@ const HeroSection = () => {
           <h1 className="text-2xl md:text-4xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] mb-0 mx-[6px] my-0 px-0 py-0 font-serif font-extrabold">
             Bienvenue sur
           </h1>
-          <div className="bg-gradient-to-b from-black/15 via-black/10 to-transparent dark:from-white/15 dark:via-white/8 dark:to-transparent px-4 py-3 rounded-xl backdrop-blur-sm">
-            <div className="flex flex-col items-start">
-              <img src={ayokaMarketLogo} alt="AYOKA" className="h-32 md:h-56 w-auto object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)] dark:drop-shadow-[0_0_12px_rgba(255,255,255,0.9)]" />
-              <p className="text-4xl md:text-6xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] -mt-6 md:-mt-10 ml-[23%] pl-[47px] pr-[14px] pb-0 pt-0 mb-0 mr-[47px] px-[42px] font-serif mx-[16px] my-0 py-[4px] text-right">
-                Market
-              </p>
-            </div>
+          <div className="flex flex-col items-center">
+            <img src={ayokaMarketLogo} alt="AYOKA Market" className="h-32 md:h-56 w-auto object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]" />
           </div>
         </div>
         <p className="text-lg md:text-xl text-white font-semibold mb-8 max-w-2xl animate-fade-in bg-warm-earth/50 backdrop-blur-sm px-6 py-3 rounded-lg drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]" style={{
