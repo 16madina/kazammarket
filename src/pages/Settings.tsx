@@ -21,6 +21,7 @@ import {
   Bell,
   FileText,
   Shield,
+  ShieldCheck,
   HelpCircle,
   Globe,
   DollarSign,
@@ -528,6 +529,14 @@ const Settings = () => {
               onClick={() => navigate("/settings/community-guidelines")}
               iconColor="bg-blue-500/10"
               iconTextColor="text-blue-600"
+            />
+            <Separator />
+            <SettingItem 
+              icon={ShieldCheck} 
+              label="Sécurité et protection" 
+              onClick={() => navigate("/settings/child-safety")}
+              iconColor="bg-emerald-500/10"
+              iconTextColor="text-emerald-600"
             />
             <Separator />
             <SettingItem 
