@@ -73,29 +73,9 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
           </div>
 
           {images.length > 1 && (
-            <>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-10"
-                onClick={scrollPrev}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10"
-                onClick={scrollNext}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-
-              {/* Counter */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1.5 rounded-full text-sm font-medium z-10">
-                {currentIndex + 1} / {images.length}
-              </div>
-            </>
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1.5 rounded-full text-sm font-medium z-10">
+              {currentIndex + 1} / {images.length}
+            </div>
           )}
         </div>
 
@@ -121,7 +101,7 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
                 <img
                   src={image}
                   alt={`${title} - Miniature ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                 />
                 {/* "Voir plus" overlay on 4th thumbnail if more images */}
                 {index === maxThumbnails - 1 && remainingImages > 0 && (
