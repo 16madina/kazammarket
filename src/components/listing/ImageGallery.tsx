@@ -44,9 +44,12 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
     );
   }
 
+  const maxThumbnails = 4;
+  const remainingImages = images.length - maxThumbnails;
+
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Swipeable carousel */}
         <div className="relative">
           <div className="overflow-hidden rounded-lg" ref={emblaRef}>
@@ -92,24 +95,46 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white px-3 py-1.5 rounded-full text-sm font-medium z-10">
                 {currentIndex + 1} / {images.length}
               </div>
-
-              {/* Dots indicator */}
-              <div className="absolute bottom-16 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                {images.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => emblaApi?.scrollTo(index)}
-                    className={`h-2 rounded-full transition-all ${
-                      index === currentIndex 
-                        ? "w-6 bg-white" 
-                        : "w-2 bg-white/50"
-                    }`}
-                  />
-                ))}
-              </div>
             </>
           )}
         </div>
+
+        {/* Thumbnails grid */}
+        {images.length > 1 && (
+          <div className="grid grid-cols-4 gap-2">
+            {images.slice(0, maxThumbnails).map((image, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  if (index === maxThumbnails - 1 && remainingImages > 0) {
+                    setIsOpen(true);
+                  } else {
+                    emblaApi?.scrollTo(index);
+                  }
+                }}
+                className={`relative aspect-square rounded-lg overflow-hidden transition-all ${
+                  index === currentIndex 
+                    ? "ring-2 ring-primary ring-offset-2" 
+                    : "opacity-70 hover:opacity-100"
+                }`}
+              >
+                <img
+                  src={image}
+                  alt={`${title} - Miniature ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {/* "Voir plus" overlay on 4th thumbnail if more images */}
+                {index === maxThumbnails - 1 && remainingImages > 0 && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <span className="text-white text-xs font-medium text-center px-1">
+                      +{remainingImages + 1}
+                    </span>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Full screen dialog */}
