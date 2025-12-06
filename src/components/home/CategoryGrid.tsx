@@ -39,14 +39,16 @@ const CategoryGrid = () => {
             const IconComponent = Icons[category.icon as keyof typeof Icons] as any;
             return (
               <Link key={category.id} to={`/categories/${category.slug}`}>
-                <Card className="p-3 hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group animate-fade-in">
-                  <div className="flex flex-col items-center text-center gap-2">
+                <Card className="p-3 hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group animate-fade-in h-full">
+                  <div className="flex flex-col items-center text-center gap-2 h-full">
                     {IconComponent && (
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 group-hover:scale-110 flex-shrink-0">
                         <IconComponent className="h-5 w-5 text-primary" />
                       </div>
                     )}
-                    <span className="font-medium text-xs line-clamp-2">{category.name}</span>
+                    <span className="font-medium text-xs line-clamp-1 leading-tight">
+                      {category.slug === 'gratuit' ? 'Gratuit' : category.name}
+                    </span>
                   </div>
                 </Card>
               </Link>
