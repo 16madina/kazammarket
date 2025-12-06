@@ -60,7 +60,7 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
                   className="flex-[0_0_100%] min-w-0 overflow-hidden"
                   onClick={() => setIsOpen(true)}
                 >
-                  <div className="aspect-[4/3] relative cursor-pointer group">
+                  <div className="aspect-[3/4] relative cursor-pointer group">
                     <img
                       src={image}
                       alt={`${title} - Image ${index + 1}`}
@@ -101,7 +101,7 @@ export const ImageGallery = ({ images, title }: ImageGalleryProps) => {
                     emblaApi?.scrollTo(index);
                   }
                 }}
-                className={`relative aspect-square rounded-lg overflow-hidden transition-all ${
+                className={`relative aspect-[4/5] rounded-lg overflow-hidden transition-all ${
                   index === currentIndex 
                     ? "ring-2 ring-primary ring-offset-2" 
                     : "opacity-70 hover:opacity-100"
