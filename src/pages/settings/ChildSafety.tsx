@@ -1,8 +1,12 @@
+import { useEffect } from "react";
 import { ArrowLeft, Shield, AlertTriangle, Ban, Eye, MessageSquare, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ChildSafety = () => {
+  useEffect(() => {
+    document.title = "Sécurité et Protection - AYOKA MARKET";
+  }, []);
   const navigate = useNavigate();
 
   const safetyMeasures = [

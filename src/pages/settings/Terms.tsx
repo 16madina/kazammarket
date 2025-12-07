@@ -1,9 +1,13 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Calendar } from "lucide-react";
 
 const Terms = () => {
+  useEffect(() => {
+    document.title = "Conditions générales - AYOKA MARKET";
+  }, []);
   const navigate = useNavigate();
 
   const sections = [

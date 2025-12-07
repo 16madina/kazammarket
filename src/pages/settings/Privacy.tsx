@@ -1,9 +1,13 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Calendar, Shield } from "lucide-react";
 
 const Privacy = () => {
+  useEffect(() => {
+    document.title = "Politique de confidentialité - AYOKA MARKET";
+  }, []);
   const navigate = useNavigate();
 
   const sections = [

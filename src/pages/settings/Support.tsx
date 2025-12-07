@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,9 @@ import { ArrowLeft, MessageCircle, Mail, Phone, Paperclip, Clock, Users } from "
 import { toast } from "sonner";
 
 const Support = () => {
+  useEffect(() => {
+    document.title = "Contacter le support - AYOKA MARKET";
+  }, []);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: "",

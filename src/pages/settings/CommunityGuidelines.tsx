@@ -1,9 +1,13 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, AlertTriangle, Shield, Users, MessageSquare, Ban } from "lucide-react";
 
 const CommunityGuidelines = () => {
+  useEffect(() => {
+    document.title = "Règles de la communauté - AYOKA MARKET";
+  }, []);
   const navigate = useNavigate();
 
   return (
