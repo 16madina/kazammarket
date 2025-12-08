@@ -52,8 +52,8 @@ const config: CapacitorConfig = {
     },
     Keyboard: {
       resize: 'body',
-      style: 'light',
-      resizeOnFullScreen: true
+      style: 'dark',
+      resizeOnFullScreen: true,
     }
   },
   ios: {

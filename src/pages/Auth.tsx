@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { TermsConditions } from "@/components/auth/TermsConditions";
 import { allCountries } from "@/data/westAfricaData";
 import { Eye, EyeOff, ArrowLeft, MapPin } from "lucide-react";
 import ayokaLogo from "@/assets/ayoka-logo.png";
+import { Capacitor } from '@capacitor/core';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -263,8 +264,25 @@ const Auth = () => {
     if (phoneRef.current) phoneRef.current.value = "";
   };
 
+  // Dismiss keyboard when tapping outside inputs on iOS
+  const handleContainerClick = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.closest('button');
+    
+    if (!isInput && Capacitor.isNativePlatform()) {
+      // Blur any focused input to dismiss keyboard
+      const activeElement = document.activeElement as HTMLElement;
+      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+        activeElement.blur();
+      }
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 bg-muted/30"
+      onClick={handleContainerClick}
+    >
       <div className="w-full max-w-2xl">
         <Button
           variant="ghost"
