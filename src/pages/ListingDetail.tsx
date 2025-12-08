@@ -345,7 +345,11 @@ const ListingDetail = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             <SellerProfile userId={listing.user_id} />
-            <LocationMap location={listing.location} />
+            <LocationMap 
+              location={listing.location} 
+              latitude={listing.latitude} 
+              longitude={listing.longitude} 
+            />
           </div>
         </div>
       </div>

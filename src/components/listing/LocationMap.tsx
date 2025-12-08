@@ -3,16 +3,20 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Navigation } from 'lucide-react';
+import { geocodeLocation } from '@/utils/distanceCalculation';
 
 interface LocationMapProps {
   location: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
-const LocationMap = ({ location }: LocationMapProps) => {
+const LocationMap = ({ location, latitude, longitude }: LocationMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
+  const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
   const mapboxToken = 'pk.eyJ1IjoibWFkaW5hZGlhbGxvIiwiYSI6ImNtaTk0eGZ0dDBqb2cya3B6MnFhMHJmODAifQ.zBKszfc8fyp-K-o6lJpymg';
 
   // Get user's location
@@ -28,6 +32,28 @@ const LocationMap = ({ location }: LocationMapProps) => {
       );
     }
   }, []);
+
+  // Get listing coordinates - prioritize stored GPS, fallback to geocoding
+  useEffect(() => {
+    const getCoordinates = async () => {
+      // If we have stored GPS coordinates, use them
+      if (latitude && longitude) {
+        setCoordinates([longitude, latitude]);
+        return;
+      }
+
+      // Otherwise, geocode the location string
+      const geocoded = await geocodeLocation(location);
+      if (geocoded) {
+        setCoordinates([geocoded.lng, geocoded.lat]);
+      } else {
+        // Default fallback to Abidjan center
+        setCoordinates([-4.0, 5.3]);
+      }
+    };
+
+    getCoordinates();
+  }, [location, latitude, longitude]);
 
   // Calculate distance
   const calculateDistance = (
@@ -48,36 +74,11 @@ const LocationMap = ({ location }: LocationMapProps) => {
     return R * c;
   };
 
+  // Initialize map when coordinates are ready
   useEffect(() => {
-    if (!mapContainer.current || !mapboxToken) {
-      console.error('Mapbox token is not configured');
+    if (!mapContainer.current || !mapboxToken || !coordinates) {
       return;
     }
-
-    // Geocode location to coordinates (simple approach for West African cities)
-    const getCoordinates = (loc: string): [number, number] => {
-      const locationMap: Record<string, [number, number]> = {
-        'abidjan': [-4.0, 5.3],
-        'dakar': [-17.4, 14.7],
-        'bamako': [-8.0, 12.6],
-        'conakry': [-13.7, 9.5],
-        'ouagadougou': [-1.5, 12.4],
-        'lomé': [1.2, 6.1],
-        'cotonou': [2.4, 6.4],
-        'niamey': [2.1, 13.5],
-      };
-
-      const normalizedLoc = loc.toLowerCase();
-      for (const [city, coords] of Object.entries(locationMap)) {
-        if (normalizedLoc.includes(city)) {
-          return coords;
-        }
-      }
-      // Default to Abidjan
-      return [-4.0, 5.3];
-    };
-
-    const coordinates = getCoordinates(location);
 
     // Calculate distance if user location is available
     if (userLocation) {
@@ -92,7 +93,7 @@ const LocationMap = ({ location }: LocationMapProps) => {
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
       center: coordinates,
-      zoom: 12,
+      zoom: 14,
     });
 
     // Add marker
@@ -107,7 +108,7 @@ const LocationMap = ({ location }: LocationMapProps) => {
     return () => {
       map.current?.remove();
     };
-  }, [location, userLocation]);
+  }, [coordinates, userLocation]);
 
   return (
     <Card>
