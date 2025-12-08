@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin, Navigation, Clock, Car, Loader2 } from 'lucide-react';
 import { geocodeLocation } from '@/utils/distanceCalculation';
 
 interface LocationMapProps {
@@ -11,12 +11,18 @@ interface LocationMapProps {
   longitude?: number | null;
 }
 
+interface TravelInfo {
+  distance: number; // in km
+  duration: number; // in minutes
+}
+
 const LocationMap = ({ location, latitude, longitude }: LocationMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [distance, setDistance] = useState<number | null>(null);
   const [coordinates, setCoordinates] = useState<[number, number] | null>(null);
+  const [travelInfo, setTravelInfo] = useState<TravelInfo | null>(null);
+  const [isLoadingTravel, setIsLoadingTravel] = useState(false);
   const mapboxToken = 'pk.eyJ1IjoibWFkaW5hZGlhbGxvIiwiYSI6ImNtaTk0eGZ0dDBqb2cya3B6MnFhMHJmODAifQ.zBKszfc8fyp-K-o6lJpymg';
 
   // Get user's location
@@ -55,35 +61,39 @@ const LocationMap = ({ location, latitude, longitude }: LocationMapProps) => {
     getCoordinates();
   }, [location, latitude, longitude]);
 
-  // Calculate distance
-  const calculateDistance = (
-    coord1: [number, number],
-    coord2: [number, number]
-  ): number => {
-    const R = 6371; // Earth's radius in km
-    const lat1 = (coord1[1] * Math.PI) / 180;
-    const lat2 = (coord2[1] * Math.PI) / 180;
-    const dLat = ((coord2[1] - coord1[1]) * Math.PI) / 180;
-    const dLon = ((coord2[0] - coord1[0]) * Math.PI) / 180;
+  // Fetch travel info from Mapbox Directions API
+  useEffect(() => {
+    const fetchTravelInfo = async () => {
+      if (!userLocation || !coordinates) return;
 
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      setIsLoadingTravel(true);
+      try {
+        const response = await fetch(
+          `https://api.mapbox.com/directions/v5/mapbox/driving/${userLocation[0]},${userLocation[1]};${coordinates[0]},${coordinates[1]}?access_token=${mapboxToken}&overview=false`
+        );
+        const data = await response.json();
 
-    return R * c;
-  };
+        if (data.routes && data.routes.length > 0) {
+          const route = data.routes[0];
+          setTravelInfo({
+            distance: route.distance / 1000, // Convert meters to km
+            duration: route.duration / 60, // Convert seconds to minutes
+          });
+        }
+      } catch (error) {
+        console.log('Could not fetch travel info:', error);
+      } finally {
+        setIsLoadingTravel(false);
+      }
+    };
+
+    fetchTravelInfo();
+  }, [userLocation, coordinates]);
 
   // Initialize map when coordinates are ready
   useEffect(() => {
     if (!mapContainer.current || !mapboxToken || !coordinates) {
       return;
-    }
-
-    // Calculate distance if user location is available
-    if (userLocation) {
-      const dist = calculateDistance(userLocation, coordinates);
-      setDistance(dist);
     }
 
     // Initialize map with token
@@ -108,25 +118,54 @@ const LocationMap = ({ location, latitude, longitude }: LocationMapProps) => {
     return () => {
       map.current?.remove();
     };
-  }, [coordinates, userLocation]);
+  }, [coordinates]);
+
+  const formatDuration = (minutes: number): string => {
+    if (minutes < 60) {
+      return `${Math.round(minutes)} min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+    return mins > 0 ? `${hours}h ${mins}min` : `${hours}h`;
+  };
+
+  const formatDistance = (km: number): string => {
+    if (km < 1) {
+      return `${Math.round(km * 1000)} m`;
+    }
+    return `${km.toFixed(1)} km`;
+  };
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-lg">
           <div className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
             Localisation
           </div>
-          {distance !== null && (
-            <div className="flex items-center gap-1 text-sm font-normal text-primary">
-              <Navigation className="h-4 w-4" />
-              <span>À {distance < 1 ? `${Math.round(distance * 1000)}m` : `${distance.toFixed(1)}km`} de vous</span>
-            </div>
-          )}
         </CardTitle>
+        {/* Travel info display */}
+        {isLoadingTravel && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Calcul du trajet...</span>
+          </div>
+        )}
+        {travelInfo && !isLoadingTravel && (
+          <div className="flex flex-wrap items-center gap-4 text-sm mt-2">
+            <div className="flex items-center gap-1.5 text-primary font-medium">
+              <Car className="h-4 w-4" />
+              <span>{formatDistance(travelInfo.distance)}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              <span>~{formatDuration(travelInfo.duration)}</span>
+            </div>
+          </div>
+        )}
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-4 pt-2">
         <div ref={mapContainer} className="h-64 w-full rounded-lg" />
       </CardContent>
     </Card>
