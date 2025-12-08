@@ -63,7 +63,16 @@ const Header = ({
       <div className="container flex flex-col sm:flex-row sm:h-16 items-center justify-between px-4 py-2 sm:py-0 gap-1 sm:gap-0">
         {/* Top row: Logo + Actions */}
         <div className="flex items-center justify-between w-full sm:w-auto">
-          <img src={ayokaLogo} alt="AYOKA MARKET" className="h-10 sm:h-14 w-auto cursor-pointer transition-all duration-300 hover:scale-105 object-contain dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" onClick={() => navigate("/")} />
+          <div className="flex flex-col">
+            <img src={ayokaLogo} alt="AYOKA MARKET" className="h-10 sm:h-14 w-auto cursor-pointer transition-all duration-300 hover:scale-105 object-contain dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" onClick={() => navigate("/")} />
+            {/* Location directly below logo on mobile */}
+            {(userLocation || isLoadingLocation) && (
+              <div className="flex sm:hidden items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
+                <MapPin className="h-2.5 w-2.5" />
+                {isLoadingLocation ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <span className="truncate max-w-[150px]">{userLocation}</span>}
+              </div>
+            )}
+          </div>
           
           {/* Actions on mobile - shown inline with logo */}
           <nav className="flex sm:hidden items-center gap-2">
@@ -83,12 +92,6 @@ const Header = ({
               </Button>}
           </nav>
         </div>
-        
-        {/* Location below logo on mobile */}
-        {(userLocation || isLoadingLocation) && <div className="flex items-center gap-1 text-xs text-muted-foreground sm:hidden">
-            <MapPin className="h-3 w-3" />
-            {isLoadingLocation ? <Loader2 className="h-3 w-3 animate-spin" /> : <span className="truncate max-w-[200px]">{userLocation}</span>}
-          </div>}
 
         {/* Desktop layout */}
         <div className="hidden sm:flex items-center gap-3">
