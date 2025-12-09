@@ -15,6 +15,7 @@ import { allCountries } from "@/data/westAfricaData";
 import { Eye, EyeOff, ArrowLeft, MapPin } from "lucide-react";
 import ayokaLogo from "@/assets/ayoka-logo.png";
 import { Capacitor } from '@capacitor/core';
+import { Keyboard } from '@capacitor/keyboard';
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -264,19 +265,28 @@ const Auth = () => {
     if (phoneRef.current) phoneRef.current.value = "";
   };
 
-  // Dismiss keyboard when tapping outside inputs on iOS
-  const handleContainerClick = useCallback((e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.closest('button');
-    
-    if (!isInput && Capacitor.isNativePlatform()) {
-      // Blur any focused input to dismiss keyboard
-      const activeElement = document.activeElement as HTMLElement;
-      if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
-        activeElement.blur();
+  // Hide keyboard programmatically
+  const hideKeyboard = useCallback(async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        await Keyboard.hide();
+      } catch (e) {
+        // Fallback to blur
+        const activeElement = document.activeElement as HTMLElement;
+        if (activeElement) activeElement.blur();
       }
     }
   }, []);
+
+  // Dismiss keyboard when tapping outside inputs on iOS
+  const handleContainerClick = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.closest('button') || target.closest('[role="combobox"]');
+    
+    if (!isInput) {
+      hideKeyboard();
+    }
+  }, [hideKeyboard]);
 
   return (
     <div 
