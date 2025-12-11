@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search, Star } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ayokaMarketLogo from "@/assets/ayoka-market-final-logo.png";
@@ -6,6 +6,8 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useHeroCarousel } from "@/hooks/useHeroCarousel";
+import { useAppRating } from "@/hooks/useAppRating";
+
 const HeroSection = () => {
   const {
     t
@@ -15,6 +17,7 @@ const HeroSection = () => {
   const {
     currentImage
   } = useHeroCarousel();
+  const { openAppStore } = useAppRating();
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -79,6 +82,17 @@ const HeroSection = () => {
             {t('hero.search_button')}
           </Button>
         </div>
+
+        {/* Bouton Noter l'application */}
+        <Button 
+          variant="outline" 
+          className="mt-4 bg-white/90 hover:bg-white text-foreground border-none animate-fade-in"
+          style={{ animationDelay: "0.6s" }}
+          onClick={openAppStore}
+        >
+          <Star className="h-4 w-4 mr-2 text-yellow-500 fill-yellow-500" />
+          Noter l'application
+        </Button>
       </div>
     </div>;
 };

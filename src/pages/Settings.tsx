@@ -54,6 +54,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useBiometricAuth } from "@/hooks/useBiometricAuth";
+import { useAppRating } from "@/hooks/useAppRating";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -80,6 +81,8 @@ const Settings = () => {
     disableBiometric,
     getBiometryName 
   } = useBiometricAuth();
+  
+  const { openAppStore } = useAppRating();
 
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile", userId],
@@ -562,6 +565,17 @@ const Settings = () => {
               onClick={handleShare}
               iconColor="bg-cyan-500/10"
               iconTextColor="text-cyan-600"
+            />
+            <Separator />
+            <SettingItem 
+              icon={Star} 
+              label="Noter l'application" 
+              onClick={() => {
+                haptics.light();
+                openAppStore();
+              }}
+              iconColor="bg-yellow-500/10"
+              iconTextColor="text-yellow-600"
             />
           </CardContent>
         </SettingSection>
