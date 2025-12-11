@@ -8,6 +8,7 @@ import SplashScreen from "./components/SplashScreen";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { usePushNotifications } from "./hooks/usePushNotifications";
 import { useSplashPreference } from "./hooks/useSplashPreference";
+import { useAppRatingPrompt } from "./hooks/useAppRatingPrompt";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Categories from "./pages/Categories";
@@ -46,6 +47,7 @@ import EmailVerified from "./pages/EmailVerified";
 import MapView from "./pages/MapView";
 import AdminNotifications from "./pages/AdminNotifications";
 import { NotificationPermissionPrompt } from "./components/notifications/NotificationPermissionPrompt";
+import { AppRatingPrompt } from "./components/AppRatingPrompt";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +61,9 @@ const App = () => {
 
   // Initialiser les notifications push
   usePushNotifications();
+  
+  // Système de demande d'avis
+  const { showPrompt, setShowPrompt, markAsRated, dismissPrompt, dismissPermanently } = useAppRatingPrompt();
 
   const handleSplashFinish = () => {
     // Mark as seen in localStorage only if it was the full version
@@ -126,6 +131,13 @@ const App = () => {
           <Route path="*" element={<NotFound />} />
             </Routes>
             <NotificationPermissionPrompt />
+            <AppRatingPrompt
+              open={showPrompt}
+              onOpenChange={setShowPrompt}
+              onRated={markAsRated}
+              onDismiss={dismissPrompt}
+              onDismissPermanently={dismissPermanently}
+            />
           </div>
         </BrowserRouter>
       </TooltipProvider>

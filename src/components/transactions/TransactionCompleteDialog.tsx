@@ -66,6 +66,11 @@ export const TransactionCompleteDialog = ({
       setTimeout(() => {
         setShowReviewDialog(true);
       }, 300);
+
+      // Trigger app rating prompt
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('ayoka-transaction-complete'));
+      }, 2000);
       
       onSuccess?.();
     } catch (error: any) {
