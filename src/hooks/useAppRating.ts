@@ -4,9 +4,9 @@ export const useAppRating = () => {
   const openAppStore = () => {
     const platform = Capacitor.getPlatform();
     
-    // App IDs - à mettre à jour avec les vrais IDs une fois publiés
+    // App IDs
     const playStoreUrl = 'https://play.google.com/store/apps/details?id=app.lovable.fdde6a57c0ea45b0bd6d4e42d3d22471';
-    const appStoreUrl = 'https://apps.apple.com/app/ayoka-market/id6740043498'; // Remplacer par le vrai ID App Store
+    const appStoreUrl = 'https://apps.apple.com/app/ayoka/id6756237345';
     
     let url: string;
     
