@@ -174,8 +174,8 @@ export const SystemNotifications = () => {
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md">
-        <SheetHeader>
+      <SheetContent className="w-full sm:max-w-md z-[100] pt-safe">
+        <SheetHeader className="mt-4">
           <SheetTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
             Messages Admin AYOKA MARKET
