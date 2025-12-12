@@ -1311,8 +1311,6 @@ const Admin = () => {
         </Tabs>
       </div>
       <BottomNav />
-      <InactiveListingsReminder />
-      <AdBannerManagement />
     </div>
   );
 };
