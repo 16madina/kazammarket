@@ -130,19 +130,85 @@ const Auth = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
+  // Fonction de validation email
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // Fonction pour traduire les erreurs Supabase
+  const getErrorMessage = (error: any): string => {
+    const errorMessage = error?.message?.toLowerCase() || "";
+    
+    if (errorMessage.includes("invalid login credentials")) {
+      return "Email ou mot de passe incorrect. Vérifiez vos identifiants.";
+    }
+    if (errorMessage.includes("email not confirmed")) {
+      return "Votre email n'a pas encore été confirmé. Vérifiez votre boîte de réception.";
+    }
+    if (errorMessage.includes("user already registered")) {
+      return "Un compte existe déjà avec cet email. Essayez de vous connecter.";
+    }
+    if (errorMessage.includes("password should be at least")) {
+      return "Le mot de passe doit contenir au moins 6 caractères.";
+    }
+    if (errorMessage.includes("email rate limit exceeded")) {
+      return "Trop de tentatives. Veuillez réessayer dans quelques minutes.";
+    }
+    if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
+      return "Erreur de connexion. Vérifiez votre connexion internet.";
+    }
+    if (errorMessage.includes("invalid email")) {
+      return "L'adresse email saisie n'est pas valide.";
+    }
+    
+    return error?.message || "Une erreur inattendue s'est produite. Veuillez réessayer.";
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     // Get values from refs
-    const email = emailRef.current?.value || "";
+    const email = emailRef.current?.value?.trim() || "";
     const password = passwordRef.current?.value || "";
     const confirmPassword = confirmPasswordRef.current?.value || "";
-    const firstName = firstNameRef.current?.value || "";
-    const lastName = lastNameRef.current?.value || "";
-    const phone = phoneRef.current?.value || "";
+    const firstName = firstNameRef.current?.value?.trim() || "";
+    const lastName = lastNameRef.current?.value?.trim() || "";
+    const phone = phoneRef.current?.value?.trim() || "";
 
     try {
+      // Validation email pour login et signup
+      if (!email) {
+        toast({
+          title: "Email requis",
+          description: "Veuillez saisir votre adresse email.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (!isValidEmail(email)) {
+        toast({
+          title: "Email invalide",
+          description: "Veuillez saisir une adresse email valide (ex: exemple@email.com).",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (!password) {
+        toast({
+          title: "Mot de passe requis",
+          description: "Veuillez saisir votre mot de passe.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
       if (isLogin) {
         // Login
         const { error } = await supabase.auth.signInWithPassword({
@@ -158,31 +224,96 @@ const Auth = () => {
         });
         navigate("/");
       } else {
-        // Sign up validation
-        if (password !== confirmPassword) {
+        // Sign up validation - Prénom
+        if (!firstName) {
           toast({
-            title: "Erreur",
-            description: "Les mots de passe ne correspondent pas",
+            title: "Prénom requis",
+            description: "Veuillez saisir votre prénom.",
             variant: "destructive",
           });
           setIsLoading(false);
           return;
         }
 
+        if (firstName.length < 2) {
+          toast({
+            title: "Prénom trop court",
+            description: "Le prénom doit contenir au moins 2 caractères.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Validation - Nom
+        if (!lastName) {
+          toast({
+            title: "Nom requis",
+            description: "Veuillez saisir votre nom de famille.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (lastName.length < 2) {
+          toast({
+            title: "Nom trop court",
+            description: "Le nom doit contenir au moins 2 caractères.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Validation - Pays
+        if (!country) {
+          toast({
+            title: "Pays requis",
+            description: "Veuillez sélectionner votre pays.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Validation - Mot de passe
         if (password.length < 6) {
           toast({
-            title: "Erreur",
-            description: "Le mot de passe doit contenir au moins 6 caractères",
+            title: "Mot de passe trop court",
+            description: "Le mot de passe doit contenir au moins 6 caractères pour votre sécurité.",
             variant: "destructive",
           });
           setIsLoading(false);
           return;
         }
 
+        // Validation - Confirmation mot de passe
+        if (!confirmPassword) {
+          toast({
+            title: "Confirmation requise",
+            description: "Veuillez confirmer votre mot de passe.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          toast({
+            title: "Mots de passe différents",
+            description: "Les deux mots de passe saisis ne correspondent pas. Vérifiez votre saisie.",
+            variant: "destructive",
+          });
+          setIsLoading(false);
+          return;
+        }
+
+        // Validation - Conditions
         if (!acceptTerms) {
           toast({
-            title: "Erreur",
-            description: "Vous devez accepter les politiques de confidentialité et les conditions générales",
+            title: "Conditions non acceptées",
+            description: "Vous devez accepter les politiques de confidentialité et les conditions générales pour créer un compte.",
             variant: "destructive",
           });
           setIsLoading(false);
@@ -212,7 +343,7 @@ const Auth = () => {
         if (error) throw error;
 
         if (!data.user) {
-          throw new Error("Erreur lors de la création du compte");
+          throw new Error("Erreur lors de la création du compte. Veuillez réessayer.");
         }
         
         // Send verification email
@@ -235,7 +366,7 @@ const Auth = () => {
         }
 
         toast({
-          title: "Compte créé !",
+          title: "Compte créé avec succès !",
           description: "Vérifiez votre email pour obtenir votre badge vérifié ✓",
         });
         navigate("/");
@@ -243,8 +374,8 @@ const Auth = () => {
     } catch (error: any) {
       console.error("Auth error:", error);
       toast({
-        title: "Erreur",
-        description: error.message || "Une erreur s'est produite",
+        title: "Erreur d'authentification",
+        description: getErrorMessage(error),
         variant: "destructive",
       });
     } finally {
