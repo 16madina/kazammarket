@@ -42,8 +42,97 @@ const Auth = () => {
   const [city, setCity] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
+  // Field-level validation errors
+  const [fieldErrors, setFieldErrors] = useState<{
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+    country?: string;
+    phone?: string;
+  }>({});
+
   const selectedCountry = allCountries.find((c) => c.code === country);
   const dialCode = selectedCountry?.dialCode || "";
+
+  // Real-time validation functions
+  const validateFirstName = (value: string): string | undefined => {
+    if (!value.trim()) return "Le prénom est requis";
+    if (value.trim().length < 2) return "Le prénom doit contenir au moins 2 caractères";
+    return undefined;
+  };
+
+  const validateLastName = (value: string): string | undefined => {
+    if (!value.trim()) return "Le nom est requis";
+    if (value.trim().length < 2) return "Le nom doit contenir au moins 2 caractères";
+    return undefined;
+  };
+
+  const validateEmail = (value: string): string | undefined => {
+    if (!value.trim()) return "L'email est requis";
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(value.trim())) return "Format email invalide (ex: exemple@email.com)";
+    return undefined;
+  };
+
+  const validatePassword = (value: string): string | undefined => {
+    if (!value) return "Le mot de passe est requis";
+    if (value.length < 6) return "Minimum 6 caractères requis";
+    return undefined;
+  };
+
+  const validateConfirmPassword = (value: string, password: string): string | undefined => {
+    if (!value) return "Veuillez confirmer votre mot de passe";
+    if (value !== password) return "Les mots de passe ne correspondent pas";
+    return undefined;
+  };
+
+  const validatePhone = (value: string): string | undefined => {
+    if (!value.trim()) return "Le téléphone est requis";
+    if (value.trim().length < 6) return "Numéro de téléphone invalide";
+    return undefined;
+  };
+
+  // Handlers for real-time validation
+  const handleFieldBlur = (field: string, value: string) => {
+    let error: string | undefined;
+    
+    switch (field) {
+      case 'firstName':
+        error = !isLogin ? validateFirstName(value) : undefined;
+        break;
+      case 'lastName':
+        error = !isLogin ? validateLastName(value) : undefined;
+        break;
+      case 'email':
+        error = validateEmail(value);
+        break;
+      case 'password':
+        error = validatePassword(value);
+        // Also revalidate confirm password if it has a value
+        if (!isLogin && confirmPasswordRef.current?.value) {
+          const confirmError = validateConfirmPassword(confirmPasswordRef.current.value, value);
+          setFieldErrors(prev => ({ ...prev, confirmPassword: confirmError }));
+        }
+        break;
+      case 'confirmPassword':
+        error = validateConfirmPassword(value, passwordRef.current?.value || "");
+        break;
+      case 'phone':
+        error = !isLogin ? validatePhone(value) : undefined;
+        break;
+    }
+    
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
+
+  // Clear field error when user starts typing
+  const handleFieldChange = (field: string) => {
+    if (fieldErrors[field as keyof typeof fieldErrors]) {
+      setFieldErrors(prev => ({ ...prev, [field]: undefined }));
+    }
+  };
 
   // Fonction pour détecter la localisation manuellement
   const detectLocation = async () => {
@@ -387,6 +476,7 @@ const Auth = () => {
   const handleModeSwitch = () => {
     setIsLogin(!isLogin);
     setAcceptTerms(false);
+    setFieldErrors({});
     // Clear input values
     if (emailRef.current) emailRef.current.value = "";
     if (passwordRef.current) passwordRef.current.value = "";
@@ -464,7 +554,7 @@ const Auth = () => {
                   />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <Label htmlFor="firstName">Prénom *</Label>
                       <Input
                         id="firstName"
@@ -473,10 +563,16 @@ const Auth = () => {
                         placeholder="Jean"
                         required
                         disabled={isLoading}
+                        className={fieldErrors.firstName ? "border-destructive" : ""}
+                        onBlur={(e) => handleFieldBlur('firstName', e.target.value)}
+                        onChange={() => handleFieldChange('firstName')}
                       />
+                      {fieldErrors.firstName && (
+                        <p className="text-xs text-destructive">{fieldErrors.firstName}</p>
+                      )}
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <Label htmlFor="lastName">Nom *</Label>
                       <Input
                         id="lastName"
@@ -485,7 +581,13 @@ const Auth = () => {
                         placeholder="Dupont"
                         required
                         disabled={isLoading}
+                        className={fieldErrors.lastName ? "border-destructive" : ""}
+                        onBlur={(e) => handleFieldBlur('lastName', e.target.value)}
+                        onChange={() => handleFieldChange('lastName')}
                       />
+                      {fieldErrors.lastName && (
+                        <p className="text-xs text-destructive">{fieldErrors.lastName}</p>
+                      )}
                     </div>
                   </div>
 
@@ -552,7 +654,7 @@ const Auth = () => {
                     </div>
                   )}
 
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <Label htmlFor="phone">Téléphone *</Label>
                     <div className="flex gap-2">
                       <Input
@@ -568,18 +670,23 @@ const Auth = () => {
                         placeholder="771234567"
                         required
                         disabled={isLoading || !country}
+                        className={fieldErrors.phone ? "border-destructive" : ""}
                         onInput={(e) => {
-                          // Only allow digits
                           const target = e.target as HTMLInputElement;
                           target.value = target.value.replace(/\D/g, "");
                         }}
+                        onBlur={(e) => handleFieldBlur('phone', e.target.value)}
+                        onChange={() => handleFieldChange('phone')}
                       />
                     </div>
+                    {fieldErrors.phone && (
+                      <p className="text-xs text-destructive">{fieldErrors.phone}</p>
+                    )}
                   </div>
                 </>
               )}
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="email">Email *</Label>
                 <Input
                   id="email"
@@ -592,10 +699,16 @@ const Auth = () => {
                   inputMode="email"
                   autoComplete={isLogin ? "email" : "email"}
                   enterKeyHint="next"
+                  className={fieldErrors.email ? "border-destructive" : ""}
+                  onBlur={(e) => handleFieldBlur('email', e.target.value)}
+                  onChange={() => handleFieldChange('email')}
                 />
+                {fieldErrors.email && (
+                  <p className="text-xs text-destructive">{fieldErrors.email}</p>
+                )}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="password">Mot de passe *</Label>
                 <div className="relative">
                   <Input
@@ -609,6 +722,9 @@ const Auth = () => {
                     minLength={6}
                     autoComplete={isLogin ? "current-password" : "new-password"}
                     enterKeyHint={isLogin ? "done" : "next"}
+                    className={fieldErrors.password ? "border-destructive" : ""}
+                    onBlur={(e) => handleFieldBlur('password', e.target.value)}
+                    onChange={() => handleFieldChange('password')}
                   />
                   <Button
                     type="button"
@@ -626,10 +742,13 @@ const Auth = () => {
                     )}
                   </Button>
                 </div>
+                {fieldErrors.password && (
+                  <p className="text-xs text-destructive">{fieldErrors.password}</p>
+                )}
               </div>
 
               {!isLogin && (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="confirmPassword">Confirmer le mot de passe *</Label>
                   <div className="relative">
                     <Input
@@ -641,6 +760,9 @@ const Auth = () => {
                       required
                       disabled={isLoading}
                       minLength={6}
+                      className={fieldErrors.confirmPassword ? "border-destructive" : ""}
+                      onBlur={(e) => handleFieldBlur('confirmPassword', e.target.value)}
+                      onChange={() => handleFieldChange('confirmPassword')}
                     />
                     <Button
                       type="button"
@@ -658,6 +780,9 @@ const Auth = () => {
                       )}
                     </Button>
                   </div>
+                  {fieldErrors.confirmPassword && (
+                    <p className="text-xs text-destructive">{fieldErrors.confirmPassword}</p>
+                  )}
                 </div>
               )}
 
