@@ -49,6 +49,17 @@ const HeroSection = () => {
     }}>
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-background" />
       </div>
+
+      {/* Bouton Noter l'application - En haut à droite avec animation */}
+      <button 
+        onClick={openAppStore}
+        className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white/90 bg-white/15 backdrop-blur-md border border-white/20 rounded-full shadow-lg transition-all duration-300 hover:bg-white/25 hover:scale-105 hover:shadow-xl animate-fade-in group"
+        style={{ animationDelay: "0.8s" }}
+      >
+        <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400 group-hover:animate-pulse" />
+        <span className="hidden sm:inline">Noter</span>
+        <span className="sm:hidden">★</span>
+      </button>
       
       <div className="relative h-full flex flex-col items-center justify-center px-4 text-center">
         <div className="flex flex-col items-center animate-fade-in mb-4">
@@ -82,17 +93,6 @@ const HeroSection = () => {
             {t('hero.search_button')}
           </Button>
         </div>
-
-        {/* Bouton Noter l'application */}
-        <Button 
-          variant="outline" 
-          className="mt-4 bg-white/90 hover:bg-white text-foreground border-none animate-fade-in"
-          style={{ animationDelay: "0.6s" }}
-          onClick={openAppStore}
-        >
-          <Star className="h-4 w-4 mr-2 text-yellow-500 fill-yellow-500" />
-          Noter l'application
-        </Button>
       </div>
     </div>;
 };
