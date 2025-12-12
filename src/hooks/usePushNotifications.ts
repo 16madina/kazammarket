@@ -18,7 +18,7 @@ export const usePushNotifications = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        console.log('No user logged in, cannot save push token');
+        console.log('❌ No user logged in, cannot save push token');
         return;
       }
 
@@ -28,18 +28,18 @@ export const usePushNotifications = () => {
         .eq('id', user.id);
 
       if (error) {
-        console.error('Error saving push token:', error);
+        console.error('❌ Error saving push token:', error);
       } else {
-        console.log('Push token (FCM) saved successfully to database');
+        console.log('✅ FCM push token saved successfully to database');
       }
     } catch (error) {
-      console.error('Error saving push token:', error);
+      console.error('❌ Error saving push token:', error);
     }
   }, []);
 
   useEffect(() => {
     if (!isNative) {
-      console.log('Push notifications only available on native platforms');
+      console.log('📱 Push notifications only available on native platforms');
       return;
     }
 
@@ -47,10 +47,13 @@ export const usePushNotifications = () => {
 
     const initializePushNotifications = async () => {
       try {
+        console.log('🔄 Loading @capacitor-firebase/messaging module...');
+        
         // Dynamically import FirebaseMessaging
         if (!FirebaseMessaging) {
           const module = await import('@capacitor-firebase/messaging');
           FirebaseMessaging = module.FirebaseMessaging;
+          console.log('✅ FirebaseMessaging module loaded:', typeof FirebaseMessaging);
         }
 
         // Wait for user to be logged in
@@ -60,24 +63,26 @@ export const usePushNotifications = () => {
           return;
         }
 
-        console.log('User logged in, initializing FCM push notifications for:', user.email);
+        console.log('👤 User logged in, initializing FCM push notifications for:', user.email);
 
-        // Check current permission status
+        // Check current permission status using FirebaseMessaging
+        console.log('🔍 Calling FirebaseMessaging.checkPermissions()...');
         const permStatus = await FirebaseMessaging.checkPermissions();
-        console.log('FCM permission status:', permStatus.receive);
+        console.log('📋 FCM permission status:', permStatus.receive);
+        setPermissionStatus(permStatus.receive as 'prompt' | 'granted' | 'denied');
         
         if (permStatus.receive === 'denied') {
-          setPermissionStatus('denied');
+          console.log('❌ Notifications denied by user');
           return;
         }
 
         if (permStatus.receive === 'prompt') {
-          console.log('Requesting FCM notification permissions...');
+          console.log('🔔 Requesting FCM notification permissions...');
           const permission = await FirebaseMessaging.requestPermissions();
-          console.log('FCM permission result:', permission.receive);
+          console.log('📋 FCM permission result:', permission.receive);
+          setPermissionStatus(permission.receive as 'prompt' | 'granted' | 'denied');
           
           if (permission.receive !== 'granted') {
-            setPermissionStatus('denied');
             return;
           }
         }
@@ -140,15 +145,23 @@ export const usePushNotifications = () => {
         });
 
         // Get FCM token (this automatically handles APNs -> FCM conversion on iOS)
-        console.log('Getting FCM token...');
+        console.log('🔑 Getting FCM token via FirebaseMessaging.getToken()...');
         const tokenResult = await FirebaseMessaging.getToken();
-        console.log(`FCM Token obtained (${platform}):`, tokenResult.token);
+        const tokenLength = tokenResult.token?.length || 0;
+        console.log(`✅ FCM Token obtained (${platform}), length: ${tokenLength}`);
+        console.log(`🔑 Token preview: ${tokenResult.token?.substring(0, 30)}...`);
+        
+        // FCM tokens are typically ~163 chars, APNs tokens are 64 chars
+        if (tokenLength < 100) {
+          console.warn('⚠️ Token seems too short - might be APNs token instead of FCM token!');
+        }
+        
         setPushToken(tokenResult.token);
         setIsRegistered(true);
         await saveTokenToDatabase(tokenResult.token);
 
       } catch (error) {
-        console.error('Error initializing FCM push notifications:', error);
+        console.error('❌ Error initializing FCM push notifications:', error);
       }
     };
 

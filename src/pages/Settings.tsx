@@ -370,27 +370,41 @@ const Settings = () => {
                   </p>
                 </div>
               </div>
-              {!notificationsEnabled && (
-                <Button
-                  size="sm"
-                  onClick={async () => {
-                    haptics.light();
-                    try {
+              <Button
+                size="sm"
+                variant={notificationsEnabled ? "outline" : "default"}
+                onClick={async () => {
+                  haptics.light();
+                  try {
+                    if (notificationsEnabled) {
+                      // Désactiver les notifications
                       if (isNative) {
-                        await nativeNotifications.requestPermission();
+                        await nativeNotifications.unregisterNotifications();
+                      }
+                      toast.success("Notifications désactivées");
+                    } else {
+                      // Activer les notifications
+                      if (isNative) {
+                        const granted = await nativeNotifications.requestPermission();
+                        if (granted) {
+                          toast.success("Notifications activées !");
+                        } else {
+                          toast.error("Permission refusée. Activez dans les réglages système.");
+                        }
                       } else {
                         await webNotifications.requestPermission();
+                        toast.success("Notifications activées !");
                       }
-                      toast.success("Notifications activées !");
-                    } catch (error) {
-                      toast.error("Impossible d'activer les notifications");
                     }
-                  }}
-                  disabled={notificationsLoading}
-                >
-                  {notificationsLoading ? 'Activation...' : 'Activer'}
-                </Button>
-              )}
+                  } catch (error) {
+                    console.error('Notification toggle error:', error);
+                    toast.error("Erreur lors du changement de notifications");
+                  }
+                }}
+                disabled={notificationsLoading}
+              >
+                {notificationsLoading ? 'Chargement...' : (notificationsEnabled ? 'Désactiver' : 'Activer')}
+              </Button>
             </div>
             <Separator />
             <SettingItem 
