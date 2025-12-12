@@ -19,45 +19,66 @@ const Header = ({
   const [userLocation, setUserLocation] = useState<string | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchUserLocation = async () => {
       // Check cache first
       const cached = sessionStorage.getItem('user_neighborhood');
       if (cached) {
-        setUserLocation(cached);
-        setIsLoadingLocation(false);
+        if (isMounted) {
+          setUserLocation(cached);
+          setIsLoadingLocation(false);
+        }
         return;
       }
+      
+      // Check if geolocation is available
+      if (!('geolocation' in navigator)) {
+        if (isMounted) setIsLoadingLocation(false);
+        return;
+      }
+      
       try {
         // Get user's GPS position
         const position = await new Promise<GeolocationPosition>((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 300000 // 5 minutes cache
+            enableHighAccuracy: false, // Faster response
+            timeout: 5000, // Reduced timeout
+            maximumAge: 600000 // 10 minutes cache
           });
         });
-        const {
-          latitude,
-          longitude
-        } = position.coords;
+        
+        if (!isMounted) return;
+        
+        const { latitude, longitude } = position.coords;
 
         // Reverse geocode to get neighborhood/commune
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&zoom=16`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&zoom=16`, {
+          headers: { 'User-Agent': 'AyokaMarket/1.0' }
+        });
+        
+        if (!isMounted) return;
+        
         const data = await response.json();
 
         // Extract neighborhood or suburb or city
         const neighborhood = data.address?.neighbourhood || data.address?.suburb || data.address?.quarter || data.address?.hamlet || data.address?.village || data.address?.town || data.address?.city_district || data.address?.city || null;
-        if (neighborhood) {
+        if (neighborhood && isMounted) {
           setUserLocation(neighborhood);
           sessionStorage.setItem('user_neighborhood', neighborhood);
         }
       } catch (error) {
         console.log('Could not get user location:', error);
       } finally {
-        setIsLoadingLocation(false);
+        if (isMounted) setIsLoadingLocation(false);
       }
     };
+    
     fetchUserLocation();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
   return <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-safe">
       <div className="container flex flex-col sm:flex-row sm:h-16 items-center justify-between px-4 py-2 sm:py-0 gap-1 sm:gap-0">
@@ -66,10 +87,15 @@ const Header = ({
           <div className="flex flex-col">
             <img src={ayokaLogo} alt="AYOKA MARKET" className="h-10 sm:h-14 w-auto cursor-pointer transition-all duration-300 hover:scale-105 object-contain dark:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)]" onClick={() => navigate("/")} />
             {/* Location directly below logo on mobile */}
-            {(userLocation || isLoadingLocation) && (
+            {userLocation && !isLoadingLocation && (
               <div className="flex sm:hidden items-center gap-1 text-[10px] text-muted-foreground -mt-1">
                 <MapPin className="h-2.5 w-2.5" />
-                {isLoadingLocation ? <Loader2 className="h-2.5 w-2.5 animate-spin" /> : <span className="truncate max-w-[150px]">{userLocation}</span>}
+                <span className="truncate max-w-[150px]">{userLocation}</span>
+              </div>
+            )}
+            {isLoadingLocation && (
+              <div className="flex sm:hidden items-center gap-1 text-[10px] text-muted-foreground -mt-1">
+                <Loader2 className="h-2.5 w-2.5 animate-spin" />
               </div>
             )}
           </div>
