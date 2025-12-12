@@ -19,66 +19,58 @@ const Header = ({
   const [userLocation, setUserLocation] = useState<string | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(true);
   useEffect(() => {
+    // Check cache first - if found, stop loading immediately
+    const cached = sessionStorage.getItem('user_neighborhood');
+    if (cached) {
+      setUserLocation(cached);
+      setIsLoadingLocation(false);
+      return;
+    }
+    
+    // No cache - try to get location once
+    if (!('geolocation' in navigator)) {
+      setIsLoadingLocation(false);
+      return;
+    }
+    
     let isMounted = true;
     
-    const fetchUserLocation = async () => {
-      // Check cache first
-      const cached = sessionStorage.getItem('user_neighborhood');
-      if (cached) {
-        if (isMounted) {
-          setUserLocation(cached);
-          setIsLoadingLocation(false);
-        }
-        return;
-      }
-      
-      // Check if geolocation is available
-      if (!('geolocation' in navigator)) {
-        if (isMounted) setIsLoadingLocation(false);
-        return;
-      }
-      
-      try {
-        // Get user's GPS position
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: false, // Faster response
-            timeout: 5000, // Reduced timeout
-            maximumAge: 600000 // 10 minutes cache
-          });
-        });
-        
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
         if (!isMounted) return;
         
-        const { latitude, longitude } = position.coords;
-
-        // Reverse geocode to get neighborhood/commune
-        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&zoom=16`, {
-          headers: { 'User-Agent': 'AyokaMarket/1.0' }
-        });
-        
-        if (!isMounted) return;
-        
-        const data = await response.json();
-
-        // Extract neighborhood or suburb or city
-        const neighborhood = data.address?.neighbourhood || data.address?.suburb || data.address?.quarter || data.address?.hamlet || data.address?.village || data.address?.town || data.address?.city_district || data.address?.city || null;
-        if (neighborhood && isMounted) {
-          setUserLocation(neighborhood);
-          sessionStorage.setItem('user_neighborhood', neighborhood);
+        try {
+          const { latitude, longitude } = position.coords;
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&zoom=16`,
+            { headers: { 'User-Agent': 'AyokaMarket/1.0' } }
+          );
+          
+          if (!isMounted) return;
+          
+          const data = await response.json();
+          const neighborhood = data.address?.neighbourhood || data.address?.suburb || 
+            data.address?.quarter || data.address?.hamlet || data.address?.village || 
+            data.address?.town || data.address?.city_district || data.address?.city || null;
+          
+          if (neighborhood && isMounted) {
+            setUserLocation(neighborhood);
+            sessionStorage.setItem('user_neighborhood', neighborhood);
+          }
+        } catch (error) {
+          console.log('Geocoding error:', error);
+        } finally {
+          if (isMounted) setIsLoadingLocation(false);
         }
-      } catch (error) {
-        console.log('Could not get user location:', error);
-      } finally {
+      },
+      () => {
+        // Silent fail on permission denied
         if (isMounted) setIsLoadingLocation(false);
-      }
-    };
+      },
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 600000 }
+    );
     
-    fetchUserLocation();
-    
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
   return <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-safe">
       <div className="container flex flex-col sm:flex-row sm:h-16 items-center justify-between px-4 py-2 sm:py-0 gap-1 sm:gap-0">
