@@ -20,3 +20,18 @@ verify_jwt = false
 
 [functions.send-push-notification]
 verify_jwt = false
+
+[functions.notify-new-message]
+verify_jwt = false
+
+[functions.notify-new-follower]
+verify_jwt = false
+
+[functions.notify-new-review]
+verify_jwt = false
+
+[functions.notify-new-favorite]
+verify_jwt = false
+
+[functions.notify-price-offer]
+verify_jwt = false

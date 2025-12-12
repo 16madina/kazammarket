@@ -21,45 +21,62 @@ serve(async (req) => {
 
   try {
     const payload: WebhookPayload = await req.json();
-    console.log('Received message webhook:', payload);
+    console.log('Received favorite webhook:', payload);
 
-    if (payload.type !== 'INSERT' || payload.table !== 'messages') {
-      return new Response(JSON.stringify({ success: false, reason: 'Not an INSERT on messages' }), {
+    if (payload.type !== 'INSERT' || payload.table !== 'favorites') {
+      return new Response(JSON.stringify({ success: false, reason: 'Not an INSERT on favorites' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
     }
 
-    const message = payload.record;
+    const favorite = payload.record;
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-    // Récupérer les infos du sender
-    const { data: senderProfile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', message.sender_id)
-      .single();
-
-    // Récupérer le titre de l'annonce
+    // Récupérer l'annonce et son propriétaire
     const { data: listing } = await supabase
       .from('listings')
-      .select('title')
-      .eq('id', message.listing_id)
+      .select('title, user_id')
+      .eq('id', favorite.listing_id)
       .single();
 
-    // Récupérer le push token du destinataire
-    const { data: receiverProfile } = await supabase
+    if (!listing) {
+      console.log('Listing not found');
+      return new Response(JSON.stringify({ success: false, reason: 'Listing not found' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    // Ne pas notifier si l'utilisateur like sa propre annonce
+    if (listing.user_id === favorite.user_id) {
+      console.log('User liked their own listing, skipping notification');
+      return new Response(JSON.stringify({ success: false, reason: 'Self like' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    // Récupérer le nom de l'utilisateur qui a liké
+    const { data: likerProfile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', favorite.user_id)
+      .single();
+
+    const likerName = likerProfile?.full_name || 'Un utilisateur';
+
+    // Récupérer le push token du propriétaire de l'annonce
+    const { data: ownerProfile } = await supabase
       .from('profiles')
       .select('push_token')
-      .eq('id', message.receiver_id)
+      .eq('id', listing.user_id)
       .single();
 
-    const senderName = senderProfile?.full_name || 'Un utilisateur';
-    const listingTitle = listing?.title || 'votre annonce';
-
-    if (receiverProfile?.push_token) {
+    if (ownerProfile?.push_token) {
+      // Envoyer la notification push via FCM
       const serviceAccountJson = Deno.env.get('FIREBASE_SERVICE_ACCOUNT');
       if (!serviceAccountJson) {
         console.error('FIREBASE_SERVICE_ACCOUNT not configured');
@@ -82,17 +99,16 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             message: {
-              token: receiverProfile.push_token,
+              token: ownerProfile.push_token,
               notification: {
-                title: '💬 Nouveau message',
-                body: `${senderName}: ${message.content?.substring(0, 100) || 'Nouveau message'}`,
+                title: '❤️ Nouveau like',
+                body: `${likerName} a aimé votre annonce "${listing.title}"`,
               },
               data: {
-                type: 'message',
-                conversation_id: message.conversation_id || '',
-                listing_id: message.listing_id,
-                sender_id: message.sender_id,
-                route: `/messages?conversation=${message.conversation_id}`,
+                type: 'favorite',
+                listing_id: favorite.listing_id,
+                user_id: favorite.user_id,
+                route: `/listing/${favorite.listing_id}`,
               },
             },
           }),
@@ -104,11 +120,7 @@ serve(async (req) => {
 
       if (!fcmResponse.ok) {
         console.error('FCM Error:', JSON.stringify(fcmResult));
-      } else {
-        console.log('Push notification sent successfully to:', message.receiver_id);
       }
-    } else {
-      console.log('Receiver has no push token, skipping push notification');
     }
 
     return new Response(

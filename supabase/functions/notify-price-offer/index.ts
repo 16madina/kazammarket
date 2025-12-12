@@ -21,45 +21,89 @@ serve(async (req) => {
 
   try {
     const payload: WebhookPayload = await req.json();
-    console.log('Received message webhook:', payload);
+    console.log('Received price_offers webhook:', payload);
 
-    if (payload.type !== 'INSERT' || payload.table !== 'messages') {
-      return new Response(JSON.stringify({ success: false, reason: 'Not an INSERT on messages' }), {
+    if (payload.table !== 'price_offers') {
+      return new Response(JSON.stringify({ success: false, reason: 'Not price_offers table' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
       });
     }
 
-    const message = payload.record;
+    const offer = payload.record;
+    const oldOffer = payload.old_record;
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
-    // Récupérer les infos du sender
-    const { data: senderProfile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', message.sender_id)
-      .single();
+    let recipientId: string;
+    let title: string;
+    let body: string;
+    let notificationType: string;
 
-    // Récupérer le titre de l'annonce
+    // Récupérer l'annonce
     const { data: listing } = await supabase
       .from('listings')
       .select('title')
-      .eq('id', message.listing_id)
+      .eq('id', offer.listing_id)
       .single();
 
-    // Récupérer le push token du destinataire
-    const { data: receiverProfile } = await supabase
+    const listingTitle = listing?.title || 'annonce';
+
+    // Récupérer le nom de l'expéditeur
+    const { data: senderProfile } = await supabase
       .from('profiles')
-      .select('push_token')
-      .eq('id', message.receiver_id)
+      .select('full_name')
+      .eq('id', offer.sender_id)
       .single();
 
     const senderName = senderProfile?.full_name || 'Un utilisateur';
-    const listingTitle = listing?.title || 'votre annonce';
 
-    if (receiverProfile?.push_token) {
+    if (payload.type === 'INSERT') {
+      // Nouvelle offre - notifier le vendeur
+      recipientId = offer.receiver_id;
+      title = '💰 Nouvelle offre de prix';
+      body = `${senderName} vous propose ${offer.amount} pour "${listingTitle}"`;
+      notificationType = 'price_offer';
+    } else if (payload.type === 'UPDATE' && oldOffer?.status === 'pending') {
+      // Offre mise à jour (acceptée ou refusée) - notifier l'acheteur
+      recipientId = offer.sender_id;
+      
+      if (offer.status === 'accepted') {
+        title = '✅ Offre acceptée';
+        body = `Votre offre de ${offer.amount} pour "${listingTitle}" a été acceptée!`;
+        notificationType = 'offer_accepted';
+      } else if (offer.status === 'rejected') {
+        title = '❌ Offre refusée';
+        body = `Votre offre de ${offer.amount} pour "${listingTitle}" a été refusée`;
+        notificationType = 'offer_rejected';
+      } else if (offer.status === 'counter') {
+        title = '🔄 Contre-offre reçue';
+        body = `Une contre-offre a été faite pour "${listingTitle}"`;
+        notificationType = 'counter_offer';
+      } else {
+        console.log('Unknown status change, skipping notification');
+        return new Response(JSON.stringify({ success: false, reason: 'Unknown status' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
+    } else {
+      console.log('Not a relevant event, skipping');
+      return new Response(JSON.stringify({ success: false, reason: 'Not relevant event' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    // Récupérer le push token du destinataire
+    const { data: recipientProfile } = await supabase
+      .from('profiles')
+      .select('push_token')
+      .eq('id', recipientId)
+      .single();
+
+    if (recipientProfile?.push_token) {
       const serviceAccountJson = Deno.env.get('FIREBASE_SERVICE_ACCOUNT');
       if (!serviceAccountJson) {
         console.error('FIREBASE_SERVICE_ACCOUNT not configured');
@@ -82,17 +126,14 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             message: {
-              token: receiverProfile.push_token,
-              notification: {
-                title: '💬 Nouveau message',
-                body: `${senderName}: ${message.content?.substring(0, 100) || 'Nouveau message'}`,
-              },
+              token: recipientProfile.push_token,
+              notification: { title, body },
               data: {
-                type: 'message',
-                conversation_id: message.conversation_id || '',
-                listing_id: message.listing_id,
-                sender_id: message.sender_id,
-                route: `/messages?conversation=${message.conversation_id}`,
+                type: notificationType,
+                conversation_id: offer.conversation_id,
+                listing_id: offer.listing_id,
+                offer_id: offer.id,
+                route: `/messages?conversation=${offer.conversation_id}`,
               },
             },
           }),
@@ -104,11 +145,9 @@ serve(async (req) => {
 
       if (!fcmResponse.ok) {
         console.error('FCM Error:', JSON.stringify(fcmResult));
-      } else {
-        console.log('Push notification sent successfully to:', message.receiver_id);
       }
     } else {
-      console.log('Receiver has no push token, skipping push notification');
+      console.log('Recipient has no push token');
     }
 
     return new Response(
