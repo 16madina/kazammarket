@@ -46,6 +46,8 @@ import AdminPerformance from "./pages/AdminPerformance";
 import EmailVerified from "./pages/EmailVerified";
 import MapView from "./pages/MapView";
 import AdminNotifications from "./pages/AdminNotifications";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import { NotificationPermissionPrompt } from "./components/notifications/NotificationPermissionPrompt";
 import { AppRatingPrompt } from "./components/AppRatingPrompt";
 
@@ -124,6 +126,8 @@ const App = () => {
             <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/email-verified" element={<EmailVerified />} />
           <Route path="/search" element={<Search />} />
           <Route path="/categories" element={<Categories />} />

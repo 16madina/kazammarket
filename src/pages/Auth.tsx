@@ -745,6 +745,18 @@ const Auth = () => {
                 {fieldErrors.password && (
                   <p className="text-xs text-destructive">{fieldErrors.password}</p>
                 )}
+                {isLogin && (
+                  <div className="text-right mt-1">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="p-0 h-auto text-sm text-muted-foreground hover:text-primary"
+                      onClick={() => navigate("/forgot-password")}
+                    >
+                      Mot de passe oublié ?
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {!isLogin && (
