@@ -347,6 +347,16 @@ const Publish = () => {
       console.error('Banned words check failed:', error);
     }
 
+    // VALIDATION STRICTE: Catégorie obligatoire
+    if (!formData.category_id || formData.category_id.trim() === '') {
+      toast({
+        title: "Catégorie requise",
+        description: "Vous devez sélectionner une catégorie pour publier votre annonce",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Validate all fields
     validateField("title", formData.title);
     validateField("description", formData.description);
@@ -354,7 +364,14 @@ const Publish = () => {
     validateField("location", formData.location);
     validateField("category_id", formData.category_id);
 
-    if (Object.keys(errors).length > 0) {
+    // Vérifier les erreurs après validation
+    const hasErrors = !formData.title.trim() || 
+                      formData.description.trim().split(/\s+/).filter(w => w.length > 0).length < 5 ||
+                      (!formData.isFree && (isNaN(parseFloat(formData.price)) || parseFloat(formData.price) <= 0)) ||
+                      formData.location.length < 3 ||
+                      !formData.category_id;
+
+    if (hasErrors || Object.keys(errors).length > 0) {
       toast({
         title: "Erreur de validation",
         description: "Veuillez corriger les erreurs dans le formulaire",
