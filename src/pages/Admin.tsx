@@ -570,30 +570,30 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="users" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 h-auto gap-1 p-1">
+            <TabsTrigger value="users" className="flex items-center gap-2 py-2.5">
               <Users className="h-4 w-4" />
-              <span className="hidden md:inline">Utilisateurs</span>
+              <span className="hidden sm:inline text-xs md:text-sm">Utilisateurs</span>
             </TabsTrigger>
-            <TabsTrigger value="listings" className="flex items-center gap-2">
+            <TabsTrigger value="listings" className="flex items-center gap-2 py-2.5">
               <FileText className="h-4 w-4" />
-              <span className="hidden md:inline">Annonces</span>
+              <span className="hidden sm:inline text-xs md:text-sm">Annonces</span>
             </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
+            <TabsTrigger value="reports" className="flex items-center gap-2 py-2.5">
               <ShieldAlert className="h-4 w-4" />
-              <span className="hidden md:inline">Signalements</span>
+              <span className="hidden sm:inline text-xs md:text-sm">Signalements</span>
             </TabsTrigger>
-            <TabsTrigger value="moderation" className="flex items-center gap-2">
+            <TabsTrigger value="moderation" className="flex items-center gap-2 py-2.5">
               <ImageOff className="h-4 w-4" />
-              <span className="hidden md:inline">Modération</span>
+              <span className="hidden sm:inline text-xs md:text-sm">Modération</span>
             </TabsTrigger>
-            <TabsTrigger value="reminders" className="flex items-center gap-2">
+            <TabsTrigger value="reminders" className="flex items-center gap-2 py-2.5">
               <Bell className="h-4 w-4" />
-              <span className="hidden md:inline">Rappels</span>
+              <span className="hidden sm:inline text-xs md:text-sm">Rappels</span>
             </TabsTrigger>
-            <TabsTrigger value="ads" className="flex items-center gap-2">
+            <TabsTrigger value="ads" className="flex items-center gap-2 py-2.5">
               <FileText className="h-4 w-4" />
-              <span className="hidden md:inline">Publicités</span>
+              <span className="hidden sm:inline text-xs md:text-sm">Publicités</span>
             </TabsTrigger>
           </TabsList>
 
