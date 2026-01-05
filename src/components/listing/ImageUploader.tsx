@@ -14,7 +14,7 @@ interface ImageUploaderProps {
 }
 
 // Fonction pour modérer une image via l'edge function
-const moderateImage = async (imageUrl: string): Promise<{ safe: boolean; reason?: string }> => {
+const moderateImage = async (imageUrl: string, userId?: string): Promise<{ safe: boolean; reason?: string }> => {
   try {
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/moderate-image`,
@@ -24,7 +24,7 @@ const moderateImage = async (imageUrl: string): Promise<{ safe: boolean; reason?
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ imageUrl }),
+        body: JSON.stringify({ imageUrl, userId }),
       }
     );
 
@@ -171,7 +171,7 @@ export const ImageUploader = ({ images, onImagesChange, maxImages = 10 }: ImageU
         // Modération des images uploadées
         setModerating(true);
         for (const result of chunkResults) {
-          const moderation = await moderateImage(result.publicUrl);
+          const moderation = await moderateImage(result.publicUrl, user.id);
           
           if (moderation.safe) {
             newImages.push(result.publicUrl);

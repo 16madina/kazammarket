@@ -13,11 +13,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Users, FileText, ShieldAlert, Mail, MessageSquare, Ban, CheckCircle, XCircle, Eye, Phone, Search, Filter, Bell } from "lucide-react";
+import { Users, FileText, ShieldAlert, Mail, MessageSquare, Ban, CheckCircle, XCircle, Eye, Phone, Search, Filter, Bell, ImageOff } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 import BottomNav from "@/components/BottomNav";
 import { InactiveListingsReminder } from "@/components/admin/InactiveListingsReminder";
 import AdBannerManagement from "@/components/admin/AdBannerManagement";
+import { ImageModerationDashboard } from "@/components/admin/ImageModerationDashboard";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -569,26 +570,30 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Utilisateurs
+              <span className="hidden md:inline">Utilisateurs</span>
             </TabsTrigger>
             <TabsTrigger value="listings" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Annonces
+              <span className="hidden md:inline">Annonces</span>
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4" />
-              Signalements
+              <span className="hidden md:inline">Signalements</span>
+            </TabsTrigger>
+            <TabsTrigger value="moderation" className="flex items-center gap-2">
+              <ImageOff className="h-4 w-4" />
+              <span className="hidden md:inline">Modération</span>
             </TabsTrigger>
             <TabsTrigger value="reminders" className="flex items-center gap-2">
               <Bell className="h-4 w-4" />
-              Rappels
+              <span className="hidden md:inline">Rappels</span>
             </TabsTrigger>
             <TabsTrigger value="ads" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
-              Publicités
+              <span className="hidden md:inline">Publicités</span>
             </TabsTrigger>
           </TabsList>
 
@@ -1297,6 +1302,11 @@ const Admin = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Image Moderation Tab */}
+          <TabsContent value="moderation" className="space-y-4">
+            <ImageModerationDashboard />
           </TabsContent>
 
           {/* Reminders Tab */}

@@ -266,6 +266,33 @@ export type Database = {
           },
         ]
       }
+      image_moderation_logs: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string
+          is_safe: boolean
+          reason: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url: string
+          is_safe?: boolean
+          reason?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_safe?: boolean
+          reason?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       listings: {
         Row: {
           category_id: string

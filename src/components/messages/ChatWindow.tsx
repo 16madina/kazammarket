@@ -20,6 +20,7 @@ import { PriceOfferHistory } from "./PriceOfferHistory";
 import { MessageReactions } from "./MessageReactions";
 import { TypingIndicator } from "./TypingIndicator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { usePresence } from "@/hooks/usePresence";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { TransactionCompleteDialog } from "@/components/transactions/TransactionCompleteDialog";
@@ -41,6 +42,7 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
   const [isMuted, setIsMuted] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showTransactionDialog, setShowTransactionDialog] = useState(false);
+  const [showOptionsSheet, setShowOptionsSheet] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const { toast } = useToast();
@@ -528,68 +530,118 @@ export const ChatWindow = ({ conversationId, userId }: ChatWindowProps) => {
             </div>
           </div>
           
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
+          {/* iOS-friendly Sheet instead of DropdownMenu */}
+          <Sheet open={showOptionsSheet} onOpenChange={setShowOptionsSheet}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="min-h-[44px] min-w-[44px]">
                 <MoreVertical className="h-5 w-5" />
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-72">
-              {/* Listing Info */}
-              <div className="px-3 py-2 border-b">
-                <button
-                  onClick={() => navigate(`/listing/${conversation.listing_id}`)}
-                  className="text-left w-full group"
-                >
-                  <p className="text-sm font-medium group-hover:text-primary transition-colors line-clamp-2">
-                    {conversation.listing?.title}
-                  </p>
-                  <p className="text-sm text-primary font-semibold mt-1">
-                    {conversation.listing?.price === 0 ? 'Gratuit' : `${conversation.listing?.price.toLocaleString()} FCFA`}
-                  </p>
-                </button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="z-[100] rounded-t-2xl pb-safe">
+              <SheetHeader className="mt-2">
+                <SheetTitle>Options de conversation</SheetTitle>
+              </SheetHeader>
+              
+              <div className="space-y-4 py-4">
+                {/* Listing Info */}
+                <div className="p-4 bg-muted/50 rounded-lg">
+                  <button
+                    onClick={() => {
+                      setShowOptionsSheet(false);
+                      navigate(`/listing/${conversation.listing_id}`);
+                    }}
+                    className="text-left w-full group"
+                  >
+                    <p className="text-sm font-medium group-hover:text-primary transition-colors line-clamp-2">
+                      {conversation.listing?.title}
+                    </p>
+                    <p className="text-sm text-primary font-semibold mt-1">
+                      {conversation.listing?.price === 0 ? 'Gratuit' : `${conversation.listing?.price.toLocaleString()} FCFA`}
+                    </p>
+                  </button>
+                  
+                  {/* Buttons Row */}
+                  <div className="flex items-center gap-2 mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setShowOptionsSheet(false);
+                        navigate(`/listing/${conversation.listing_id}`);
+                      }}
+                      className="h-9 text-sm px-4 gap-2"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      Voir l'annonce
+                    </Button>
+                    
+                    <PriceOfferHistory conversationId={conversationId} />
+                  </div>
+                </div>
                 
-                {/* Buttons Row */}
-                <div className="flex items-center gap-2 mt-2">
+                {/* Action Buttons */}
+                <div className="space-y-2">
                   <Button
                     variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/listing/${conversation.listing_id}`)}
-                    className="h-7 text-xs px-3 gap-1.5"
+                    className="w-full justify-start h-12 text-base"
+                    onClick={() => {
+                      setShowOptionsSheet(false);
+                      setShowTransactionDialog(true);
+                    }}
                   >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    Voir l'annonce
+                    <CheckCircle2 className="h-5 w-5 mr-3" />
+                    Transaction complétée
                   </Button>
                   
-                  <PriceOfferHistory conversationId={conversationId} />
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-12 text-base"
+                    onClick={() => {
+                      setShowOptionsSheet(false);
+                      toggleMute.mutate();
+                    }}
+                  >
+                    {isMuted ? "🔔" : "🔇"} 
+                    <span className="ml-3">{isMuted ? "Activer" : "Couper"} les notifications</span>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-12 text-base"
+                    onClick={() => {
+                      setShowOptionsSheet(false);
+                      setShowReportDialog(true);
+                    }}
+                  >
+                    <Flag className="h-5 w-5 mr-3" />
+                    Signaler cette conversation
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-12 text-base"
+                    onClick={() => {
+                      setShowOptionsSheet(false);
+                      setShowBlockDialog(true);
+                    }}
+                  >
+                    🚫 <span className="ml-3">Bloquer l'utilisateur</span>
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start h-12 text-base text-destructive hover:text-destructive"
+                    onClick={() => {
+                      setShowOptionsSheet(false);
+                      setShowDeleteDialog(true);
+                    }}
+                  >
+                    🗑️ <span className="ml-3">Supprimer la conversation</span>
+                  </Button>
                 </div>
               </div>
-              
-              <DropdownMenuItem onClick={() => setShowTransactionDialog(true)}>
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Transaction complétée
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => toggleMute.mutate()}>
-                {isMuted ? "🔔 Activer" : "🔇 Couper"} les notifications
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => setShowReportDialog(true)}>
-                <Flag className="h-4 w-4 mr-2" />
-                Signaler cette conversation
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setShowBlockDialog(true)}>
-                🚫 Bloquer l'utilisateur
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={() => setShowDeleteDialog(true)}
-                className="text-destructive focus:text-destructive"
-              >
-                🗑️ Supprimer la conversation
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </SheetContent>
+          </Sheet>
         </div>
       </Card>
 

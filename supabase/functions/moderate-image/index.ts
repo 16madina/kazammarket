@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageUrl } = await req.json();
+    const { imageUrl, userId } = await req.json();
 
     if (!imageUrl) {
       return new Response(
@@ -19,6 +20,11 @@ serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Initialize Supabase client with service role for logging
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -135,11 +141,26 @@ Réponds UNIQUEMENT avec un JSON valide:
       cleanContent = cleanContent.trim();
 
       const result = JSON.parse(cleanContent);
+      const isSafe = result.safe === true;
+      const reason = result.reason || null;
+      
+      // Log moderation result to database
+      try {
+        await supabase.from("image_moderation_logs").insert({
+          image_url: imageUrl,
+          user_id: userId || null,
+          is_safe: isSafe,
+          reason: reason,
+        });
+        console.log("Moderation log saved:", isSafe ? "safe" : "unsafe");
+      } catch (logError) {
+        console.error("Failed to save moderation log:", logError);
+      }
       
       return new Response(
         JSON.stringify({
-          safe: result.safe === true,
-          reason: result.reason || null
+          safe: isSafe,
+          reason: reason
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
@@ -149,6 +170,18 @@ Réponds UNIQUEMENT avec un JSON valide:
       // Analyse basique du texte en cas d'échec du parsing
       const lowerContent = content.toLowerCase();
       if (lowerContent.includes('"safe": false') || lowerContent.includes('"safe":false')) {
+        // Log rejected image
+        try {
+          await supabase.from("image_moderation_logs").insert({
+            image_url: imageUrl,
+            user_id: userId || null,
+            is_safe: false,
+            reason: "Contenu potentiellement inapproprié détecté",
+          });
+        } catch (logError) {
+          console.error("Failed to save moderation log:", logError);
+        }
+        
         return new Response(
           JSON.stringify({ safe: false, reason: "Contenu potentiellement inapproprié détecté" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
