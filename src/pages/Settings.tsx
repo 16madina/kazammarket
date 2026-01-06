@@ -48,13 +48,15 @@ import {
   CheckCircle,
   Sun,
   Moon,
-  RotateCcw
+  RotateCcw,
+  Loader2
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { NotificationSettings } from "@/components/settings/NotificationSettings";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useBiometricAuth } from "@/hooks/useBiometricAuth";
 import { useAppRating } from "@/hooks/useAppRating";
+import { useStorageInfo } from "@/hooks/useStorageInfo";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -83,6 +85,7 @@ const Settings = () => {
   } = useBiometricAuth();
   
   const { openAppStore } = useAppRating();
+  const { storageInfo, isClearing, clearAllCache } = useStorageInfo();
 
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile", userId],
@@ -475,19 +478,50 @@ const Settings = () => {
             <SettingItem 
               icon={Database} 
               label="Gérer le stockage" 
-              onClick={() => toast.info("Cache: 45 MB")}
+              onClick={() => toast.info(`Cache: ${storageInfo.formattedSize}`)}
               iconColor="bg-teal-500/10"
               iconTextColor="text-teal-600"
-              rightElement={<span className="text-sm text-muted-foreground">45 MB</span>}
+              rightElement={<span className="text-sm text-muted-foreground">{storageInfo.formattedSize}</span>}
             />
             <Separator />
-            <SettingItem 
-              icon={Trash2} 
-              label="Vider le cache" 
-              onClick={() => toast.success("Cache vidé avec succès")}
-              iconColor="bg-red-500/10"
-              iconTextColor="text-red-600"
-            />
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-500/10 text-red-600 p-2 rounded-xl">
+                  <Trash2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <span className="text-sm font-medium">Vider le cache</span>
+                  <p className="text-xs text-muted-foreground">
+                    Supprime les données temporaires
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={async () => {
+                  haptics.medium();
+                  const success = await clearAllCache();
+                  if (success) {
+                    haptics.success();
+                    toast.success("Cache vidé avec succès ! Les données de session sont préservées.");
+                  } else {
+                    haptics.error();
+                    toast.error("Erreur lors du vidage du cache");
+                  }
+                }}
+                disabled={isClearing}
+              >
+                {isClearing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    Vidage...
+                  </>
+                ) : (
+                  "Vider"
+                )}
+              </Button>
+            </div>
           </CardContent>
         </SettingSection>
 
