@@ -11,6 +11,7 @@ import { Rocket, Sparkles, ArrowRight } from "lucide-react";
 import { useReferral, BoostCard } from "@/hooks/useReferral";
 import { useConfetti } from "@/hooks/useConfetti";
 import { useHaptics } from "@/hooks/useHaptics";
+import { useCelebrationSound } from "@/hooks/useCelebrationSound";
 
 interface ApplyBoostDialogProps {
   open: boolean;
@@ -29,6 +30,7 @@ export const ApplyBoostDialog = ({
   const [selectedCard, setSelectedCard] = useState<BoostCard | null>(null);
   const { launchConfetti } = useConfetti();
   const haptics = useHaptics();
+  const { playCelebrationSound } = useCelebrationSound();
 
   const handleApplyBoost = () => {
     if (!selectedCard) return;
@@ -38,6 +40,7 @@ export const ApplyBoostDialog = ({
         onSuccess: () => {
           // Celebration!
           launchConfetti(3000);
+          playCelebrationSound();
           haptics.success();
           
           // Close dialog after a short delay to let user see the celebration
