@@ -85,10 +85,11 @@ const NotificationNavigationHandler = () => {
 const App = () => {
   const { isReturningUser, markFullSplashSeen } = useSplashPreference();
   const [showSplash, setShowSplash] = useState(() => {
-    // Vérifier si le splash a déjà été montré dans cette session
     const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
     return !hasSeenSplash;
   });
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [showContent, setShowContent] = useState(false);
 
   // Initialiser les notifications push
   usePushNotifications();
@@ -102,27 +103,64 @@ const App = () => {
       markFullSplashSeen();
     }
     sessionStorage.setItem('hasSeenSplash', 'true');
-    setShowSplash(false);
+    
+    // Start transition animation
+    setIsTransitioning(true);
+    
+    // Show content with a slight delay for crossfade effect
+    setTimeout(() => {
+      setShowContent(true);
+    }, 100);
+    
+    // Hide splash after transition
+    setTimeout(() => {
+      setShowSplash(false);
+      setIsTransitioning(false);
+    }, 600);
   };
 
-  if (showSplash) {
-    return (
-      <SplashScreen 
-        onFinish={handleSplashFinish} 
-        isShortVersion={isReturningUser}
-      />
-    );
-  }
+  // If splash is done and no transition, show content immediately
+  useEffect(() => {
+    if (!showSplash && !isTransitioning) {
+      setShowContent(true);
+    }
+  }, [showSplash, isTransitioning]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        <BrowserRouter>
-          <ScrollToTop />
-          <NotificationNavigationHandler />
-          <div className="animate-fade-in">
+        
+        {/* Splash Screen Layer */}
+        {showSplash && (
+          <div 
+            className={`fixed inset-0 z-50 transition-all duration-700 ${
+              isTransitioning ? "opacity-0 scale-110" : "opacity-100 scale-100"
+            }`}
+          >
+            <SplashScreen 
+              onFinish={handleSplashFinish} 
+              isShortVersion={isReturningUser}
+            />
+          </div>
+        )}
+        
+        {/* Main Content Layer */}
+        <div 
+          className={`transition-all duration-700 ease-out ${
+            showContent 
+              ? "opacity-100 scale-100 translate-y-0" 
+              : "opacity-0 scale-95 translate-y-4"
+          }`}
+          style={{
+            visibility: showContent ? 'visible' : 'hidden',
+          }}
+        >
+          <BrowserRouter>
+            <ScrollToTop />
+            <NotificationNavigationHandler />
+            <div>
             <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
@@ -172,8 +210,9 @@ const App = () => {
               onDismiss={dismissPrompt}
               onDismissPermanently={dismissPermanently}
             />
-          </div>
-        </BrowserRouter>
+            </div>
+          </BrowserRouter>
+        </div>
       </TooltipProvider>
     </QueryClientProvider>
   );
