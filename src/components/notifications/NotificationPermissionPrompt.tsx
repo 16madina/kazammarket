@@ -21,8 +21,13 @@ export const NotificationPermissionPrompt = ({ onDismiss }: NotificationPermissi
 
   useEffect(() => {
     // Check if we should show the prompt
-    const hasSeenPrompt = localStorage.getItem('ayoka_notification_prompt_seen');
-    
+    let hasSeenPrompt: string | null = null;
+    try {
+      hasSeenPrompt = localStorage.getItem('ayoka_notification_prompt_seen');
+    } catch {
+      hasSeenPrompt = null;
+    }
+
     if (hasSeenPrompt) {
       setShowPrompt(false);
       return;
@@ -68,14 +73,22 @@ export const NotificationPermissionPrompt = ({ onDismiss }: NotificationPermissi
     } finally {
       setIsLoading(false);
       setShowPrompt(false);
-      localStorage.setItem('ayoka_notification_prompt_seen', 'true');
+      try {
+        localStorage.setItem('ayoka_notification_prompt_seen', 'true');
+      } catch {
+        // ignore
+      }
     }
   };
 
   const handleDismiss = () => {
     setDismissed(true);
     setShowPrompt(false);
-    localStorage.setItem('ayoka_notification_prompt_seen', 'true');
+    try {
+      localStorage.setItem('ayoka_notification_prompt_seen', 'true');
+    } catch {
+      // ignore
+    }
     onDismiss?.();
   };
 

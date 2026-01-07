@@ -16,24 +16,39 @@ export const useAppRatingPrompt = () => {
   const [showPrompt, setShowPrompt] = useState(false);
 
   const getRatingData = useCallback((): RatingData => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored) as RatingData;
+      }
+    } catch {
+      // ignore (storage/parse can fail)
     }
+
     const initial: RatingData = {
       firstUseDate: new Date().toISOString(),
       transactionCount: 0,
       hasRated: false,
       dismissed: false,
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+    } catch {
+      // ignore
+    }
+
     return initial;
   }, []);
 
   const updateRatingData = useCallback((updates: Partial<RatingData>) => {
     const current = getRatingData();
     const updated = { ...current, ...updates };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch {
+      // ignore
+    }
     return updated;
   }, [getRatingData]);
 

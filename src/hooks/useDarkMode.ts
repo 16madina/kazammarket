@@ -2,10 +2,14 @@ import { useEffect, useState } from "react";
 
 export const useDarkMode = () => {
   const [darkMode, setDarkMode] = useState(() => {
-    // Initialize from localStorage, default to light mode
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      return savedTheme === 'dark';
+    // Initialize from localStorage, default to light mode (storage can throw on some browsers/modes)
+    try {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        return savedTheme === 'dark';
+      }
+    } catch {
+      // ignore
     }
     // Default to light mode instead of system preference
     return false;
@@ -23,7 +27,11 @@ export const useDarkMode = () => {
   const toggleDarkMode = () => {
     const newMode = !darkMode;
     setDarkMode(newMode);
-    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    try {
+      localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    } catch {
+      // ignore
+    }
   };
 
   return { darkMode, toggleDarkMode };

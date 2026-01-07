@@ -42,9 +42,13 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
         }
       } else {
         // Load from localStorage for non-authenticated users
-        const saved = localStorage.getItem("language");
-        if (saved) {
-          setLanguageState(saved as Language);
+        try {
+          const saved = localStorage.getItem("language");
+          if (saved) {
+            setLanguageState(saved as Language);
+          }
+        } catch {
+          // ignore (storage can throw on some browsers/modes)
         }
       }
     };
@@ -54,7 +58,11 @@ export const LanguageProvider = ({ children }: LanguageProviderProps) => {
 
   const setLanguage = async (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem("language", lang);
+    try {
+      localStorage.setItem("language", lang);
+    } catch {
+      // ignore
+    }
     
     // Update in database if user is authenticated
     const { data: { user } } = await supabase.auth.getUser();

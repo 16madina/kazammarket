@@ -64,16 +64,27 @@ const NotificationNavigationHandler = () => {
     if (hasHandledNotification) return;
 
     // Check for pending notification route after a short delay to ensure app is ready
-    const checkPendingRoute = () => {
-      const pendingRoute = sessionStorage.getItem('pendingNotificationRoute') || getPendingNotificationRoute();
-      
-      if (pendingRoute && pendingRoute !== location.pathname) {
-        console.log('📍 Handling pending notification navigation to:', pendingRoute);
-        sessionStorage.removeItem('pendingNotificationRoute');
-        setHasHandledNotification(true);
-        navigate(pendingRoute);
-      }
-    };
+     const checkPendingRoute = () => {
+       let pendingRoute: string | null = null;
+       try {
+         pendingRoute = sessionStorage.getItem("pendingNotificationRoute");
+       } catch {
+         pendingRoute = null;
+       }
+
+       pendingRoute = pendingRoute || getPendingNotificationRoute();
+
+       if (pendingRoute && pendingRoute !== location.pathname) {
+         console.log("📍 Handling pending notification navigation to:", pendingRoute);
+         try {
+           sessionStorage.removeItem("pendingNotificationRoute");
+         } catch {
+           // ignore
+         }
+         setHasHandledNotification(true);
+         navigate(pendingRoute);
+       }
+     };
 
     // Wait for app to be fully loaded before navigating
     const timer = setTimeout(checkPendingRoute, 300);

@@ -158,7 +158,11 @@ export const usePushNotifications = () => {
           if (route) {
             console.log('📍 Notification tap - storing route for navigation:', route);
             // Store the route in sessionStorage for App.tsx to handle after full load
-            sessionStorage.setItem('pendingNotificationRoute', route);
+            try {
+              sessionStorage.setItem('pendingNotificationRoute', route);
+            } catch {
+              // ignore
+            }
             pendingNotificationRoute = route;
           }
         });
