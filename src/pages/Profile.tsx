@@ -10,7 +10,7 @@ import BottomNav from "@/components/BottomNav";
 import { UserListingCard } from "@/components/profile/UserListingCard";
 import { ReviewCard } from "@/components/profile/ReviewCard";
 import { toast } from "sonner";
-import { LogOut, Edit, Settings, Shield, Bell, Share2, ArrowLeft, Users, Star, MapPin, Calendar, Package, TrendingUp, Award, Heart, Receipt, CheckCircle2, X, Mail, CheckCircle } from "lucide-react";
+import { LogOut, Edit, Settings, Shield, Bell, Share2, ArrowLeft, Users, Star, MapPin, Calendar, Package, TrendingUp, Award, Heart, Receipt, CheckCircle2, X, Mail, CheckCircle, Gift } from "lucide-react";
 import { toast as toastHook } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -491,6 +491,15 @@ const Profile = () => {
               Paramètres
             </Button>
           </div>
+
+          {/* Referral Button */}
+          <Button 
+            className="w-full rounded-full h-12 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+            onClick={() => navigate("/referral")}
+          >
+            <Gift className="h-4 w-4 mr-2" />
+            Parrainage & Boost
+          </Button>
 
           {isAdmin && (
             <Button 

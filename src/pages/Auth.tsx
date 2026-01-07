@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ProfileImageUpload } from "@/components/auth/ProfileImageUpload";
 import { PrivacyPolicy } from "@/components/auth/PrivacyPolicy";
 import { TermsConditions } from "@/components/auth/TermsConditions";
+import { ReferralCodeInput } from "@/components/referral/ReferralCodeInput";
 import { allCountries } from "@/data/westAfricaData";
 import { Eye, EyeOff, ArrowLeft, MapPin } from "lucide-react";
 import ayokaLogo from "@/assets/ayoka-logo.png";
@@ -41,6 +42,7 @@ const Auth = () => {
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [referralCodeApplied, setReferralCodeApplied] = useState(false);
 
   // Field-level validation errors
   const [fieldErrors, setFieldErrors] = useState<{
@@ -796,6 +798,11 @@ const Auth = () => {
                     <p className="text-xs text-destructive">{fieldErrors.confirmPassword}</p>
                   )}
                 </div>
+              )}
+
+              {/* Referral Code Input - only for signup */}
+              {!isLogin && (
+                <ReferralCodeInput onSuccess={() => setReferralCodeApplied(true)} />
               )}
 
               {!isLogin && (
