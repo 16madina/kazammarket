@@ -90,7 +90,11 @@ const App = () => {
     return !hasSeenSplash;
   });
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showContent, setShowContent] = useState(false);
+  // Show content immediately if splash is already done
+  const [showContent, setShowContent] = useState(() => {
+    const hasSeenSplash = sessionStorage.getItem('hasSeenSplash');
+    return !!hasSeenSplash;
+  });
 
   // Initialiser les notifications push
   usePushNotifications();
