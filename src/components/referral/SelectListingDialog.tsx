@@ -14,6 +14,8 @@ import { useReferral, BoostCard } from "@/hooks/useReferral";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatPrice } from "@/utils/currency";
+import { useConfetti } from "@/hooks/useConfetti";
+import { useHaptics } from "@/hooks/useHaptics";
 
 interface SelectListingDialogProps {
   open: boolean;
@@ -30,6 +32,8 @@ export const SelectListingDialog = ({
 }: SelectListingDialogProps) => {
   const { applyBoost, isApplyingBoost, activeBoosts } = useReferral();
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
+  const { launchConfetti } = useConfetti();
+  const haptics = useHaptics();
 
   // Fetch user's active listings
   const { data: listings, isLoading: isLoadingListings } = useQuery({
@@ -66,8 +70,15 @@ export const SelectListingDialog = ({
       { listingId: selectedListingId, boostCardId: boostCard.id },
       {
         onSuccess: () => {
-          setSelectedListingId(null);
-          onSuccess?.();
+          // Celebration!
+          launchConfetti(3000);
+          haptics.success();
+          
+          // Close dialog after a short delay
+          setTimeout(() => {
+            setSelectedListingId(null);
+            onSuccess?.();
+          }, 500);
         },
       }
     );
