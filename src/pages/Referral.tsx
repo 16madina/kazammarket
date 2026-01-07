@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useReferral, BoostCard } from "@/hooks/useReferral";
 import { ReferralCard } from "@/components/referral/ReferralCard";
 import { BoostCardsList } from "@/components/referral/BoostCardsList";
+import { SelectListingDialog } from "@/components/referral/SelectListingDialog";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
@@ -19,6 +20,8 @@ import BottomNav from "@/components/BottomNav";
 const ReferralPage = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<BoostCard | null>(null);
+  const [showSelectListing, setShowSelectListing] = useState(false);
   const {
     referralCode,
     referralCount,
@@ -171,7 +174,13 @@ const ReferralPage = () => {
           </TabsList>
 
           <TabsContent value="cards" className="mt-4">
-            <BoostCardsList />
+            <BoostCardsList 
+              selectable={true}
+              onSelectCard={(card) => {
+                setSelectedCard(card);
+                setShowSelectListing(true);
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="referrals" className="mt-4 space-y-3">
@@ -289,6 +298,17 @@ const ReferralPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Select Listing Dialog */}
+      <SelectListingDialog
+        open={showSelectListing}
+        onOpenChange={setShowSelectListing}
+        boostCard={selectedCard}
+        onSuccess={() => {
+          setSelectedCard(null);
+          setShowSelectListing(false);
+        }}
+      />
 
       <BottomNav />
     </div>
