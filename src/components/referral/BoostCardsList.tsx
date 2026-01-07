@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import ayokaLogo from "@/assets/ayoka-logo.png";
+import { useCardFlipSound } from "@/hooks/useCardFlipSound";
 
 interface BoostCardsListProps {
   onSelectCard?: (card: BoostCard) => void;
@@ -17,8 +18,10 @@ interface BoostCardsListProps {
 export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsListProps) => {
   const { boostCards, isLoading } = useReferral();
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
+  const { playFlipSound } = useCardFlipSound();
 
   const toggleFlip = (cardId: string) => {
+    playFlipSound();
     setFlippedCards(prev => {
       const newSet = new Set(prev);
       if (newSet.has(cardId)) {
