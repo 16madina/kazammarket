@@ -113,16 +113,10 @@ const App = () => {
     }
   };
 
-  const [showSplash, setShowSplash] = useState(() => {
-    const hasSeenSplash = safeSessionGet("hasSeenSplash");
-    return !hasSeenSplash;
-  });
+  // Force splash on page load (always show at least short version)
+  const [showSplash, setShowSplash] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  // Show content immediately if splash is already done
-  const [showContent, setShowContent] = useState(() => {
-    const hasSeenSplash = safeSessionGet("hasSeenSplash");
-    return !!hasSeenSplash;
-  });
+  const [showContent, setShowContent] = useState(false);
 
   // Initialiser les notifications push
   usePushNotifications();
