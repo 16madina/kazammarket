@@ -101,6 +101,19 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
     });
   };
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "available":
+        return "Disponible";
+      case "used":
+        return "Utilisée";
+      case "expired":
+        return "Expirée";
+      default:
+        return status;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-4">
@@ -128,19 +141,6 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
       </Card>
     );
   }
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "available":
-        return "Disponible";
-      case "used":
-        return "Utilisée";
-      case "expired":
-        return "Expirée";
-      default:
-        return status;
-    }
-  };
 
   return (
     <div className="grid grid-cols-2 gap-4">
