@@ -9,19 +9,87 @@ import { fr } from "date-fns/locale";
 import { Skeleton } from "@/components/ui/skeleton";
 import ayokaLogo from "@/assets/ayoka-logo.png";
 import { useCardFlipSound } from "@/hooks/useCardFlipSound";
+import { useHaptics } from "@/hooks/useHaptics";
 
 interface BoostCardsListProps {
   onSelectCard?: (card: BoostCard) => void;
   selectable?: boolean;
 }
 
+// Card tier based on card number - determines color scheme
+type CardTier = 'bronze' | 'silver' | 'gold';
+
+const getCardTier = (cardNumber: number): CardTier => {
+  if (cardNumber >= 5) return 'gold';
+  if (cardNumber >= 3) return 'silver';
+  return 'bronze';
+};
+
+const tierGradients = {
+  bronze: {
+    front: 'from-amber-700 via-amber-800 to-amber-900',
+    back: 'from-amber-900 via-amber-800 to-amber-700',
+    inactive: 'from-stone-600 via-stone-700 to-stone-800',
+  },
+  silver: {
+    front: 'from-slate-400 via-slate-500 to-slate-600',
+    back: 'from-slate-600 via-slate-500 to-slate-400',
+    inactive: 'from-gray-500 via-gray-600 to-gray-700',
+  },
+  gold: {
+    front: 'from-yellow-500 via-amber-500 to-orange-500',
+    back: 'from-orange-500 via-amber-500 to-yellow-500',
+    inactive: 'from-gray-500 via-gray-600 to-gray-700',
+  },
+};
+
+const tierColors = {
+  bronze: {
+    border: 'border-amber-500/40',
+    text: 'text-amber-200',
+    subText: 'text-amber-300',
+    accent: 'text-amber-400',
+    glow: 'rgba(217, 119, 6, 0.5)',
+    infoBox: 'bg-amber-900/50 border-amber-700/50',
+    button: 'from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600',
+  },
+  silver: {
+    border: 'border-slate-300/50',
+    text: 'text-slate-100',
+    subText: 'text-slate-200',
+    accent: 'text-slate-300',
+    glow: 'rgba(148, 163, 184, 0.5)',
+    infoBox: 'bg-slate-700/50 border-slate-500/50',
+    button: 'from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600',
+  },
+  gold: {
+    border: 'border-yellow-300/60',
+    text: 'text-yellow-100',
+    subText: 'text-yellow-200',
+    accent: 'text-yellow-300',
+    glow: 'rgba(234, 179, 8, 0.6)',
+    infoBox: 'bg-yellow-800/50 border-yellow-600/50',
+    button: 'from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600',
+  },
+};
+
+const getTierLabel = (tier: CardTier): string => {
+  switch (tier) {
+    case 'gold': return '★ Or';
+    case 'silver': return '◆ Argent';
+    case 'bronze': return '● Bronze';
+  }
+};
+
 export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsListProps) => {
   const { boostCards, isLoading } = useReferral();
   const [flippedCards, setFlippedCards] = useState<Set<string>>(new Set());
   const { playFlipSound } = useCardFlipSound();
+  const haptics = useHaptics();
 
   const toggleFlip = (cardId: string) => {
     playFlipSound();
+    haptics.medium();
     setFlippedCards(prev => {
       const newSet = new Set(prev);
       if (newSet.has(cardId)) {
@@ -61,19 +129,6 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
     );
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "available":
-        return "bg-gradient-to-r from-amber-500 to-orange-500";
-      case "used":
-        return "bg-blue-500/80";
-      case "expired":
-        return "bg-gray-500/80";
-      default:
-        return "bg-gray-500/80";
-    }
-  };
-
   const getStatusLabel = (status: string) => {
     switch (status) {
       case "available":
@@ -92,14 +147,16 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
       {boostCards.map((card, index) => {
         const isFlipped = flippedCards.has(card.id);
         const cardNumber = index + 1;
+        const tier = getCardTier(cardNumber);
+        const isActive = card.status === "available";
+        const colors = tierColors[tier];
+        const gradients = tierGradients[tier];
 
         return (
           <div
             key={card.id}
             className={`relative aspect-[2.5/3.5] cursor-pointer transition-transform duration-300 ${
-              card.status === "available" 
-                ? "hover:scale-105" 
-                : "opacity-60"
+              isActive ? "hover:scale-105" : "opacity-60"
             }`}
             style={{ perspective: "1000px" }}
             onClick={() => toggleFlip(card.id)}
@@ -114,33 +171,43 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
             >
               {/* Front Side */}
               <div 
-                className="absolute inset-0 rounded-xl overflow-hidden"
+                className="absolute inset-0 rounded-xl overflow-hidden shadow-xl"
                 style={{ backfaceVisibility: "hidden" }}
               >
                 <div className={`
-                  relative w-full h-full
-                  ${card.status === "available" 
-                    ? "bg-gradient-to-br from-amber-800 via-amber-900 to-amber-950 shadow-xl" 
-                    : "bg-gradient-to-br from-gray-600 via-gray-700 to-gray-800"
-                  }
+                  relative w-full h-full bg-gradient-to-br
+                  ${isActive ? gradients.front : gradients.inactive}
                 `}>
                   {/* Card Border/Frame */}
-                  <div className="absolute inset-1 rounded-lg border-2 border-amber-400/30" />
+                  <div className={`absolute inset-1 rounded-lg border-2 ${isActive ? colors.border : 'border-gray-500/30'}`} />
                   
-                  {/* Corner Decorations - Top Left */}
-                  <div className="absolute top-2 left-2 flex flex-col items-center">
-                    <span className={`text-xl font-bold ${card.status === "available" ? "text-amber-300" : "text-gray-400"}`}>
-                      {cardNumber}
-                    </span>
-                    <Sparkles className={`h-3 w-3 ${card.status === "available" ? "text-amber-400" : "text-gray-500"}`} />
+                  {/* Tier Badge - Top Left */}
+                  <div className="absolute top-2 left-2">
+                    <Badge className={`
+                      text-[8px] px-1.5 py-0.5 font-bold
+                      ${tier === 'gold' && isActive ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-900' : ''}
+                      ${tier === 'silver' && isActive ? 'bg-gradient-to-r from-slate-300 to-slate-400 text-slate-800' : ''}
+                      ${tier === 'bronze' && isActive ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-amber-100' : ''}
+                      ${!isActive ? 'bg-gray-500 text-gray-300' : ''}
+                    `}>
+                      {getTierLabel(tier)}
+                    </Badge>
                   </div>
                   
-                  {/* Corner Decorations - Bottom Right (inverted) */}
-                  <div className="absolute bottom-2 right-2 flex flex-col items-center rotate-180">
-                    <span className={`text-xl font-bold ${card.status === "available" ? "text-amber-300" : "text-gray-400"}`}>
+                  {/* Corner Number - Top Right */}
+                  <div className="absolute top-2 right-2 flex flex-col items-center">
+                    <span className={`text-xl font-bold ${isActive ? colors.text : 'text-gray-400'}`}>
                       {cardNumber}
                     </span>
-                    <Sparkles className={`h-3 w-3 ${card.status === "available" ? "text-amber-400" : "text-gray-500"}`} />
+                    <Sparkles className={`h-3 w-3 ${isActive ? colors.accent : 'text-gray-500'}`} />
+                  </div>
+                  
+                  {/* Corner Number - Bottom Left (inverted) */}
+                  <div className="absolute bottom-2 left-2 flex flex-col items-center rotate-180">
+                    <span className={`text-xl font-bold ${isActive ? colors.text : 'text-gray-400'}`}>
+                      {cardNumber}
+                    </span>
+                    <Sparkles className={`h-3 w-3 ${isActive ? colors.accent : 'text-gray-500'}`} />
                   </div>
 
                   {/* Center Content */}
@@ -148,22 +215,26 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
                     {/* Logo Container with Glow */}
                     <div className={`
                       relative p-3 rounded-full mb-2
-                      ${card.status === "available" 
-                        ? "bg-gradient-to-br from-amber-600/40 to-orange-700/40 shadow-lg" 
-                        : "bg-gray-700/50"
-                      }
-                    `}>
+                      ${isActive ? 'shadow-lg' : 'bg-gray-700/50'}
+                    `}
+                    style={isActive ? {
+                      background: `linear-gradient(135deg, ${colors.glow}, transparent)`
+                    } : {}}
+                    >
                       {/* Glow Effect */}
-                      {card.status === "available" && (
-                        <div className="absolute inset-0 rounded-full bg-amber-400/20 blur-xl animate-pulse" />
+                      {isActive && (
+                        <div 
+                          className="absolute inset-0 rounded-full blur-xl animate-pulse"
+                          style={{ backgroundColor: colors.glow }}
+                        />
                       )}
                       <img 
                         src={ayokaLogo} 
                         alt="AYOKA" 
                         className="w-12 h-12 object-contain relative z-10"
                         style={{
-                          filter: card.status === "available" 
-                            ? "drop-shadow(0 0 10px rgba(251, 191, 36, 0.5))" 
+                          filter: isActive 
+                            ? `drop-shadow(0 0 10px ${colors.glow})` 
                             : "grayscale(100%)"
                         }}
                       />
@@ -172,7 +243,7 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
                     {/* Card Title */}
                     <h4 className={`
                       text-xs font-bold uppercase tracking-wider text-center
-                      ${card.status === "available" ? "text-amber-200" : "text-gray-400"}
+                      ${isActive ? colors.text : 'text-gray-400'}
                     `}>
                       Carte Boost
                     </h4>
@@ -180,7 +251,7 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
                     {/* Duration */}
                     <p className={`
                       text-[10px] mt-0.5
-                      ${card.status === "available" ? "text-amber-300/80" : "text-gray-500"}
+                      ${isActive ? colors.subText + '/80' : 'text-gray-500'}
                     `}>
                       {card.duration_days} jours
                     </p>
@@ -188,15 +259,20 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
                     {/* Tap hint */}
                     <p className={`
                       text-[8px] mt-2 opacity-60
-                      ${card.status === "available" ? "text-amber-300" : "text-gray-500"}
+                      ${isActive ? colors.subText : 'text-gray-500'}
                     `}>
                       Touchez pour retourner
                     </p>
                   </div>
 
-                  {/* Status Badge */}
-                  <div className="absolute top-2 right-2">
-                    <Badge className={`${getStatusColor(card.status)} text-white text-[8px] px-1.5 py-0.5`}>
+                  {/* Status Badge - Bottom Right */}
+                  <div className="absolute bottom-2 right-2">
+                    <Badge className={`
+                      text-white text-[8px] px-1.5 py-0.5
+                      ${card.status === 'available' ? 'bg-green-500/80' : ''}
+                      ${card.status === 'used' ? 'bg-blue-500/80' : ''}
+                      ${card.status === 'expired' ? 'bg-gray-500/80' : ''}
+                    `}>
                       {getStatusLabel(card.status)}
                     </Badge>
                   </div>
@@ -215,7 +291,7 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
                   </div>
 
                   {/* Shine Effect for available cards */}
-                  {card.status === "available" && (
+                  {isActive && (
                     <div 
                       className="absolute inset-0 pointer-events-none"
                       style={{
@@ -230,21 +306,18 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
 
               {/* Back Side */}
               <div 
-                className="absolute inset-0 rounded-xl overflow-hidden"
+                className="absolute inset-0 rounded-xl overflow-hidden shadow-xl"
                 style={{ 
                   backfaceVisibility: "hidden",
                   transform: "rotateY(180deg)"
                 }}
               >
                 <div className={`
-                  relative w-full h-full
-                  ${card.status === "available" 
-                    ? "bg-gradient-to-br from-amber-950 via-amber-900 to-amber-800 shadow-xl" 
-                    : "bg-gradient-to-br from-gray-800 via-gray-700 to-gray-600"
-                  }
+                  relative w-full h-full bg-gradient-to-br
+                  ${isActive ? gradients.back : gradients.inactive}
                 `}>
                   {/* Card Border/Frame */}
-                  <div className="absolute inset-1 rounded-lg border-2 border-amber-400/30" />
+                  <div className={`absolute inset-1 rounded-lg border-2 ${isActive ? colors.border : 'border-gray-500/30'}`} />
 
                   {/* Diamond Pattern Background */}
                   <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
@@ -261,39 +334,37 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
                     {/* Crown Icon */}
                     <div className={`
                       p-2 rounded-full mb-3
-                      ${card.status === "available" 
-                        ? "bg-gradient-to-br from-amber-500/30 to-orange-600/30" 
-                        : "bg-gray-700/50"
-                      }
-                    `}>
-                      <Crown className={`h-8 w-8 ${card.status === "available" ? "text-amber-400" : "text-gray-500"}`} />
+                      ${isActive ? '' : 'bg-gray-700/50'}
+                    `}
+                    style={isActive ? {
+                      background: `linear-gradient(135deg, ${colors.glow}, transparent)`
+                    } : {}}
+                    >
+                      <Crown className={`h-8 w-8 ${isActive ? colors.accent : 'text-gray-500'}`} />
                     </div>
 
                     {/* Card Details */}
                     <h4 className={`
                       text-sm font-bold uppercase tracking-wider text-center mb-2
-                      ${card.status === "available" ? "text-amber-200" : "text-gray-400"}
+                      ${isActive ? colors.text : 'text-gray-400'}
                     `}>
                       Boost #{cardNumber}
                     </h4>
 
                     {/* Info Box */}
                     <div className={`
-                      w-full rounded-lg p-2 space-y-1
-                      ${card.status === "available" 
-                        ? "bg-amber-900/50 border border-amber-700/50" 
-                        : "bg-gray-800/50 border border-gray-600/50"
-                      }
+                      w-full rounded-lg p-2 space-y-1 border
+                      ${isActive ? colors.infoBox : 'bg-gray-800/50 border-gray-600/50'}
                     `}>
                       <div className="flex items-center gap-1.5">
-                        <Zap className={`h-3 w-3 ${card.status === "available" ? "text-amber-400" : "text-gray-500"}`} />
-                        <span className={`text-[10px] ${card.status === "available" ? "text-amber-300" : "text-gray-400"}`}>
+                        <Zap className={`h-3 w-3 ${isActive ? colors.accent : 'text-gray-500'}`} />
+                        <span className={`text-[10px] ${isActive ? colors.subText : 'text-gray-400'}`}>
                           {card.duration_days} jours en top liste
                         </span>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <Clock className={`h-3 w-3 ${card.status === "available" ? "text-amber-400" : "text-gray-500"}`} />
-                        <span className={`text-[10px] ${card.status === "available" ? "text-amber-300/80" : "text-gray-500"}`}>
+                        <Clock className={`h-3 w-3 ${isActive ? colors.accent : 'text-gray-500'}`} />
+                        <span className={`text-[10px] ${isActive ? colors.subText + '/80' : 'text-gray-500'}`}>
                           {card.status === "available" && (
                             <>Obtenue {formatDistanceToNow(new Date(card.earned_at), { addSuffix: true, locale: fr })}</>
                           )}
@@ -306,12 +377,13 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
                     </div>
 
                     {/* Use Button */}
-                    {selectable && card.status === "available" && (
+                    {selectable && isActive && (
                       <Button 
                         size="sm"
-                        className="mt-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-xs w-full"
+                        className={`mt-3 bg-gradient-to-r ${colors.button} text-xs w-full text-white`}
                         onClick={(e) => {
                           e.stopPropagation();
+                          haptics.success();
                           if (onSelectCard) {
                             onSelectCard(card);
                           }
@@ -324,7 +396,7 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
                     {/* Tap hint */}
                     <p className={`
                       text-[8px] mt-2 opacity-60
-                      ${card.status === "available" ? "text-amber-300" : "text-gray-500"}
+                      ${isActive ? colors.subText : 'text-gray-500'}
                     `}>
                       Touchez pour retourner
                     </p>

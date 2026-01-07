@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MapPin, Navigation } from "lucide-react";
+import { MapPin, Navigation, Rocket } from "lucide-react";
 import { translateCondition } from "@/utils/translations";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { sortListingsByLocation, getLocationPriority } from "@/utils/geographicFiltering";
@@ -109,6 +109,22 @@ const RecentListings = () => {
     enabled: !!session?.user, // NE S'EXÉCUTE QUE SI L'UTILISATEUR EST AUTHENTIFIÉ
   });
   
+  // Fetch active boosts to prioritize boosted listings
+  const { data: activeBoosts = [] } = useQuery({
+    queryKey: ["active-boosts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("listing_boosts")
+        .select("listing_id")
+        .eq("is_active", true)
+        .gte("ends_at", new Date().toISOString());
+      
+      if (error) throw error;
+      return data?.map(b => b.listing_id) || [];
+    },
+    staleTime: 1000 * 60 * 2, // Cache pendant 2 minutes
+  });
+
   const { data: listings, isLoading } = useQuery({
     queryKey: ["recent-listings", userProfile?.city, userProfile?.country],
     queryFn: async () => {
@@ -121,12 +137,10 @@ const RecentListings = () => {
         `)
         .eq("status", "active")
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(30);
       
       if (error) throw error;
       
-      // Ne PAS trier par priorité géographique - garder l'ordre chronologique
-      // Le filtrage sera fait après pour ne garder que les annonces pertinentes
       return data;
     },
     staleTime: 1000 * 60 * 5, // Cache pendant 5 minutes
@@ -228,8 +242,9 @@ const RecentListings = () => {
     calculateDistances();
   }, [userCoordinates, listings]);
 
-  // RÈGLE : Trier les annonces par proximité pour les utilisateurs avec localisation (authentifiés ou invités)
-  // - Utilisateurs avec localisation: tri par proximité (même ville > même pays > pays voisins > autres)
+  // RÈGLE : Trier les annonces par boost puis par proximité pour les utilisateurs avec localisation
+  // - Annonces boostées en premier (top liste)
+  // - Puis par proximité (même ville > même pays > pays voisins > autres)
   // - Utilisateurs sans localisation: ordre chronologique par défaut
   const isAuthenticated = !!session?.user;
   const userCity = userProfile?.city || guestLocation.city || null;
@@ -237,13 +252,29 @@ const RecentListings = () => {
   
   const hasValidLocation = !!(userCity?.trim() || userCountry?.trim());
   
-  // Trier par proximité pour tous les utilisateurs avec une localisation
-  // (authentifiés ou invités avec géolocalisation activée)
-  const displayedListings = hasValidLocation
-    ? sortListingsByLocation(listings || [], userCity, userCountry)
-    : listings || [];
+  // Trier : 1) Annonces boostées en premier, 2) Puis par proximité
+  const sortedListings = useMemo(() => {
+    if (!listings) return [];
+    
+    // Séparer les annonces boostées des autres
+    const boostedListings = listings.filter(l => activeBoosts.includes(l.id));
+    const regularListings = listings.filter(l => !activeBoosts.includes(l.id));
+    
+    // Trier par proximité si localisation disponible
+    const sortedBoosted = hasValidLocation 
+      ? sortListingsByLocation(boostedListings, userCity, userCountry)
+      : boostedListings;
+    const sortedRegular = hasValidLocation 
+      ? sortListingsByLocation(regularListings, userCity, userCountry)
+      : regularListings;
+    
+    // Annonces boostées en premier
+    return [...sortedBoosted, ...sortedRegular];
+  }, [listings, activeBoosts, hasValidLocation, userCity, userCountry]);
+  
+  const displayedListings = sortedListings;
 
-  console.log('📊 Auth:', isAuthenticated, '| Total listings:', listings?.length, '| Displayed listings:', displayedListings.length, '| User location:', userCity, userCountry, '| Sorting by proximity:', isAuthenticated && hasValidLocation);
+  console.log('📊 Auth:', isAuthenticated, '| Total listings:', listings?.length, '| Boosted:', activeBoosts.length, '| User location:', userCity, userCountry);
 
   const hasDisplayedListings = displayedListings.length > 0;
   const hasUserLocation = !!(userProfile?.city || userProfile?.country);
@@ -276,6 +307,16 @@ const RecentListings = () => {
   const getBadges = (listing: any) => {
     const badges: JSX.Element[] = [];
     
+    // 0. Priorité maximale: Badge Boosté pour les annonces en top liste
+    if (activeBoosts.includes(listing.id)) {
+      badges.push(
+        <Badge key="boosted" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white backdrop-blur-sm text-xs font-medium gap-1">
+          <Rocket className="h-3 w-3" />
+          Top
+        </Badge>
+      );
+    }
+    
     // 1. Priorité haute: Badge Gratuit pour les articles à prix 0
     if (listing.price === 0) {
       badges.push(
@@ -286,7 +327,7 @@ const RecentListings = () => {
     }
     
     // 2. État (condition)
-    if (listing.condition) {
+    if (listing.condition && badges.length < 2) {
       badges.push(
         <Badge key="condition" className="bg-accent/90 text-accent-foreground backdrop-blur-sm text-xs font-medium">
           {translateCondition(listing.condition, language)}
