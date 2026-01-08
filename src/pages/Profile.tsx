@@ -74,7 +74,7 @@ const Profile = () => {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const { data: profile, refetch: refetchProfile } = useQuery({
+  const { data: profile, refetch: refetchProfile, isLoading: isProfileLoading } = useQuery({
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user) return null;
@@ -87,9 +87,12 @@ const Profile = () => {
       return data;
     },
     enabled: !!user,
-    // Keep the UI in sync after returning from email app / deep link.
+    // Fetch fresh data immediately, don't use stale cache
+    staleTime: 0,
+    // Only poll if email not verified yet
     refetchInterval: (query) => (query.state.data?.email_verified ? false : 5000),
     refetchOnWindowFocus: true,
+    refetchOnMount: 'always',
   });
 
   useEffect(() => {
