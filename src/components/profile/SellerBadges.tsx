@@ -1,5 +1,5 @@
 import { Badge } from "@/components/ui/badge";
-import { Shield, Star, Zap } from "lucide-react";
+import { Shield, Star, Zap, Crown } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -17,6 +17,7 @@ interface SellerBadgesProps {
     rating_average?: number;
     response_rate?: number;
     avg_response_time_minutes?: number;
+    referral_count?: number;
   };
   size?: "sm" | "md" | "lg";
 }
@@ -25,9 +26,34 @@ export const SellerBadges = ({ profile, size = "md" }: SellerBadgesProps) => {
   const iconSize = size === "sm" ? "h-3 w-3" : size === "md" ? "h-4 w-4" : "h-5 w-5";
   const badgeSize = size === "sm" ? "text-xs px-2 py-0.5" : size === "md" ? "text-sm px-3 py-1" : "text-base px-4 py-1.5";
 
+  // Check if user is a Gold Referrer (10+ referrals)
+  const isGoldReferrer = (profile.referral_count || 0) >= 10;
+
   return (
     <TooltipProvider>
       <div className="flex flex-wrap items-center gap-2">
+        {/* Parrain Or - Gold Referrer Badge */}
+        {isGoldReferrer && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge 
+                variant="default" 
+                className={`flex items-center gap-1 bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 hover:from-yellow-600 hover:via-amber-600 hover:to-orange-600 shadow-lg ${badgeSize}`}
+              >
+                <Crown className={iconSize} />
+                Parrain Or
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <div className="text-sm space-y-1">
+                <p className="font-semibold">Parrain Or 👑</p>
+                <p>✓ {profile.referral_count}+ parrainages validés</p>
+                <p>Membre actif de la communauté AYOKA</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        )}
+
         {/* Vendeur vérifié */}
         {profile.verified_seller && (
           <Tooltip>

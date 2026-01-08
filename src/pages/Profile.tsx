@@ -285,7 +285,8 @@ const Profile = () => {
   // Calculate badges
   const badges = [];
   if (profile?.email_verified) badges.push({ icon: CheckCircle2, label: "Email vérifié", color: "text-green-500" });
-  if ((profile?.total_sales || 0) >= 10) badges.push({ icon: Award, label: "Vendeur expert", color: "text-yellow-500" });
+  if ((profile?.referral_count || 0) >= 10) badges.push({ icon: Award, label: "Parrain Or", color: "text-yellow-500" });
+  if ((profile?.total_sales || 0) >= 10) badges.push({ icon: Award, label: "Vendeur expert", color: "text-amber-500" });
   if ((profile?.rating_average || 0) >= 4.5 && (profile?.rating_count || 0) >= 5) badges.push({ icon: Star, label: "Excellent vendeur", color: "text-orange-500" });
   if (monthsSinceMember >= 12) badges.push({ icon: Calendar, label: "Membre fidèle", color: "text-purple-500" });
 
