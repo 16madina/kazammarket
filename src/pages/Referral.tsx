@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Share2, Gift, Rocket, Users, CheckCircle2, Clock, Archive } from "lucide-react";
+import { ArrowLeft, Share2, Gift, Rocket, Users, CheckCircle2, Clock, Archive, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -15,6 +15,7 @@ import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { FaWhatsapp, FaFacebook, FaTwitter } from "react-icons/fa";
 import BottomNav from "@/components/BottomNav";
 
 const ReferralPage = () => {
@@ -151,6 +152,63 @@ const ReferralPage = () => {
               <p className="font-mono font-bold text-2xl text-center tracking-[0.3em] text-amber-700 dark:text-amber-400">
                 {isLoading ? <Skeleton className="h-8 w-40 mx-auto" /> : referralCode}
               </p>
+              
+              {/* Social Share Buttons */}
+              <div className="flex items-center justify-center gap-3 mt-4">
+                <Button
+                  size="sm"
+                  className="bg-[#25D366] hover:bg-[#128C7E] text-white"
+                  onClick={() => {
+                    const text = encodeURIComponent(`🎁 Rejoins AYOKA MARKET avec mon code parrain ${referralCode} et découvre des milliers d'annonces près de chez toi ! 🛍️✨\n\n👉 https://ayokamarket.com?ref=${referralCode}`);
+                    window.open(`https://wa.me/?text=${text}`, '_blank');
+                  }}
+                >
+                  <FaWhatsapp className="h-4 w-4 mr-1" />
+                  WhatsApp
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-[#1877F2] hover:bg-[#0d65d9] text-white"
+                  onClick={() => {
+                    const url = encodeURIComponent(`https://ayokamarket.com?ref=${referralCode}`);
+                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+                  }}
+                >
+                  <FaFacebook className="h-4 w-4 mr-1" />
+                  Facebook
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-[#1DA1F2] hover:bg-[#0c85d0] text-white"
+                  onClick={() => {
+                    const text = encodeURIComponent(`🎁 Rejoins AYOKA MARKET avec mon code parrain ${referralCode} ! 🛍️✨`);
+                    const url = encodeURIComponent(`https://ayokamarket.com?ref=${referralCode}`);
+                    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400');
+                  }}
+                >
+                  <FaTwitter className="h-4 w-4 mr-1" />
+                  Twitter
+                </Button>
+              </div>
+              
+              {/* Copy Code Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full mt-3"
+                onClick={async () => {
+                  if (referralCode) {
+                    await navigator.clipboard.writeText(referralCode);
+                    toast({
+                      title: "✅ Code copié !",
+                      description: referralCode,
+                    });
+                  }
+                }}
+              >
+                <Copy className="h-4 w-4 mr-2" />
+                Copier le code
+              </Button>
             </div>
 
             {/* Progress */}
