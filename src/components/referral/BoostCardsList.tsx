@@ -87,6 +87,9 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
   const { playFlipSound } = useCardFlipSound();
   const haptics = useHaptics();
 
+  // Only show available cards
+  const availableCards = boostCards.filter(card => card.status === 'available');
+
   const toggleFlip = (cardId: string) => {
     playFlipSound();
     haptics.medium();
@@ -124,7 +127,7 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
     );
   }
 
-  if (boostCards.length === 0) {
+  if (availableCards.length === 0) {
     return (
       <Card className="border-dashed">
         <CardContent className="flex flex-col items-center justify-center py-8 text-center">
@@ -132,7 +135,7 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
             <Rocket className="h-6 w-6 text-muted-foreground" />
           </div>
           <p className="text-muted-foreground">
-            Pas encore de carte boost
+            Pas de carte boost disponible
           </p>
           <p className="text-sm text-muted-foreground mt-1">
             Parrainez 3 amis pour en obtenir une !
@@ -144,7 +147,7 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
 
   return (
     <div className="grid grid-cols-2 gap-4">
-      {boostCards.map((card, index) => {
+      {availableCards.map((card, index) => {
         const isFlipped = flippedCards.has(card.id);
         const cardNumber = index + 1;
         const tier = getCardTierFromDuration(card.duration_days);
