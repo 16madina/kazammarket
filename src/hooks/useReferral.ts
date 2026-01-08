@@ -8,6 +8,7 @@ export interface BoostCard {
   user_id: string;
   status: "available" | "used" | "expired";
   duration_days: number;
+  tier: string | null;
   earned_at: string;
   used_at: string | null;
   expires_at: string | null;
