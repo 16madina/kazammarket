@@ -18,14 +18,9 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom"],
   },
   build: {
-    rollupOptions: {
-      external: [
-        '@capacitor-firebase/messaging',
-        '@capacitor/app'
-      ]
+    commonjsOptions: {
+      include: [/node_modules/],
+      transformMixedEsModules: true
     }
-  },
-  optimizeDeps: {
-    exclude: ['@capacitor-firebase/messaging', '@capacitor/app']
   }
 }));
