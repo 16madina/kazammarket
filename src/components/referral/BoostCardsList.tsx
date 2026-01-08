@@ -16,12 +16,12 @@ interface BoostCardsListProps {
   selectable?: boolean;
 }
 
-// Card tier based on card number - determines color scheme
+// Card tier based on duration_days from the card itself
 type CardTier = 'bronze' | 'silver' | 'gold';
 
-const getCardTier = (cardNumber: number): CardTier => {
-  if (cardNumber >= 5) return 'gold';
-  if (cardNumber >= 3) return 'silver';
+const getCardTierFromDuration = (durationDays: number): CardTier => {
+  if (durationDays >= 7) return 'gold';
+  if (durationDays >= 3) return 'silver';
   return 'bronze';
 };
 
@@ -147,7 +147,7 @@ export const BoostCardsList = ({ onSelectCard, selectable = false }: BoostCardsL
       {boostCards.map((card, index) => {
         const isFlipped = flippedCards.has(card.id);
         const cardNumber = index + 1;
-        const tier = getCardTier(cardNumber);
+        const tier = getCardTierFromDuration(card.duration_days);
         const isActive = card.status === "available";
         const colors = tierColors[tier];
         const gradients = tierGradients[tier];

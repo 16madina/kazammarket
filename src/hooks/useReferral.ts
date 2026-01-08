@@ -221,9 +221,34 @@ export const useReferral = () => {
   const validatedReferrals = referrals.filter((r) => r.status === "validated");
   const pendingReferrals = referrals.filter((r) => r.status === "pending");
 
-  // Progress to next card (3 referrals needed)
-  const referralsToNextCard = 3 - (referralData?.referral_count || 0) % 3;
-  const progressToNextCard = ((referralData?.referral_count || 0) % 3) / 3 * 100;
+  // Calculate next milestone and progress based on tiered system:
+  // 3 = Bronze (2 days), 8 = Silver (3 days), 10 = Gold (7 days), then every +7 = Gold
+  const count = referralData?.referral_count || 0;
+  
+  const getNextMilestone = (current: number): { milestone: number; tier: string; duration: number } => {
+    if (current < 3) return { milestone: 3, tier: 'bronze', duration: 2 };
+    if (current < 8) return { milestone: 8, tier: 'silver', duration: 3 };
+    if (current < 10) return { milestone: 10, tier: 'gold', duration: 7 };
+    // After 10, every +7 referrals = new gold card (17, 24, 31, ...)
+    const goldMilestonesAfter10 = Math.floor((current - 10) / 7);
+    const nextGoldMilestone = 10 + (goldMilestonesAfter10 + 1) * 7;
+    return { milestone: nextGoldMilestone, tier: 'gold', duration: 7 };
+  };
+
+  const getPreviousMilestone = (current: number): number => {
+    if (current < 3) return 0;
+    if (current < 8) return 3;
+    if (current < 10) return 8;
+    // After 10, calculate previous gold milestone
+    const goldMilestonesAfter10 = Math.floor((current - 10) / 7);
+    return goldMilestonesAfter10 === 0 ? 10 : 10 + goldMilestonesAfter10 * 7;
+  };
+
+  const nextMilestoneInfo = getNextMilestone(count);
+  const previousMilestone = getPreviousMilestone(count);
+  const referralsToNextCard = nextMilestoneInfo.milestone - count;
+  const progressRange = nextMilestoneInfo.milestone - previousMilestone;
+  const progressToNextCard = ((count - previousMilestone) / progressRange) * 100;
 
   return {
     referralCode: referralData?.referral_code,
@@ -237,6 +262,7 @@ export const useReferral = () => {
     activeBoosts,
     referralsToNextCard,
     progressToNextCard,
+    nextMilestoneInfo,
     isLoading: isLoadingReferral || isLoadingCards || isLoadingReferrals || isLoadingBoosts,
     applyBoost: applyBoostMutation.mutate,
     isApplyingBoost: applyBoostMutation.isPending,

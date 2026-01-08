@@ -145,6 +145,7 @@ export type Database = {
           expires_at: string | null
           id: string
           status: string
+          tier: string | null
           used_at: string | null
           user_id: string
         }
@@ -155,6 +156,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           status?: string
+          tier?: string | null
           used_at?: string | null
           user_id: string
         }
@@ -165,6 +167,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           status?: string
+          tier?: string | null
           used_at?: string | null
           user_id?: string
         }

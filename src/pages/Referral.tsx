@@ -33,6 +33,7 @@ const ReferralPage = () => {
     activeBoosts,
     referralsToNextCard,
     progressToNextCard,
+    nextMilestoneInfo,
     isLoading,
   } = useReferral();
 
@@ -127,14 +128,16 @@ const ReferralPage = () => {
             {/* Progress */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Prochaine carte boost</span>
-                <span className="font-medium">{3 - referralsToNextCard}/3</span>
+                <span className="text-muted-foreground">
+                  Prochaine carte {nextMilestoneInfo?.tier === 'gold' ? 'Or' : nextMilestoneInfo?.tier === 'silver' ? 'Argent' : 'Bronze'}
+                </span>
+                <span className="font-medium">{nextMilestoneInfo?.milestone - referralsToNextCard}/{nextMilestoneInfo?.milestone}</span>
               </div>
               <Progress value={progressToNextCard} className="h-3" />
               <p className="text-xs text-center text-muted-foreground">
                 {referralsToNextCard === 0 
                   ? "🎉 Nouvelle carte débloquée !" 
-                  : `Plus que ${referralsToNextCard} parrainage${referralsToNextCard > 1 ? "s" : ""}`}
+                  : `Plus que ${referralsToNextCard} parrainage${referralsToNextCard > 1 ? "s" : ""} (${nextMilestoneInfo?.duration} jours de boost)`}
               </p>
             </div>
           </CardContent>
@@ -291,8 +294,33 @@ const ReferralPage = () => {
               <div>
                 <p className="font-medium">Gagnez des cartes boost</p>
                 <p className="text-sm text-muted-foreground">
-                  3 parrainages validés = 1 carte boost de 3 jours (max 5 cartes)
+                  Paliers progressifs avec des récompenses croissantes
                 </p>
+              </div>
+            </div>
+            
+            {/* Tier Milestones */}
+            <div className="mt-4 pt-4 border-t space-y-2">
+              <p className="text-sm font-medium mb-3">Paliers de récompenses :</p>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-r from-amber-600 to-orange-600 flex items-center justify-center text-white text-xs">●</span>
+                <span className="font-medium">3 parrainages</span>
+                <span className="text-muted-foreground">→ Carte Bronze (2 jours)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-r from-slate-400 to-slate-500 flex items-center justify-center text-white text-xs">◆</span>
+                <span className="font-medium">8 parrainages</span>
+                <span className="text-muted-foreground">→ Carte Argent (3 jours)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 flex items-center justify-center text-white text-xs">★</span>
+                <span className="font-medium">10 parrainages</span>
+                <span className="text-muted-foreground">→ Carte Or (7 jours)</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-r from-yellow-500 to-amber-500 flex items-center justify-center text-white text-xs">★</span>
+                <span className="font-medium">+7 ensuite</span>
+                <span className="text-muted-foreground">→ Nouvelle Carte Or</span>
               </div>
             </div>
           </CardContent>
