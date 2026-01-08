@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
 import BottomNav from "@/components/BottomNav";
 import { ArrowLeft, Heart } from "lucide-react";
@@ -95,12 +96,12 @@ const Favorites = () => {
               if (!listing) return null;
 
               return (
-                <Card key={fav.id} className="overflow-hidden">
+                <GlassCard key={fav.id} className="p-0">
                   <div className="flex gap-3 p-3">
                     <img
                       src={listing.images?.[0] || "/placeholder.svg"}
                       alt={listing.title}
-                      className="w-24 h-24 object-cover rounded-md"
+                      className="w-24 h-24 object-cover rounded-md cursor-pointer"
                       onClick={() => navigate(`/listing/${listing.id}`)}
                     />
                     <CardContent className="flex-1 p-0">
@@ -145,7 +146,7 @@ const Favorites = () => {
                       )}
                     </CardContent>
                   </div>
-                </Card>
+                </GlassCard>
               );
             })}
           </div>

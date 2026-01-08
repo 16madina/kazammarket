@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import BottomNav from "@/components/BottomNav";
 import { Card } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -162,7 +163,7 @@ const Categories = () => {
         {isLoading ? (
           <div className="grid grid-cols-2 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-              <Card key={i} className="overflow-hidden">
+              <Card variant="glass" key={i} className="overflow-hidden">
                 <Skeleton className="h-32 w-full" />
                 <div className="p-3">
                   <Skeleton className="h-4 w-full" />
@@ -177,12 +178,12 @@ const Categories = () => {
                 const fallbackImage = categoryImages[category.slug] || autresImg;
                 
                 return (
-                  <Card
+                  <GlassCard
                     key={category.id}
-                    className="relative overflow-hidden cursor-pointer group hover:scale-105 transition-transform duration-200 shadow-md"
+                    className="cursor-pointer group hover:scale-105 transition-transform duration-200"
                     onClick={() => navigate(`/categories/${category.slug}`)}
                   >
-                    <div className="h-32 relative overflow-hidden">
+                    <div className="h-32 relative overflow-hidden rounded-t-xl">
                       <img 
                         src={fallbackImage} 
                         alt={category.name}
@@ -190,7 +191,7 @@ const Categories = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     </div>
-                    <div className="p-3 bg-background">
+                    <div className="p-3 bg-white/50 dark:bg-black/30 backdrop-blur-sm rounded-b-xl">
                       <p className="text-sm font-medium text-center line-clamp-2">
                         {category.name}
                       </p>
@@ -198,7 +199,7 @@ const Categories = () => {
                         {category.count} {category.count === 1 ? 'annonce' : 'annonces'}
                       </p>
                     </div>
-                  </Card>
+                  </GlassCard>
                 );
               })}
             </div>
@@ -208,9 +209,9 @@ const Categories = () => {
                 const fallbackImage = categoryImages[category.slug] || autresImg;
                 
                 return (
-                  <Card
+                  <GlassCard
                     key={category.id}
-                    className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+                    className="cursor-pointer"
                     onClick={() => navigate(`/categories/${category.slug}`)}
                   >
                     <div className="flex gap-4 p-4">
@@ -233,7 +234,7 @@ const Categories = () => {
                         </div>
                       </div>
                     </div>
-                  </Card>
+                  </GlassCard>
                 );
               })}
             </div>

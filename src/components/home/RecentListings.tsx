@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
+import { GlassCard } from "@/components/ui/glass-card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Navigation, Rocket, Sparkles } from "lucide-react";
@@ -359,14 +360,13 @@ const RecentListings = () => {
 
   // Fonction de rendu pour une carte d'annonce
   const renderListingCard = (listing: any, index: number) => (
-    <Card 
+    <GlassCard 
       key={listing.id}
-      variant="glass"
-      className="overflow-hidden cursor-pointer animate-fade-in group"
+      className="cursor-pointer animate-fade-in group"
       style={{ animationDelay: `${index * 0.05}s` }}
       onClick={() => window.location.href = `/listing/${listing.id}`}
     >
-      <div className="aspect-[4/3] bg-muted relative overflow-hidden">
+      <div className="aspect-[4/3] bg-muted relative overflow-hidden rounded-t-xl">
         {listing.images?.[0] ? (
           <img
             src={listing.images[0]}
@@ -418,7 +418,7 @@ const RecentListings = () => {
           {formatRelativeTime(listing.created_at)}
         </div>
       </CardContent>
-    </Card>
+    </GlassCard>
   );
 
   // Composant skeleton pour le chargement
