@@ -15,9 +15,9 @@ const OpenApp = () => {
   const refCode = searchParams.get("ref");
   const targetPath = searchParams.get("path") || "/";
   
-  // Store IDs - Replace with actual IDs when published
-  const APP_STORE_ID = "YOUR_APP_STORE_ID";
-  const PLAY_STORE_ID = "com.ayoka.market";
+  // Store IDs
+  const APP_STORE_ID = "6756237345";
+  const PLAY_STORE_ID = "app.lovable.fdde6a57c0ea45b0bd6d4e42d3d22471";
   
   // URLs
   const appStoreUrl = `https://apps.apple.com/app/id${APP_STORE_ID}`;
