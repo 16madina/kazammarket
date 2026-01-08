@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Share2, Gift, Rocket, Users, CheckCircle2, Clock } from "lucide-react";
+import { ArrowLeft, Share2, Gift, Rocket, Users, CheckCircle2, Clock, Archive } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -170,10 +170,11 @@ const ReferralPage = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="cards" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="cards">Cartes Boost</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="cards">Cartes</TabsTrigger>
+            <TabsTrigger value="archived">Archivées</TabsTrigger>
             <TabsTrigger value="referrals">Filleuls</TabsTrigger>
-            <TabsTrigger value="boosts">Boosts actifs</TabsTrigger>
+            <TabsTrigger value="boosts">Boosts</TabsTrigger>
           </TabsList>
 
           <TabsContent value="cards" className="mt-4">
@@ -184,6 +185,53 @@ const ReferralPage = () => {
                 setShowSelectListing(true);
               }}
             />
+          </TabsContent>
+
+          <TabsContent value="archived" className="mt-4 space-y-3">
+            {usedCards.length === 0 ? (
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-8 text-center">
+                  <Archive className="h-10 w-10 text-muted-foreground mb-3" />
+                  <p className="text-muted-foreground">Aucune carte archivée</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Les cartes utilisées apparaîtront ici
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                {usedCards.map((card) => {
+                  const tier = card.tier || (card.duration_days >= 7 ? 'gold' : card.duration_days >= 3 ? 'silver' : 'bronze');
+                  const tierLabel = tier === 'gold' ? '★ Or' : tier === 'silver' ? '◆ Argent' : '● Bronze';
+                  const tierColors = {
+                    gold: 'from-yellow-500/20 to-amber-500/20 border-yellow-500/30',
+                    silver: 'from-slate-400/20 to-slate-500/20 border-slate-400/30',
+                    bronze: 'from-amber-600/20 to-orange-600/20 border-amber-500/30',
+                  };
+                  
+                  return (
+                    <Card 
+                      key={card.id} 
+                      className={`bg-gradient-to-br ${tierColors[tier as keyof typeof tierColors]} border opacity-60`}
+                    >
+                      <CardContent className="p-4 text-center">
+                        <Badge variant="secondary" className="mb-2 text-xs">
+                          {tierLabel}
+                        </Badge>
+                        <p className="text-sm font-medium">{card.duration_days} jours</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Utilisée {card.used_at && formatDistanceToNow(new Date(card.used_at), { addSuffix: true, locale: fr })}
+                        </p>
+                        <Badge variant="outline" className="mt-2 text-xs">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Utilisée
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="referrals" className="mt-4 space-y-3">
