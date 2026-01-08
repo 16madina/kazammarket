@@ -193,10 +193,26 @@ const App = () => {
     }
   };
 
-  // Force splash on page load (always show at least short version)
-  const [showSplash, setShowSplash] = useState(true);
+  const safeSessionGet = (key: string): string | null => {
+    try {
+      return sessionStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  };
+
+  // Only show splash on initial app load, not on internal navigation
+  // Check if splash was already shown in this session
+  const [showSplash, setShowSplash] = useState(() => {
+    const alreadyShown = safeSessionGet("splashShownThisSession");
+    return !alreadyShown;
+  });
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(() => {
+    // If splash already shown, show content immediately
+    const alreadyShown = safeSessionGet("splashShownThisSession");
+    return !!alreadyShown;
+  });
 
   const handleSplashFinish = () => {
     setIsTransitioning(true);
@@ -210,6 +226,7 @@ const App = () => {
         markFullSplashSeen();
       }
       safeSessionSet("hasSeenSplash", "true");
+      safeSessionSet("splashShownThisSession", "true");
     } catch {
       // ignore
     }

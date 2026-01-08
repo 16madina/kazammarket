@@ -103,23 +103,26 @@ export async function geocodeLocation(
 export function getUserLocation(): Promise<{ lat: number; lng: number } | null> {
   return new Promise((resolve) => {
     if (!('geolocation' in navigator)) {
+      console.log('Geolocation not available in navigator');
       resolve(null);
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log('📍 Geolocation success:', position.coords.latitude, position.coords.longitude);
         resolve({
           lat: position.coords.latitude,
           lng: position.coords.longitude
         });
       },
       (error) => {
-        console.log('Geolocation error:', error);
+        console.log('Geolocation error:', error.code, error.message);
         resolve(null);
       },
       {
-        timeout: 5000,
+        enableHighAccuracy: false, // false is faster and works better on iOS
+        timeout: 10000, // 10 seconds timeout for iOS
         maximumAge: 300000 // Cache for 5 minutes
       }
     );

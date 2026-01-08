@@ -50,15 +50,15 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/25 to-background" />
       </div>
 
-      {/* Bouton Noter AYOKA - En haut à droite avec animation brillance */}
+      {/* Bouton Noter AYOKA - En haut à droite, compact sur mobile */}
       <button 
         onClick={openAppStore}
-        className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-2 min-h-[44px] text-xs font-medium text-white bg-white/15 backdrop-blur-md border border-white/20 rounded-full shadow-lg transition-all duration-300 hover:bg-white/25 active:bg-white/30 hover:scale-105 hover:shadow-xl animate-fade-in group overflow-hidden touch-manipulation"
+        className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2 py-1 md:px-3 md:py-2 min-h-[32px] md:min-h-[44px] text-[10px] md:text-xs font-medium text-white bg-white/15 backdrop-blur-md border border-white/20 rounded-full shadow-lg transition-all duration-300 hover:bg-white/25 active:bg-white/30 hover:scale-105 hover:shadow-xl animate-fade-in group overflow-hidden touch-manipulation"
         style={{ animationDelay: "0.8s", WebkitTapHighlightColor: 'transparent' }}
       >
         {/* Effet brillance animé */}
         <span className="absolute inset-0 -translate-x-full animate-[shimmer_3s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
-        <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400 relative z-10" />
+        <Star className="h-3 w-3 md:h-3.5 md:w-3.5 text-yellow-400 fill-yellow-400 relative z-10" />
         <span className="relative z-10">Noter AYOKA</span>
       </button>
       
