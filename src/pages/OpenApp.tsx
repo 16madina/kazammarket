@@ -12,18 +12,34 @@ const OpenApp = () => {
   const [isRedirecting, setIsRedirecting] = useState(true);
   const [platform, setPlatform] = useState<"ios" | "android" | "web">("web");
   
+  // Get all possible parameters
   const refCode = searchParams.get("ref");
-  const targetPath = searchParams.get("path") || "/";
+  const listingId = searchParams.get("listing");
+  const sellerId = searchParams.get("seller");
+  const pathParam = searchParams.get("path");
+  
+  // Determine target path based on parameters
+  const getTargetPath = () => {
+    if (listingId) return `/listing/${listingId}`;
+    if (sellerId) return `/seller/${sellerId}`;
+    if (pathParam) return pathParam;
+    return "/";
+  };
+  
+  const targetPath = getTargetPath();
   
   // Store IDs
   const APP_STORE_ID = "6756237345";
   const PLAY_STORE_ID = "com.ayoka.market";
   
+  // Build query string for deep link
+  const queryParams = refCode ? `?ref=${refCode}` : "";
+  
   // URLs
   const appStoreUrl = `https://apps.apple.com/app/id${APP_STORE_ID}`;
   const playStoreUrl = `https://play.google.com/store/apps/details?id=${PLAY_STORE_ID}`;
-  const customSchemeUrl = `ayokamarket://${targetPath}${refCode ? `?ref=${refCode}` : ""}`;
-  const universalLinkUrl = `https://ayokamarket.com${targetPath}${refCode ? `?ref=${refCode}` : ""}`;
+  const customSchemeUrl = `ayokamarket://${targetPath}${queryParams}`;
+  const universalLinkUrl = `https://ayokamarket.com${targetPath}${queryParams}`;
 
   useEffect(() => {
     // Detect platform
@@ -64,7 +80,7 @@ const OpenApp = () => {
       } else {
         // On web, redirect to the target path
         setIsRedirecting(false);
-        navigate(targetPath + (refCode ? `?ref=${refCode}` : ""));
+        navigate(targetPath + queryParams);
       }
     };
 
@@ -80,7 +96,7 @@ const OpenApp = () => {
   };
 
   const handleContinueWeb = () => {
-    navigate(targetPath + (refCode ? `?ref=${refCode}` : ""));
+    navigate(targetPath + queryParams);
   };
 
   if (isRedirecting) {

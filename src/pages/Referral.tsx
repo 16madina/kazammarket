@@ -59,7 +59,7 @@ const ReferralPage = () => {
     }
     
     const shareText = `🎁 Rejoins AYOKA MARKET avec mon code parrain ${referralCode} et découvre des milliers d'annonces près de chez toi ! 🛍️✨`;
-    const shareUrl = `https://ayokamarket.com?ref=${referralCode}`;
+    const shareUrl = `https://ayokamarket.com/open-app?ref=${referralCode}`;
     const fullMessage = `${shareText}\n\n👉 ${shareUrl}`;
     
     // Check if Web Share API is available and can share

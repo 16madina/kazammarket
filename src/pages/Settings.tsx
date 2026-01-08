@@ -149,22 +149,25 @@ const Settings = () => {
   };
 
   const handleShare = async () => {
+    const shareUrl = "https://ayokamarket.com/open-app";
+    const shareText = "Découvrez AYOKA MARKET - Achetez et vendez facilement !";
+    
     if (navigator.share) {
       try {
         await navigator.share({
           title: 'AYOKA MARKET',
-          text: 'Découvrez AYOKA MARKET - Achetez et vendez facilement !',
-          url: window.location.origin
+          text: shareText,
+          url: shareUrl
         });
         toast.success('Application partagée avec succès');
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
-          navigator.clipboard.writeText(window.location.origin);
+          navigator.clipboard.writeText(shareUrl);
           toast.success('Lien copié dans le presse-papiers');
         }
       }
     } else {
-      navigator.clipboard.writeText(window.location.origin);
+      navigator.clipboard.writeText(shareUrl);
       toast.success('Lien copié dans le presse-papiers');
     }
   };

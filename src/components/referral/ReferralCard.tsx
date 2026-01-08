@@ -37,7 +37,7 @@ export const ReferralCard = () => {
     if (!referralCode) return;
     
     const shareText = `Rejoins AYOKA MARKET avec mon code parrain ${referralCode} et découvre des milliers d'annonces ! 🛍️`;
-    const shareUrl = `https://ayokamarket.com?ref=${referralCode}`;
+    const shareUrl = `https://ayokamarket.com/open-app?ref=${referralCode}`;
     
     if (navigator.share) {
       try {

@@ -359,7 +359,7 @@ const Profile = () => {
               variant="ghost" 
               size="icon"
               onClick={async () => {
-                const shareUrl = `${window.location.origin}/seller/${user?.id}`;
+                const shareUrl = `https://ayokamarket.com/open-app?seller=${user?.id}`;
                 const shareData = {
                   title: `Profil de ${fullName} sur AYOKA`,
                   text: `Découvrez le profil de ${fullName} sur AYOKA Market`,

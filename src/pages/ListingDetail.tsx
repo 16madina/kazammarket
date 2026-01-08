@@ -189,9 +189,9 @@ const ListingDetail = () => {
     
     const currency = userProfile?.currency || "FCFA";
     const shareText = listing.price === 0 
-      ? `${listing.title} - Gratuit` 
-      : `${listing.title} - ${formatPrice(listing.price, currency)}`;
-    const shareUrl = window.location.href;
+      ? `${listing.title} - Gratuit sur AYOKA Market` 
+      : `${listing.title} - ${formatPrice(listing.price, currency)} sur AYOKA Market`;
+    const shareUrl = `https://ayokamarket.com/open-app?listing=${listing.id}`;
 
     if (method === "copy") {
       navigator.clipboard.writeText(shareUrl);
