@@ -14,7 +14,6 @@ import { useOnboarding } from "@/hooks/useOnboarding";
 import { Button } from "@/components/ui/button";
 import { MapIcon } from "lucide-react";
 import { BoostPromoButton } from "@/components/referral/BoostPromoButton";
-
 const Index = () => {
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -58,8 +57,6 @@ const Index = () => {
         open={!welcomeCompleted}
         onComplete={completeWelcome}
       />
-      
-      <BoostPromoButton />
       
       <BottomNav />
     </div>

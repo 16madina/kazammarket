@@ -1,4 +1,4 @@
-import { Search, Star } from "lucide-react";
+import { Search, Star, Rocket } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import ayokaMarketLogo from "@/assets/ayoka-market-final-logo.png";
@@ -7,6 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import { useHeroCarousel } from "@/hooks/useHeroCarousel";
 import { useAppRating } from "@/hooks/useAppRating";
+import { useReferral } from "@/hooks/useReferral";
+import { useHaptics } from "@/hooks/useHaptics";
+import { BoostPromoButton } from "@/components/referral/BoostPromoButton";
 
 const HeroSection = () => {
   const {
@@ -18,6 +21,9 @@ const HeroSection = () => {
     currentImage
   } = useHeroCarousel();
   const { openAppStore } = useAppRating();
+  const { availableCards } = useReferral();
+  const haptics = useHaptics();
+  const [boostDialogOpen, setBoostDialogOpen] = useState(false);
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +67,34 @@ const HeroSection = () => {
         <Star className="h-3 w-3 md:h-3.5 md:w-3.5 text-yellow-400 fill-yellow-400 relative z-10" />
         <span className="relative z-10">Noter AYOKA</span>
       </button>
+
+      {/* Bouton Boost - À gauche dans le hero */}
+      <button
+        onClick={() => {
+          haptics.medium();
+          setBoostDialogOpen(true);
+        }}
+        className="absolute left-0 top-1/3 z-10 flex items-center gap-1.5 
+          bg-gradient-to-r from-primary to-primary/80 text-primary-foreground
+          pl-2 pr-3 py-2.5 rounded-r-full shadow-lg
+          hover:shadow-xl hover:scale-105 active:scale-95
+          transition-all duration-300 group animate-boost-hero"
+        style={{
+          writingMode: 'vertical-rl',
+          textOrientation: 'mixed',
+        }}
+      >
+        <Rocket className="h-4 w-4 rotate-90 group-hover:animate-bounce" />
+        <span className="text-xs font-semibold tracking-wide">Boost</span>
+        {availableCards.length > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold animate-pulse">
+            {availableCards.length}
+          </span>
+        )}
+      </button>
       
+      {/* Boost Dialog */}
+      <BoostPromoButton isOpen={boostDialogOpen} onOpenChange={setBoostDialogOpen} />
       
       <div className="relative h-full flex flex-col items-center justify-center px-4 text-center">
         <div className="flex flex-col items-center animate-fade-in mb-4">
@@ -96,6 +129,24 @@ const HeroSection = () => {
           </Button>
         </div>
       </div>
+      
+      {/* Boost button animation */}
+      <style>{`
+        @keyframes boostSlideInHero {
+          0% {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-boost-hero {
+          animation: boostSlideInHero 0.6s ease-out 0.5s forwards;
+          transform: translateX(-100%);
+        }
+      `}</style>
     </div>;
 };
 export default HeroSection;

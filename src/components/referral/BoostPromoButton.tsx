@@ -13,8 +13,16 @@ import { toast } from "sonner";
 import ayokaLogo from "@/assets/ayoka-logo.png";
 import { useHaptics } from "@/hooks/useHaptics";
 
-export const BoostPromoButton = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface BoostPromoButtonProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export const BoostPromoButton = ({ isOpen: controlledIsOpen, onOpenChange }: BoostPromoButtonProps = {}) => {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  const setIsOpen = onOpenChange || setInternalIsOpen;
+  
   const [copied, setCopied] = useState(false);
   const { referralCode, referralCount, availableCards } = useReferral();
   const navigate = useNavigate();
@@ -87,31 +95,6 @@ export const BoostPromoButton = () => {
 
   return (
     <>
-      {/* Floating Boost Button */}
-      <button
-        onClick={() => {
-          haptics.medium();
-          setIsOpen(true);
-        }}
-        className="fixed left-0 top-1/4 z-50 flex items-center gap-1.5 
-          bg-gradient-to-r from-primary to-primary/80 text-primary-foreground
-          pl-2 pr-3 py-2.5 rounded-r-full shadow-lg
-          hover:shadow-xl hover:scale-105 active:scale-95
-          transition-all duration-300 group animate-boost-button"
-        style={{
-          writingMode: 'vertical-rl',
-          textOrientation: 'mixed',
-        }}
-      >
-        <Rocket className="h-4 w-4 rotate-90 group-hover:animate-bounce" />
-        <span className="text-xs font-semibold tracking-wide">Boost</span>
-        {availableCards.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold animate-pulse">
-            {availableCards.length}
-          </span>
-        )}
-      </button>
-
       {/* Promo Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-0">
@@ -259,8 +242,38 @@ export const BoostPromoButton = () => {
           </div>
         </DialogContent>
       </Dialog>
+    </>
+  );
+};
 
-      {/* Custom animations */}
+// Export the trigger button separately for use in HeroSection
+export const BoostPromoTrigger = ({ onClick, availableCardsCount }: { onClick: () => void; availableCardsCount: number }) => {
+  const haptics = useHaptics();
+  
+  return (
+    <button
+      onClick={() => {
+        haptics.medium();
+        onClick();
+      }}
+      className="absolute left-0 top-1/3 z-10 flex items-center gap-1.5 
+        bg-gradient-to-r from-primary to-primary/80 text-primary-foreground
+        pl-2 pr-3 py-2.5 rounded-r-full shadow-lg
+        hover:shadow-xl hover:scale-105 active:scale-95
+        transition-all duration-300 group animate-boost-button"
+      style={{
+        writingMode: 'vertical-rl',
+        textOrientation: 'mixed',
+      }}
+    >
+      <Rocket className="h-4 w-4 rotate-90 group-hover:animate-bounce" />
+      <span className="text-xs font-semibold tracking-wide">Boost</span>
+      {availableCardsCount > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold animate-pulse">
+          {availableCardsCount}
+        </span>
+      )}
+      
       <style>{`
         @keyframes boostSlideIn {
           0% {
@@ -277,6 +290,6 @@ export const BoostPromoButton = () => {
           transform: translateX(-100%);
         }
       `}</style>
-    </>
+    </button>
   );
 };
