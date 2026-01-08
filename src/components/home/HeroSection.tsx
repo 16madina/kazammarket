@@ -17,7 +17,7 @@ const HeroSection = () => {
   const {
     currentImage
   } = useHeroCarousel();
-  const { openAppStore, hasRated } = useAppRating();
+  const { openAppStore } = useAppRating();
   const [parallaxOffset, setParallaxOffset] = useState(0);
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -51,18 +51,17 @@ const HeroSection = () => {
       </div>
 
       {/* Bouton Noter AYOKA - En haut à droite avec animation brillance */}
-      {!hasRated && (
-        <button 
-          onClick={openAppStore}
-          className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-white/15 backdrop-blur-md border border-white/20 rounded-full shadow-lg transition-all duration-300 hover:bg-white/25 hover:scale-105 hover:shadow-xl animate-fade-in group overflow-hidden"
-          style={{ animationDelay: "0.8s" }}
-        >
-          {/* Effet brillance animé */}
-          <span className="absolute inset-0 -translate-x-full animate-[shimmer_3s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-          <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400 relative z-10" />
-          <span className="relative z-10">Noter AYOKA</span>
-        </button>
-      )}
+      <button 
+        onClick={openAppStore}
+        className="absolute top-4 right-4 z-10 flex items-center gap-1.5 px-3 py-2 min-h-[44px] text-xs font-medium text-white bg-white/15 backdrop-blur-md border border-white/20 rounded-full shadow-lg transition-all duration-300 hover:bg-white/25 active:bg-white/30 hover:scale-105 hover:shadow-xl animate-fade-in group overflow-hidden touch-manipulation"
+        style={{ animationDelay: "0.8s", WebkitTapHighlightColor: 'transparent' }}
+      >
+        {/* Effet brillance animé */}
+        <span className="absolute inset-0 -translate-x-full animate-[shimmer_3s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none" />
+        <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400 relative z-10" />
+        <span className="relative z-10">Noter AYOKA</span>
+      </button>
+      
       
       <div className="relative h-full flex flex-col items-center justify-center px-4 text-center">
         <div className="flex flex-col items-center animate-fade-in mb-4">

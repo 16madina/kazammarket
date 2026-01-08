@@ -149,12 +149,17 @@ export const ConversationList = ({
         return (
           <Card
             key={conv.id}
-            className={`p-3 cursor-pointer transition-colors hover:bg-accent ${
+            className={`p-3 cursor-pointer transition-colors active:bg-accent/80 hover:bg-accent touch-manipulation ${
               selectedConversationId === conv.id ? "bg-accent" : ""
             } ${hasUnread ? "border-l-4 border-l-primary" : ""}`}
-            onClick={() => onSelectConversation(conv.id)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onSelectConversation(conv.id);
+            }}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 pointer-events-none">
               <div className="relative shrink-0">
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={otherUser?.avatar_url || ""} />
