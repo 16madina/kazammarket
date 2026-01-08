@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +27,7 @@ const Profile = () => {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showVerificationAlert, setShowVerificationAlert] = useState(false);
+  const prevEmailVerifiedRef = useRef<boolean | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -107,7 +108,21 @@ const Profile = () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [user, refetchProfile]);
+  useEffect(() => {
+    const next = profile?.email_verified ?? null;
+    const prev = prevEmailVerifiedRef.current;
 
+    // Debug for iOS/Capacitor: helps confirm what the app is receiving.
+    if (next !== null) console.log("[Profile] email_verified:", next);
+
+    if (prev === false && next === true) {
+      toast.success("Email vérifié ✅", {
+        description: "Votre compte est maintenant vérifié.",
+      });
+    }
+
+    prevEmailVerifiedRef.current = next;
+  }, [profile?.email_verified]);
 
   const { data: listings, refetch: refetchListings } = useQuery({
     queryKey: ["user-listings", user?.id],
