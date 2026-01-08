@@ -93,16 +93,14 @@ export const BoostPromoButton = () => {
           haptics.medium();
           setIsOpen(true);
         }}
-        className="fixed left-0 top-1/4 z-40 flex items-center gap-1.5 
+        className="fixed left-0 top-1/4 z-50 flex items-center gap-1.5 
           bg-gradient-to-r from-primary to-primary/80 text-primary-foreground
           pl-2 pr-3 py-2.5 rounded-r-full shadow-lg
           hover:shadow-xl hover:scale-105 active:scale-95
-          transition-all duration-300 group
-          animate-[slideInLeft_0.6s_ease-out_1s_forwards,pulse-glow_2s_ease-in-out_2s_3]"
+          transition-all duration-300 group animate-boost-button"
         style={{
           writingMode: 'vertical-rl',
           textOrientation: 'mixed',
-          transform: 'translateX(-100%)',
         }}
       >
         <Rocket className="h-4 w-4 rotate-90 group-hover:animate-bounce" />
@@ -264,7 +262,7 @@ export const BoostPromoButton = () => {
 
       {/* Custom animations */}
       <style>{`
-        @keyframes slideInLeft {
+        @keyframes boostSlideIn {
           0% {
             transform: translateX(-100%);
             opacity: 0;
@@ -274,13 +272,9 @@ export const BoostPromoButton = () => {
             opacity: 1;
           }
         }
-        @keyframes pulse-glow {
-          0%, 100% {
-            box-shadow: 0 4px 15px rgba(var(--primary), 0.3);
-          }
-          50% {
-            box-shadow: 0 4px 25px rgba(var(--primary), 0.6), 0 0 30px rgba(var(--primary), 0.4);
-          }
+        .animate-boost-button {
+          animation: boostSlideIn 0.6s ease-out 0.5s forwards;
+          transform: translateX(-100%);
         }
       `}</style>
     </>
