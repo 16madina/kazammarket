@@ -14,6 +14,8 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    // Prevent "Invalid hook call" / dispatcher null by forcing a single React instance
+    dedupe: ["react", "react-dom"],
   },
   build: {
     rollupOptions: {
