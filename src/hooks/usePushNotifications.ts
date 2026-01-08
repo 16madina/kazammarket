@@ -191,8 +191,9 @@ export const usePushNotifications = () => {
         setIsRegistered(true);
         await saveTokenToDatabase(tokenResult.token);
 
-      } catch (error) {
-        console.error('❌ Error initializing FCM push notifications:', error);
+      } catch (error: any) {
+        console.error('❌ Error initializing FCM push notifications:', error?.message || error?.code || JSON.stringify(error) || error);
+        if (error?.stack) console.error('Stack:', error.stack);
       }
     };
 

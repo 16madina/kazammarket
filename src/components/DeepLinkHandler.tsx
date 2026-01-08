@@ -105,8 +105,9 @@ export const DeepLinkHandler = () => {
         return () => {
           listener.remove();
         };
-      } catch (error) {
-        console.error("Error initializing deep link handler:", error);
+      } catch (error: any) {
+        console.error("Error initializing deep link handler:", error?.message || error?.code || JSON.stringify(error) || error);
+        if (error?.stack) console.error("Stack:", error.stack);
       }
     };
 
