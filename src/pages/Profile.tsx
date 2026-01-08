@@ -312,13 +312,37 @@ const Profile = () => {
               variant="ghost" 
               size="icon"
               className="bg-background/80 backdrop-blur-sm hover:bg-background/90 rounded-full transition-all hover:scale-105 active:scale-95"
+              aria-label="Notifications"
             >
               <Bell className="h-5 w-5" />
             </Button>
             <Button 
               variant="ghost" 
               size="icon"
+              onClick={async () => {
+                const shareUrl = `${window.location.origin}/seller/${user?.id}`;
+                const shareData = {
+                  title: `Profil de ${fullName} sur AYOKA`,
+                  text: `Découvrez le profil de ${fullName} sur AYOKA Market`,
+                  url: shareUrl,
+                };
+                
+                try {
+                  if (navigator.share && navigator.canShare?.(shareData)) {
+                    await navigator.share(shareData);
+                  } else {
+                    await navigator.clipboard.writeText(shareUrl);
+                    toast.success("Lien copié dans le presse-papier !");
+                  }
+                } catch (error: any) {
+                  if (error.name !== 'AbortError') {
+                    await navigator.clipboard.writeText(shareUrl);
+                    toast.success("Lien copié dans le presse-papier !");
+                  }
+                }
+              }}
               className="bg-background/80 backdrop-blur-sm hover:bg-background/90 rounded-full transition-all hover:scale-105 active:scale-95"
+              aria-label="Partager mon profil"
             >
               <Share2 className="h-5 w-5" />
             </Button>

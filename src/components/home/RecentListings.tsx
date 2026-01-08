@@ -10,6 +10,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { sortListingsByLocation, getLocationPriority } from "@/utils/geographicFiltering";
 import { formatPriceWithConversion } from "@/utils/currency";
 import { getUserLocation, geocodeLocation, calculateDistance, formatDistance } from "@/utils/distanceCalculation";
+import { formatRelativeTime } from "@/utils/timeFormatting";
 
 const RecentListings = () => {
   const { t, language } = useLanguage();
@@ -411,6 +412,9 @@ const RecentListings = () => {
               <span className="text-xs">{formatDistance(listingDistances[listing.id])}</span>
             </div>
           )}
+        </div>
+        <div className="text-[10px] text-muted-foreground/60 mt-1.5">
+          {formatRelativeTime(listing.created_at)}
         </div>
       </CardContent>
     </Card>
