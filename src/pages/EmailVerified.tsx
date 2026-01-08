@@ -14,26 +14,44 @@ const EmailVerified = () => {
     // Handle email verification from URL params
     const handleVerification = async () => {
       const searchParams = new URLSearchParams(window.location.search);
-      const userId = searchParams.get('userId');
-      
+      const userId = searchParams.get("userId");
+
       if (userId) {
+        // Prevent multiple confirmations in the same session (iOS deep link can re-open the same URL)
+        const guardKey = `emailVerifiedProcessed:${userId}`;
+        try {
+          if (sessionStorage.getItem(guardKey) === "true") {
+            console.log("Email verification already processed in this session, skipping");
+            setIsProcessing(false);
+            return;
+          }
+        } catch {
+          // ignore
+        }
+
         try {
           // Call the confirm-email edge function
-          const { error } = await supabase.functions.invoke('confirm-email', {
-            body: { userId }
+          const { error } = await supabase.functions.invoke("confirm-email", {
+            body: { userId },
           });
-          
+
           if (error) {
             console.error("Error confirming email:", error);
             throw error;
           }
-          
+
+          try {
+            sessionStorage.setItem(guardKey, "true");
+          } catch {
+            // ignore
+          }
+
           console.log("Email verified successfully");
         } catch (error) {
           console.error("Failed to verify email:", error);
         }
       }
-      
+
       setIsProcessing(false);
     };
 
