@@ -171,10 +171,10 @@ const App = () => {
               isTransitioning ? "opacity-0 scale-110" : "opacity-100 scale-100"
             }`}
           >
-            <SplashScreen 
-              onFinish={handleSplashFinish} 
-              isShortVersion={isReturningUser}
-            />
+             <SplashScreen 
+               onFinish={handleSplashFinish} 
+               isShortVersion={false}
+             />
           </div>
         )}
         
