@@ -15,8 +15,8 @@ const SplashScreen = ({ onFinish, isShortVersion = false }: SplashScreenProps) =
   const { playStartupSound } = useSplashSound();
   const hasFinished = useRef(false);
 
-  const duration = isShortVersion ? 500 : 3000;
-  const fadeOutDuration = isShortVersion ? 300 : 800;
+  const duration = isShortVersion ? 800 : 2500;
+  const fadeOutDuration = isShortVersion ? 400 : 600;
 
   const safeFinish = useCallback(() => {
     if (hasFinished.current) return;
