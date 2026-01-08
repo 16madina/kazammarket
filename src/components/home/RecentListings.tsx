@@ -360,8 +360,9 @@ const RecentListings = () => {
   // Fonction de rendu pour une carte d'annonce
   const renderListingCard = (listing: any, index: number) => (
     <Card 
-      key={listing.id} 
-      className="overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer animate-fade-in group border-0 shadow-sm"
+      key={listing.id}
+      variant="glass"
+      className="overflow-hidden cursor-pointer animate-fade-in group"
       style={{ animationDelay: `${index * 0.05}s` }}
       onClick={() => window.location.href = `/listing/${listing.id}`}
     >
@@ -422,7 +423,7 @@ const RecentListings = () => {
 
   // Composant skeleton pour le chargement
   const SkeletonCard = () => (
-    <Card className="overflow-hidden border-0 shadow-sm">
+    <Card variant="glass" className="overflow-hidden">
       <Skeleton className="aspect-[4/3] w-full" />
       <CardContent className="p-4 space-y-3">
         <Skeleton className="h-5 w-full" />
