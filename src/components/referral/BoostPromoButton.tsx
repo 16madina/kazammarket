@@ -93,7 +93,7 @@ export const BoostPromoButton = () => {
           haptics.medium();
           setIsOpen(true);
         }}
-        className="fixed left-0 top-1/3 z-40 flex items-center gap-1.5 
+        className="fixed left-0 top-1/4 z-40 flex items-center gap-1.5 
           bg-gradient-to-r from-primary to-primary/80 text-primary-foreground
           pl-2 pr-3 py-2.5 rounded-r-full shadow-lg
           hover:shadow-xl hover:scale-105 active:scale-95
