@@ -14,6 +14,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { useHaptics } from "@/hooks/useHaptics";
 import { useWebPushNotifications } from "@/hooks/useWebPushNotifications";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { useNativeShare } from "@/hooks/useNativeShare";
 import {
   User,
   Heart,
@@ -86,6 +87,7 @@ const Settings = () => {
   
   const { openAppStore } = useAppRating();
   const { storageInfo, isClearing, clearAllCache } = useStorageInfo();
+  const { share } = useNativeShare();
 
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile", userId],
@@ -149,27 +151,11 @@ const Settings = () => {
   };
 
   const handleShare = async () => {
-    const shareUrl = "https://ayokamarket.com/open-app";
-    const shareText = "Découvrez AYOKA MARKET - Achetez et vendez facilement !";
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'AYOKA MARKET',
-          text: shareText,
-          url: shareUrl
-        });
-        toast.success('Application partagée avec succès');
-      } catch (err) {
-        if ((err as Error).name !== 'AbortError') {
-          navigator.clipboard.writeText(shareUrl);
-          toast.success('Lien copié dans le presse-papiers');
-        }
-      }
-    } else {
-      navigator.clipboard.writeText(shareUrl);
-      toast.success('Lien copié dans le presse-papiers');
-    }
+    await share({
+      title: 'AYOKA MARKET',
+      text: 'Découvrez AYOKA MARKET - Achetez et vendez facilement !',
+      url: 'https://ayokamarket.com/open-app',
+    });
   };
 
   const handleLogout = async () => {

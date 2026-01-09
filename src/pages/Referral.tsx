@@ -17,9 +17,11 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import { FaWhatsapp, FaFacebook, FaTwitter } from "react-icons/fa";
 import BottomNav from "@/components/BottomNav";
+import { useNativeShare } from "@/hooks/useNativeShare";
 
 const ReferralPage = () => {
   const navigate = useNavigate();
+  const { share } = useNativeShare();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedCard, setSelectedCard] = useState<BoostCard | null>(null);
   const [showSelectListing, setShowSelectListing] = useState(false);
@@ -58,47 +60,11 @@ const ReferralPage = () => {
       return;
     }
     
-    const shareText = `🎁 Rejoins AYOKA MARKET avec mon code parrain ${referralCode} et découvre des milliers d'annonces près de chez toi ! 🛍️✨`;
-    const shareUrl = `https://ayokamarket.com/open-app?ref=${referralCode}`;
-    const fullMessage = `${shareText}\n\n👉 ${shareUrl}`;
-    
-    // Check if Web Share API is available and can share
-    if (navigator.share && navigator.canShare) {
-      try {
-        const shareData = {
-          title: "AYOKA MARKET - Parrainage",
-          text: shareText,
-          url: shareUrl,
-        };
-        
-        // Check if this data can be shared
-        if (navigator.canShare(shareData)) {
-          await navigator.share(shareData);
-          return;
-        }
-      } catch (error: any) {
-        // If user cancelled, don't show error
-        if (error.name === 'AbortError') {
-          return;
-        }
-        console.log('Share failed, falling back to clipboard:', error);
-      }
-    }
-    
-    // Fallback: copy to clipboard
-    try {
-      await navigator.clipboard.writeText(fullMessage);
-      toast({
-        title: "✅ Lien copié !",
-        description: "Collez-le dans WhatsApp, Facebook ou SMS pour le partager",
-      });
-    } catch (clipboardError) {
-      // Ultimate fallback: prompt user to copy manually
-      toast({
-        title: "Code de parrainage",
-        description: `Copiez ce code: ${referralCode}`,
-      });
-    }
+    await share({
+      title: "AYOKA MARKET - Parrainage",
+      text: `🎁 Rejoins AYOKA MARKET avec mon code parrain ${referralCode} et découvre des milliers d'annonces près de chez toi ! 🛍️✨`,
+      url: `https://ayokamarket.com/open-app?ref=${referralCode}`,
+    });
   };
 
   if (!isAuthenticated) {

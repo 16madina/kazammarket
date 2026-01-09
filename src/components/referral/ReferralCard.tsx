@@ -7,6 +7,7 @@ import { Share2, Copy, Gift, Rocket, Users, CheckCircle2 } from "lucide-react";
 import { useReferral } from "@/hooks/useReferral";
 import { toast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNativeShare } from "@/hooks/useNativeShare";
 
 export const ReferralCard = () => {
   const {
@@ -19,6 +20,7 @@ export const ReferralCard = () => {
     progressToNextCard,
     isLoading,
   } = useReferral();
+  const { share } = useNativeShare();
 
   const [isCopying, setIsCopying] = useState(false);
 
@@ -36,26 +38,11 @@ export const ReferralCard = () => {
   const handleShare = async () => {
     if (!referralCode) return;
     
-    const shareText = `Rejoins AYOKA MARKET avec mon code parrain ${referralCode} et découvre des milliers d'annonces ! 🛍️`;
-    const shareUrl = `https://ayokamarket.com/open-app?ref=${referralCode}`;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "AYOKA MARKET - Parrainage",
-          text: shareText,
-          url: shareUrl,
-        });
-      } catch (error) {
-        // User cancelled or error
-      }
-    } else {
-      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-      toast({
-        title: "Lien copié !",
-        description: "Partagez-le sur vos réseaux",
-      });
-    }
+    await share({
+      title: "AYOKA MARKET - Parrainage",
+      text: `Rejoins AYOKA MARKET avec mon code parrain ${referralCode} et découvre des milliers d'annonces ! 🛍️`,
+      url: `https://ayokamarket.com/open-app?ref=${referralCode}`,
+    });
   };
 
   if (isLoading) {

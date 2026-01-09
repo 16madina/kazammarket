@@ -12,6 +12,7 @@ import { ReviewCard } from "@/components/profile/ReviewCard";
 import { toast } from "sonner";
 import { LogOut, Edit, Settings, Shield, Bell, Share2, ArrowLeft, Users, Star, MapPin, Calendar, Package, TrendingUp, Award, Heart, Receipt, CheckCircle2, X, Mail, CheckCircle, Gift } from "lucide-react";
 import { toast as toastHook } from "@/hooks/use-toast";
+import { useNativeShare } from "@/hooks/useNativeShare";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,7 @@ import {
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { share } = useNativeShare();
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [showVerificationAlert, setShowVerificationAlert] = useState(false);
@@ -358,27 +360,12 @@ const Profile = () => {
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={async () => {
-                const shareUrl = `https://ayokamarket.com/open-app?seller=${user?.id}`;
-                const shareData = {
+              onClick={() => {
+                share({
                   title: `Profil de ${fullName} sur AYOKA`,
                   text: `Découvrez le profil de ${fullName} sur AYOKA Market`,
-                  url: shareUrl,
-                };
-                
-                try {
-                  if (navigator.share && navigator.canShare?.(shareData)) {
-                    await navigator.share(shareData);
-                  } else {
-                    await navigator.clipboard.writeText(shareUrl);
-                    toast.success("Lien copié dans le presse-papier !");
-                  }
-                } catch (error: any) {
-                  if (error.name !== 'AbortError') {
-                    await navigator.clipboard.writeText(shareUrl);
-                    toast.success("Lien copié dans le presse-papier !");
-                  }
-                }
+                  url: `https://ayokamarket.com/open-app?seller=${user?.id}`,
+                });
               }}
               className="bg-background/80 backdrop-blur-sm hover:bg-background/90 rounded-full transition-all hover:scale-105 active:scale-95"
               aria-label="Partager mon profil"

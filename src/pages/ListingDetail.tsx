@@ -20,10 +20,12 @@ import { translateCondition } from "@/utils/translations";
 import { formatPrice } from "@/utils/currency";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useNativeShare } from "@/hooks/useNativeShare";
 
 const ListingDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { share } = useNativeShare();
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
   const { data: user } = useQuery({
@@ -212,18 +214,12 @@ const ListingDetail = () => {
       return;
     }
 
-    // Native share
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: listing.title,
-          text: shareText,
-          url: shareUrl,
-        });
-      } catch (error) {
-        console.error("Share error:", error);
-      }
-    }
+    // Native share using Capacitor
+    await share({
+      title: listing.title,
+      text: shareText,
+      url: shareUrl,
+    });
     setShareDialogOpen(false);
   };
 

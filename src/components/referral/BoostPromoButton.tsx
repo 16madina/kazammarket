@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import ayokaLogo from "@/assets/ayoka-logo.png";
 import { useHaptics } from "@/hooks/useHaptics";
+import { useNativeShare } from "@/hooks/useNativeShare";
 
 interface BoostPromoButtonProps {
   isOpen?: boolean;
@@ -27,29 +28,17 @@ export const BoostPromoButton = ({ isOpen: controlledIsOpen, onOpenChange }: Boo
   const { referralCode, referralCount, availableCards } = useReferral();
   const navigate = useNavigate();
   const haptics = useHaptics();
+  const { share } = useNativeShare();
 
   const handleShare = async () => {
-    const shareUrl = `https://ayokamarket.com/open-app?ref=${referralCode}`;
-    const shareText = `🎁 Rejoins AYOKA Market avec mon code ${referralCode} et obtiens des récompenses ! Télécharge l'app ici : ${shareUrl}`;
+    const success = await share({
+      title: "Rejoins AYOKA Market !",
+      text: `🎁 Rejoins AYOKA Market avec mon code ${referralCode} et obtiens des récompenses !`,
+      url: `https://ayokamarket.com/open-app?ref=${referralCode}`,
+    });
     
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "Rejoins AYOKA Market !",
-          text: shareText,
-          url: shareUrl,
-        });
-        haptics.success();
-      } else {
-        await navigator.clipboard.writeText(shareText);
-        toast.success("Message copié !");
-        haptics.medium();
-      }
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        await navigator.clipboard.writeText(shareText);
-        toast.success("Message copié !");
-      }
+    if (success) {
+      haptics.success();
     }
   };
 
