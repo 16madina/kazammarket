@@ -11,9 +11,13 @@
           "/listing/*",
           "/messages",
           "/profile/*",
+          "/seller/*",
           "/email-verified",
           "/reset-password",
-          "/open/*"
+          "/open/*",
+          "/open-app",
+          "/open-app/*",
+          "/*"
         ]
       }
     ]
