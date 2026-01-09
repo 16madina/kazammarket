@@ -1,0 +1,25 @@
+<!-- Intent Filters pour AYOKA MARKET Deep Links -->
+<!-- À ajouter dans android/app/src/main/AndroidManifest.xml dans la balise <activity> -->
+
+<!-- App Links - HTTPS (vérifiés automatiquement via assetlinks.json) -->
+<intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="https" android:host="ayokamarket.com" />
+</intent-filter>
+
+<intent-filter android:autoVerify="true">
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="https" android:host="www.ayokamarket.com" />
+</intent-filter>
+
+<!-- Custom URL Scheme (ne nécessite pas de vérification) -->
+<intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="ayokamarket" />
+</intent-filter>
