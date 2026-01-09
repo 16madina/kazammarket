@@ -59,29 +59,27 @@ const OpenApp = () => {
       localStorage.setItem("pendingReferralCode", refCode);
     }
 
-    // Web: route inside the SPA
-    if (detected === "web") {
+    // For mobile: try to open the native app via custom scheme
+    if (detected !== "web") {
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = customSchemeUrl;
+      document.body.appendChild(iframe);
+
+      const timer = window.setTimeout(() => {
+        setIsRedirecting(false);
+        if (document.body.contains(iframe)) document.body.removeChild(iframe);
+      }, 2000);
+
+      return () => {
+        window.clearTimeout(timer);
+        if (document.body.contains(iframe)) document.body.removeChild(iframe);
+      };
+    } else {
+      // For web: just show the page immediately
       setIsRedirecting(false);
-      navigate(targetPath + queryParams, { replace: true });
-      return;
     }
-
-    // Mobile: try to open the native app via custom scheme.
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-    iframe.src = customSchemeUrl;
-    document.body.appendChild(iframe);
-
-    const timer = window.setTimeout(() => {
-      setIsRedirecting(false);
-      if (document.body.contains(iframe)) document.body.removeChild(iframe);
-    }, 2000);
-
-    return () => {
-      window.clearTimeout(timer);
-      if (document.body.contains(iframe)) document.body.removeChild(iframe);
-    };
-  }, [refCode, targetPath, navigate, customSchemeUrl, queryParams]);
+  }, [refCode, customSchemeUrl]);
 
   const handleOpenStore = () => {
     if (platform === "ios") {
