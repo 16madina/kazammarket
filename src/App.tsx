@@ -165,8 +165,6 @@ const AppContent = () => {
           <Route path="/admin/notifications" element={<AdminNotifications />} />
           <Route path="/map" element={<MapView />} />
           <Route path="/referral" element={<Referral />} />
-          <Route path="/open" element={<OpenApp />} />
-          <Route path="/open/*" element={<OpenApp />} />
           <Route path="/open-app" element={<OpenApp />} />
           <Route path="/open-app/*" element={<OpenApp />} />
           <Route path="*" element={<NotFound />} />
