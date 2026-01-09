@@ -125,7 +125,7 @@ const ReferralPage = () => {
                   size="sm"
                   className="bg-[#25D366] hover:bg-[#128C7E] text-white"
                   onClick={() => {
-                    const text = encodeURIComponent(`🎁 Rejoins AYOKA MARKET avec mon code parrain ${referralCode} et découvre des milliers d'annonces près de chez toi ! 🛍️✨\n\n👉 https://ayokamarket.com?ref=${referralCode}`);
+                    const text = encodeURIComponent(`🎁 Rejoins AYOKA MARKET avec mon code parrain ${referralCode} et découvre des milliers d'annonces près de chez toi ! 🛍️✨\n\n👉 https://ayokamarket.com/open-app?ref=${referralCode}`);
                     window.open(`https://wa.me/?text=${text}`, '_blank');
                   }}
                 >
@@ -136,7 +136,7 @@ const ReferralPage = () => {
                   size="sm"
                   className="bg-[#1877F2] hover:bg-[#0d65d9] text-white"
                   onClick={() => {
-                    const url = encodeURIComponent(`https://ayokamarket.com?ref=${referralCode}`);
+                    const url = encodeURIComponent(`https://ayokamarket.com/open-app?ref=${referralCode}`);
                     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
                   }}
                 >
@@ -148,7 +148,7 @@ const ReferralPage = () => {
                   className="bg-[#1DA1F2] hover:bg-[#0c85d0] text-white"
                   onClick={() => {
                     const text = encodeURIComponent(`🎁 Rejoins AYOKA MARKET avec mon code parrain ${referralCode} ! 🛍️✨`);
-                    const url = encodeURIComponent(`https://ayokamarket.com?ref=${referralCode}`);
+                    const url = encodeURIComponent(`https://ayokamarket.com/open-app?ref=${referralCode}`);
                     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'width=600,height=400');
                   }}
                 >

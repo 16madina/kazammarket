@@ -167,6 +167,8 @@ const AppContent = () => {
           <Route path="/referral" element={<Referral />} />
           <Route path="/open" element={<OpenApp />} />
           <Route path="/open/*" element={<OpenApp />} />
+          <Route path="/open-app" element={<OpenApp />} />
+          <Route path="/open-app/*" element={<OpenApp />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <NotificationPermissionPrompt />
