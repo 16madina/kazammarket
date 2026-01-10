@@ -181,6 +181,61 @@ export type Database = {
           },
         ]
       }
+      call_signals: {
+        Row: {
+          caller_id: string
+          conversation_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          receiver_id: string
+          signal_data: Json | null
+          signal_type: string
+        }
+        Insert: {
+          caller_id: string
+          conversation_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          receiver_id: string
+          signal_data?: Json | null
+          signal_type: string
+        }
+        Update: {
+          caller_id?: string
+          conversation_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          receiver_id?: string
+          signal_data?: Json | null
+          signal_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_signals_caller_id_fkey"
+            columns: ["caller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_signals_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_signals_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           created_at: string
