@@ -42,6 +42,7 @@ import Transactions from "./pages/Transactions";
 import SellerBadgesInfo from "./pages/settings/SellerBadges";
 import Referral from "./pages/Referral";
 import OpenApp from "./pages/OpenApp";
+import Download from "./pages/Download";
 
 import TestCamera from "./pages/TestCamera";
 import AdminPerformance from "./pages/AdminPerformance";
@@ -167,6 +168,7 @@ const AppContent = () => {
           <Route path="/referral" element={<Referral />} />
           <Route path="/open-app" element={<OpenApp />} />
           <Route path="/open-app/*" element={<OpenApp />} />
+          <Route path="/download" element={<Download />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <NotificationPermissionPrompt />
