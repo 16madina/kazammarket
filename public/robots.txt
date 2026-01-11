@@ -13,9 +13,11 @@ Allow: /
 User-agent: *
 Allow: /
 
+# Canonical URL (redirect www to non-www, http to https)
+Host: https://ayokamarket.com
+
 # Dynamic Sitemap (includes all listings and sellers)
 Sitemap: https://lczzyelucnfvkicwdbbe.supabase.co/functions/v1/sitemap
 
 # Static Sitemap fallback
-Sitemap: https://ayoka.market/sitemap.xml
-Allow: /
+Sitemap: https://ayokamarket.com/sitemap.xml

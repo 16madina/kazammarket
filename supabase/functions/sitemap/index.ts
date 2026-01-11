@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const baseUrl = "https://ayoka.market";
+    const baseUrl = "https://ayokamarket.com";
     const today = new Date().toISOString().split("T")[0];
 
     // Fetch active listings
@@ -201,7 +201,7 @@ Deno.serve(async (req) => {
       `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://ayoka.market/</loc>
+    <loc>https://ayokamarket.com/</loc>
     <lastmod>${new Date().toISOString().split("T")[0]}</lastmod>
     <priority>1.0</priority>
   </url>
