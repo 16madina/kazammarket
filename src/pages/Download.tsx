@@ -53,9 +53,9 @@ const Download = () => {
               className="transition-transform hover:scale-105"
             >
               <img 
-                src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/fr-fr?size=250x83"
+                src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
                 alt="Télécharger sur l'App Store"
-                className="h-14"
+                className="h-12"
               />
             </a>
           )}
@@ -71,7 +71,7 @@ const Download = () => {
               <img 
                 src="https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png"
                 alt="Disponible sur Google Play"
-                className="h-[68px]"
+                className="h-16"
               />
             </a>
           )}
