@@ -38,7 +38,7 @@ const Download = () => {
             Télécharger l'application AYOKA
           </h1>
           <p className="text-muted-foreground">
-            Le shopping africain, authentique et local.
+            Donnez une seconde vie à vos articles, partout autour de vous.
           </p>
         </div>
 
