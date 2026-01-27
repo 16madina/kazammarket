@@ -125,115 +125,124 @@ export default function AdBannerManagement() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Ajouter une bannière publicitaire</CardTitle>
-          <CardDescription>
+        <CardHeader className="px-3 sm:px-6 py-3 sm:py-4">
+          <CardTitle className="text-base sm:text-lg">Ajouter une bannière</CardTitle>
+          <CardDescription className="text-xs sm:text-sm">
             Les bannières apparaîtront entre chaque 6 annonces
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
           <div>
-            <Label htmlFor="title">Titre</Label>
+            <Label htmlFor="title" className="text-sm">Titre</Label>
             <Input
               id="title"
               value={newBanner.title}
               onChange={(e) => setNewBanner({ ...newBanner, title: e.target.value })}
               placeholder="Titre de la bannière"
+              className="text-sm"
             />
           </div>
 
           <div>
-            <Label htmlFor="image">Image</Label>
+            <Label htmlFor="image" className="text-sm">Image</Label>
             <Input
               id="image"
               type="file"
               accept="image/*"
               onChange={handleImageUpload}
+              className="text-sm"
             />
             {newBanner.image_url && (
               <img
                 src={newBanner.image_url}
                 alt="Preview"
-                className="mt-2 h-32 object-cover rounded"
+                className="mt-2 h-24 sm:h-32 object-cover rounded"
               />
             )}
           </div>
 
           <div>
-            <Label htmlFor="link">Lien (optionnel)</Label>
+            <Label htmlFor="link" className="text-sm">Lien (optionnel)</Label>
             <Input
               id="link"
               value={newBanner.link_url}
               onChange={(e) => setNewBanner({ ...newBanner, link_url: e.target.value })}
               placeholder="https://..."
+              className="text-sm"
             />
           </div>
 
           <div>
-            <Label htmlFor="order">Ordre d'affichage</Label>
+            <Label htmlFor="order" className="text-sm">Ordre d'affichage</Label>
             <Input
               id="order"
               type="number"
               value={newBanner.display_order}
               onChange={(e) => setNewBanner({ ...newBanner, display_order: parseInt(e.target.value) })}
+              className="text-sm w-24"
             />
           </div>
 
           <Button
             onClick={() => createBanner.mutate(newBanner)}
             disabled={!newBanner.title || !newBanner.image_url}
+            className="w-full sm:w-auto"
+            size="sm"
           >
             <Plus className="w-4 h-4 mr-2" />
-            Ajouter la bannière
+            Ajouter
           </Button>
         </CardContent>
       </Card>
 
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Bannières existantes ({banners.length})</h3>
+      <div className="space-y-3 sm:space-y-4">
+        <h3 className="text-base sm:text-lg font-semibold px-1">Bannières ({banners.length})</h3>
         {banners.map((banner) => (
           <Card key={banner.id}>
-            <CardContent className="flex items-center gap-4 p-4">
-              <img
-                src={banner.image_url}
-                alt={banner.title}
-                className="w-32 h-20 object-cover rounded"
-              />
-              <div className="flex-1">
-                <h4 className="font-semibold">{banner.title}</h4>
-                {banner.link_url && (
-                  <a
-                    href={banner.link_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-primary hover:underline flex items-center gap-1"
-                  >
-                    <ExternalLink className="w-3 h-3" />
-                    {banner.link_url}
-                  </a>
-                )}
-                <p className="text-sm text-muted-foreground">Ordre: {banner.display_order}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Label htmlFor={`active-${banner.id}`}>Active</Label>
-                  <Switch
-                    id={`active-${banner.id}`}
-                    checked={banner.active}
-                    onCheckedChange={(checked) => 
-                      updateBanner.mutate({ id: banner.id, active: checked })
-                    }
-                  />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <img
+                  src={banner.image_url}
+                  alt={banner.title}
+                  className="w-full sm:w-32 h-20 object-cover rounded"
+                />
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-sm sm:text-base truncate">{banner.title}</h4>
+                  {banner.link_url && (
+                    <a
+                      href={banner.link_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs sm:text-sm text-primary hover:underline flex items-center gap-1 truncate"
+                    >
+                      <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                      <span className="truncate">{banner.link_url}</span>
+                    </a>
+                  )}
+                  <p className="text-xs sm:text-sm text-muted-foreground">Ordre: {banner.display_order}</p>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  onClick={() => deleteBanner.mutate(banner.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="flex sm:flex-col items-center justify-between sm:justify-start gap-2 sm:gap-3">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor={`active-${banner.id}`} className="text-xs sm:text-sm">Active</Label>
+                    <Switch
+                      id={`active-${banner.id}`}
+                      checked={banner.active}
+                      onCheckedChange={(checked) => 
+                        updateBanner.mutate({ id: banner.id, active: checked })
+                      }
+                    />
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => deleteBanner.mutate(banner.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

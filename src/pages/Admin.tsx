@@ -553,142 +553,154 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <ShieldAlert className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold">Panneau d'administration</h1>
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6">
+        {/* Header - Stack on mobile, row on desktop */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ShieldAlert className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
+            <h1 className="text-xl sm:text-3xl font-bold">Admin</h1>
           </div>
           <Button
             onClick={() => navigate('/admin/notifications')}
             variant="outline"
-            className="flex items-center gap-2"
+            size="sm"
+            className="flex items-center gap-2 w-full sm:w-auto"
           >
             <Bell className="h-4 w-4" />
-            Notifications Push
+            <span className="sm:inline">Push Notifications</span>
           </Button>
         </div>
 
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 h-auto gap-1 p-1">
-            <TabsTrigger value="users" className="flex items-center gap-2 py-2.5">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs md:text-sm">Utilisateurs</span>
-            </TabsTrigger>
-            <TabsTrigger value="listings" className="flex items-center gap-2 py-2.5">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs md:text-sm">Annonces</span>
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2 py-2.5">
-              <ShieldAlert className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs md:text-sm">Signalements</span>
-            </TabsTrigger>
-            <TabsTrigger value="moderation" className="flex items-center gap-2 py-2.5">
-              <ImageOff className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs md:text-sm">Modération</span>
-            </TabsTrigger>
-            <TabsTrigger value="reminders" className="flex items-center gap-2 py-2.5">
-              <Bell className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs md:text-sm">Rappels</span>
-            </TabsTrigger>
-            <TabsTrigger value="ads" className="flex items-center gap-2 py-2.5">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs md:text-sm">Publicités</span>
-            </TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
+          {/* Tabs - Scrollable on mobile */}
+          <div className="overflow-x-auto -mx-2 px-2 scrollbar-hide">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-6 h-auto gap-0.5 sm:gap-1 p-1">
+              <TabsTrigger value="users" className="flex items-center gap-1.5 sm:gap-2 py-2 px-3 sm:px-4 text-xs sm:text-sm whitespace-nowrap">
+                <Users className="h-4 w-4 flex-shrink-0" />
+                <span>Utilisateurs</span>
+              </TabsTrigger>
+              <TabsTrigger value="listings" className="flex items-center gap-1.5 sm:gap-2 py-2 px-3 sm:px-4 text-xs sm:text-sm whitespace-nowrap">
+                <FileText className="h-4 w-4 flex-shrink-0" />
+                <span>Annonces</span>
+              </TabsTrigger>
+              <TabsTrigger value="reports" className="flex items-center gap-1.5 sm:gap-2 py-2 px-3 sm:px-4 text-xs sm:text-sm whitespace-nowrap">
+                <ShieldAlert className="h-4 w-4 flex-shrink-0" />
+                <span>Signalements</span>
+              </TabsTrigger>
+              <TabsTrigger value="moderation" className="flex items-center gap-1.5 sm:gap-2 py-2 px-3 sm:px-4 text-xs sm:text-sm whitespace-nowrap">
+                <ImageOff className="h-4 w-4 flex-shrink-0" />
+                <span>Modération</span>
+              </TabsTrigger>
+              <TabsTrigger value="reminders" className="flex items-center gap-1.5 sm:gap-2 py-2 px-3 sm:px-4 text-xs sm:text-sm whitespace-nowrap">
+                <Bell className="h-4 w-4 flex-shrink-0" />
+                <span>Rappels</span>
+              </TabsTrigger>
+              <TabsTrigger value="ads" className="flex items-center gap-1.5 sm:gap-2 py-2 px-3 sm:px-4 text-xs sm:text-sm whitespace-nowrap">
+                <FileText className="h-4 w-4 flex-shrink-0" />
+                <span>Publicités</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Users Tab */}
-          <TabsContent value="users" className="space-y-4">
+          <TabsContent value="users" className="space-y-3 sm:space-y-4">
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row gap-3">
-                  <div className="relative flex-1">
+              <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Rechercher par nom, email ou téléphone..."
+                      placeholder="Nom, email, téléphone..."
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 text-sm"
                     />
                   </div>
-                  <Select value={userStatusFilter} onValueChange={setUserStatusFilter}>
-                    <SelectTrigger className="w-full md:w-48">
-                      <SelectValue placeholder="Statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous</SelectItem>
-                      <SelectItem value="active">Actifs</SelectItem>
-                      <SelectItem value="banned">Bannis</SelectItem>
-                      <SelectItem value="verified">Vérifiés</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {selectedUsers.length > 0 && (
-                    <Button
-                      onClick={() => setShowBulkEmailDialog(true)}
-                      className="w-full md:w-auto"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Envoyer email ({selectedUsers.length})
-                    </Button>
-                  )}
+                  <div className="flex gap-2">
+                    <Select value={userStatusFilter} onValueChange={setUserStatusFilter}>
+                      <SelectTrigger className="flex-1 text-sm h-9">
+                        <SelectValue placeholder="Statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous</SelectItem>
+                        <SelectItem value="active">Actifs</SelectItem>
+                        <SelectItem value="banned">Bannis</SelectItem>
+                        <SelectItem value="verified">Vérifiés</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {selectedUsers.length > 0 && (
+                      <Button
+                        onClick={() => setShowBulkEmailDialog(true)}
+                        size="sm"
+                        className="flex-shrink-0"
+                      >
+                        <Mail className="h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Email ({selectedUsers.length})</span>
+                        <span className="sm:hidden">{selectedUsers.length}</span>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Tous les utilisateurs ({filteredUsers.length} / {users?.length || 0})</CardTitle>
+              <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-3 sm:px-6 py-3 sm:py-4">
+                <CardTitle className="text-base sm:text-lg">Utilisateurs ({filteredUsers.length}/{users?.length || 0})</CardTitle>
                 {filteredUsers.length > 0 && (
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={toggleAllUsers}
+                    className="text-xs h-8"
                   >
-                    {selectedUsers.length === filteredUsers.length ? "Désélectionner tout" : "Sélectionner tout"}
+                    {selectedUsers.length === filteredUsers.length ? "Tout désélectionner" : "Tout sélectionner"}
                   </Button>
                 )}
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 sm:space-y-3 px-2 sm:px-6">
                 {filteredUsers.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Aucun utilisateur trouvé</p>
+                  <p className="text-center text-muted-foreground py-6 text-sm">Aucun utilisateur trouvé</p>
                 ) : (
                   filteredUsers.map((profile) => (
-                    <Card key={profile.id} className="p-4">
-                      <div className="flex items-start gap-3">
+                    <Card key={profile.id} className="p-3 sm:p-4">
+                      <div className="flex items-start gap-2 sm:gap-3">
                         <Checkbox
                           checked={selectedUsers.includes(profile.id)}
                           onCheckedChange={() => toggleUserSelection(profile.id)}
-                          className="mt-1"
+                          className="mt-0.5"
                         />
-                        <div className="flex items-start justify-between flex-1">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <h3 className="font-semibold">{profile.full_name || "Utilisateur"}</h3>
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between flex-1 gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                              <h3 className="font-semibold text-sm sm:text-base truncate">{profile.full_name || "Utilisateur"}</h3>
                               {profile.is_banned && (
-                                <Badge variant="destructive">Banni</Badge>
+                                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">Banni</Badge>
                               )}
                               {profile.email_verified && (
-                                <Badge variant="default" className="bg-green-600">Vérifié</Badge>
+                                <Badge className="bg-emerald-600 text-white text-[10px] px-1.5 py-0">Vérifié</Badge>
                               )}
                             </div>
-                            <div className="text-sm text-muted-foreground mt-1 space-y-1">
-                              <p className="flex items-center gap-2">
-                                <Mail className="h-3 w-3" />
-                                {(profile as any).email || "Email non disponible"}
+                            <div className="text-xs sm:text-sm text-muted-foreground mt-1 space-y-0.5">
+                              <p className="flex items-center gap-1.5 truncate">
+                                <Mail className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">{(profile as any).email || "Email non disponible"}</span>
                               </p>
                               {profile.phone && (
-                                <p className="flex items-center gap-2">
-                                  <Phone className="h-3 w-3" />
+                                <p className="flex items-center gap-1.5">
+                                  <Phone className="h-3 w-3 flex-shrink-0" />
                                   {profile.phone}
                                 </p>
                               )}
-                              <p>Localisation: {profile.city}, {profile.country}</p>
-                              <p>Inscrit: {new Date(profile.created_at).toLocaleDateString()}</p>
-                              <p>Ventes: {profile.total_sales || 0}</p>
-                              <p>Note: {profile.rating_average || 0}/5 ({profile.rating_count || 0} avis)</p>
+                              <p className="truncate">{profile.city}, {profile.country}</p>
+                              <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                                <span>Inscrit: {new Date(profile.created_at).toLocaleDateString('fr-FR')}</span>
+                                <span>Ventes: {profile.total_sales || 0}</span>
+                                <span>★ {profile.rating_average || 0}/5</span>
+                              </div>
                             </div>
                           </div>
-                          <div className="flex flex-col gap-1.5 min-w-[100px]">
+                          <div className="flex flex-wrap sm:flex-col gap-1.5 sm:min-w-[90px]">
                             {/* User action buttons */}
                             <Button
                               size="sm"
@@ -936,80 +948,86 @@ const Admin = () => {
           </Dialog>
 
           {/* Listings Tab */}
-          <TabsContent value="listings" className="space-y-4">
+          <TabsContent value="listings" className="space-y-3 sm:space-y-4">
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row gap-3">
-                  <div className="relative flex-1">
+              <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Rechercher par titre ou description..."
+                      placeholder="Titre ou description..."
                       value={listingSearch}
                       onChange={(e) => setListingSearch(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 text-sm"
                     />
                   </div>
-                  <Select value={listingStatusFilter} onValueChange={setListingStatusFilter}>
-                    <SelectTrigger className="w-full md:w-48">
-                      <SelectValue placeholder="Statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous</SelectItem>
-                      <SelectItem value="pending">En attente</SelectItem>
-                      <SelectItem value="approved">Approuvés</SelectItem>
-                      <SelectItem value="rejected">Rejetés</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={listingCategoryFilter} onValueChange={setListingCategoryFilter}>
-                    <SelectTrigger className="w-full md:w-48">
-                      <SelectValue placeholder="Catégorie" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Toutes</SelectItem>
-                      {categories?.map(category => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-2">
+                    <Select value={listingStatusFilter} onValueChange={setListingStatusFilter}>
+                      <SelectTrigger className="flex-1 text-sm h-9">
+                        <SelectValue placeholder="Statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous</SelectItem>
+                        <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="approved">Approuvés</SelectItem>
+                        <SelectItem value="rejected">Rejetés</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={listingCategoryFilter} onValueChange={setListingCategoryFilter}>
+                      <SelectTrigger className="flex-1 text-sm h-9">
+                        <SelectValue placeholder="Catégorie" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Toutes</SelectItem>
+                        {categories?.map(category => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Annonces ({filteredListings.length} / {listings?.length || 0})</CardTitle>
+              <CardHeader className="px-3 sm:px-6 py-3 sm:py-4">
+                <CardTitle className="text-base sm:text-lg">Annonces ({filteredListings.length}/{listings?.length || 0})</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 sm:space-y-3 px-2 sm:px-6">
                 {filteredListings.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Aucune annonce trouvée</p>
+                  <p className="text-center text-muted-foreground py-6 text-sm">Aucune annonce trouvée</p>
                 ) : (
                   filteredListings.map(listing => (
-                    <Card key={listing.id} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-semibold">{listing.title}</h3>
-                          <p className="text-sm text-muted-foreground">{listing.description}</p>
-                          <p className="text-sm mt-1">Catégorie: {listing.categories?.name || "N/A"}</p>
-                          <p className="text-sm mt-1">Prix: {listing.price} €</p>
-                          <p className="text-sm mt-1">Statut: {listing.moderation_status}</p>
+                    <Card key={listing.id} className="p-3 sm:p-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-sm sm:text-base truncate">{listing.title}</h3>
+                          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{listing.description}</p>
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs sm:text-sm">
+                            <span>{listing.categories?.name || "N/A"}</span>
+                            <span className="font-medium text-primary">{listing.price?.toLocaleString()} FCFA</span>
+                            <Badge variant={listing.moderation_status === 'approved' ? 'secondary' : listing.moderation_status === 'rejected' ? 'destructive' : 'default'} className="text-[10px]">
+                              {listing.moderation_status === 'pending' ? 'En attente' : listing.moderation_status === 'approved' ? 'Approuvé' : 'Rejeté'}
+                            </Badge>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap sm:flex-col gap-1.5">
                           {listing.moderation_status === "pending" && (
                             <>
-                              <Button size="sm" variant="outline" onClick={() => handleApproveListing(listing.id)}>
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Approuver
+                              <Button size="sm" variant="outline" onClick={() => handleApproveListing(listing.id)} className="h-7 text-xs px-2">
+                                <CheckCircle className="h-3 w-3 sm:mr-1" />
+                                <span className="hidden sm:inline">OK</span>
                               </Button>
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button size="sm" variant="destructive">
-                                    <XCircle className="h-4 w-4 mr-1" />
-                                    Rejeter
+                                  <Button size="sm" variant="destructive" className="h-7 text-xs px-2">
+                                    <XCircle className="h-3 w-3 sm:mr-1" />
+                                    <span className="hidden sm:inline">Non</span>
                                   </Button>
                                 </DialogTrigger>
-                                <DialogContent>
+                                <DialogContent className="mx-4 max-w-[calc(100%-2rem)] sm:max-w-lg">
                                   <DialogHeader>
                                     <DialogTitle>Rejeter l'annonce</DialogTitle>
                                     <DialogDescription>Indiquez la raison du rejet</DialogDescription>
@@ -1018,10 +1036,10 @@ const Admin = () => {
                                     placeholder="Raison du rejet..."
                                     value={messageContent}
                                     onChange={(e) => setMessageContent(e.target.value)}
-                                    rows={6}
+                                    rows={4}
                                   />
-                                  <DialogFooter>
-                                    <Button variant="outline" onClick={() => setMessageContent("")}>
+                                  <DialogFooter className="flex-col sm:flex-row gap-2">
+                                    <Button variant="outline" onClick={() => setMessageContent("")} className="w-full sm:w-auto">
                                       Annuler
                                     </Button>
                                     <Button
@@ -1030,6 +1048,7 @@ const Admin = () => {
                                         setMessageContent("");
                                       }}
                                       disabled={!messageContent.trim()}
+                                      className="w-full sm:w-auto"
                                     >
                                       Confirmer
                                     </Button>
@@ -1038,9 +1057,9 @@ const Admin = () => {
                               </Dialog>
                             </>
                           )}
-                          <Button size="sm" variant="outline" onClick={() => navigate(`/listing/${listing.id}`)}>
-                            <Eye className="h-4 w-4 mr-1" />
-                            Voir
+                          <Button size="sm" variant="outline" onClick={() => navigate(`/listing/${listing.id}`)} className="h-7 text-xs px-2">
+                            <Eye className="h-3 w-3 sm:mr-1" />
+                            <span className="hidden sm:inline">Voir</span>
                           </Button>
                         </div>
                       </div>
@@ -1052,61 +1071,63 @@ const Admin = () => {
           </TabsContent>
 
           {/* Reports Tab */}
-          <TabsContent value="reports" className="space-y-4">
+          <TabsContent value="reports" className="space-y-3 sm:space-y-4">
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row gap-3">
-                  <div className="relative flex-1">
+              <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Rechercher par titre d'annonce ou nom du signalant..."
+                      placeholder="Titre ou signalant..."
                       value={reportSearch}
                       onChange={(e) => setReportSearch(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 text-sm"
                     />
                   </div>
-                  <Select value={reportStatusFilter} onValueChange={setReportStatusFilter}>
-                    <SelectTrigger className="w-full md:w-48">
-                      <SelectValue placeholder="Statut" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous</SelectItem>
-                      <SelectItem value="pending">En attente</SelectItem>
-                      <SelectItem value="resolved">Résolus</SelectItem>
-                      <SelectItem value="dismissed">Rejetés</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select value={reportReasonFilter} onValueChange={setReportReasonFilter}>
-                    <SelectTrigger className="w-full md:w-48">
-                      <SelectValue placeholder="Raison" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Toutes</SelectItem>
-                      <SelectItem value="spam">Spam</SelectItem>
-                      <SelectItem value="inappropriate">Inapproprié</SelectItem>
-                      <SelectItem value="fraud">Fraude</SelectItem>
-                      <SelectItem value="other">Autre</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-2">
+                    <Select value={reportStatusFilter} onValueChange={setReportStatusFilter}>
+                      <SelectTrigger className="flex-1 text-sm h-9">
+                        <SelectValue placeholder="Statut" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous</SelectItem>
+                        <SelectItem value="pending">En attente</SelectItem>
+                        <SelectItem value="resolved">Résolus</SelectItem>
+                        <SelectItem value="dismissed">Rejetés</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={reportReasonFilter} onValueChange={setReportReasonFilter}>
+                      <SelectTrigger className="flex-1 text-sm h-9">
+                        <SelectValue placeholder="Raison" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Toutes</SelectItem>
+                        <SelectItem value="spam">Spam</SelectItem>
+                        <SelectItem value="inappropriate">Inapproprié</SelectItem>
+                        <SelectItem value="fraud">Fraude</SelectItem>
+                        <SelectItem value="other">Autre</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle>Signalements ({filteredReports.length} / {reports?.length || 0})</CardTitle>
+              <CardHeader className="px-3 sm:px-6 py-3 sm:py-4">
+                <CardTitle className="text-base sm:text-lg">Signalements ({filteredReports.length}/{reports?.length || 0})</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 sm:space-y-3 px-2 sm:px-6">
                 {filteredReports.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-8">Aucun signalement trouvé</p>
+                  <p className="text-center text-muted-foreground py-6 text-sm">Aucun signalement trouvé</p>
                 ) : (
                   filteredReports.map(report => (
-                    <Card key={report.id} className="p-4">
-                      <div className="flex gap-4">
+                    <Card key={report.id} className="p-2 sm:p-4">
+                      <div className="flex gap-2 sm:gap-4">
                         {/* Image and action buttons column */}
-                        <div className="flex flex-col gap-2">
+                        <div className="flex flex-col gap-1.5 sm:gap-2">
                           {report.listings?.images?.[0] && (
-                            <div className="w-24 h-24 flex-shrink-0 rounded overflow-hidden bg-muted">
+                            <div className="w-16 h-16 sm:w-24 sm:h-24 flex-shrink-0 rounded overflow-hidden bg-muted">
                               <img 
                                 src={report.listings.images[0]} 
                                 alt={report.listings.title}
@@ -1116,37 +1137,36 @@ const Admin = () => {
                           )}
                           
                           {/* Action buttons under image */}
-                          <div className="flex flex-col gap-1.5 w-24">
+                          <div className="flex flex-col gap-1 sm:gap-1.5 w-16 sm:w-24">
                             {report.listings?.id && (
                               <Button 
                                 size="sm" 
                                 variant="outline" 
                                 onClick={() => navigate(`/listing/${report.listings.id}`)}
-                                className="h-7 text-[10px] px-1.5 w-full"
+                                className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1 sm:px-1.5 w-full"
                               >
-                                <Eye className="h-3 w-3 mr-0.5" />
-                                Voir
+                                <Eye className="h-2.5 w-2.5 sm:h-3 sm:w-3 sm:mr-0.5" />
+                                <span className="hidden sm:inline">Voir</span>
                               </Button>
                             )}
                             {report.status === "pending" && (
                               <>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                    <Button size="sm" variant="destructive" className="h-7 text-[10px] px-1.5 w-full">
-                                      <Ban className="h-3 w-3 mr-0.5" />
-                                      Ban
+                                    <Button size="sm" variant="destructive" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1 sm:px-1.5 w-full">
+                                      <Ban className="h-2.5 w-2.5 sm:h-3 sm:w-3 sm:mr-0.5" />
+                                      <span className="hidden sm:inline">Ban</span>
                                     </Button>
                                   </AlertDialogTrigger>
-                                  <AlertDialogContent>
+                                  <AlertDialogContent className="mx-4 max-w-[calc(100%-2rem)] sm:max-w-lg">
                                     <AlertDialogHeader>
-                                      <AlertDialogTitle>Supprimer l'annonce et bannir l'utilisateur ?</AlertDialogTitle>
-                                      <AlertDialogDescription>
+                                      <AlertDialogTitle className="text-base sm:text-lg">Supprimer et bannir ?</AlertDialogTitle>
+                                      <AlertDialogDescription className="text-xs sm:text-sm">
                                         Cette action va :
-                                        <ul className="list-disc list-inside mt-2 space-y-1">
-                                          <li>Supprimer définitivement l'annonce</li>
-                                          <li>Bannir le vendeur de la plateforme</li>
-                                          <li>Marquer le signalement comme résolu</li>
-                                          <li>Notifier l'utilisateur ayant signalé</li>
+                                        <ul className="list-disc list-inside mt-2 space-y-0.5 sm:space-y-1 text-xs sm:text-sm">
+                                          <li>Supprimer l'annonce</li>
+                                          <li>Bannir le vendeur</li>
+                                          <li>Résoudre le signalement</li>
                                         </ul>
                                       </AlertDialogDescription>
                                     </AlertDialogHeader>
@@ -1154,9 +1174,10 @@ const Admin = () => {
                                       placeholder="Raison du bannissement..."
                                       value={banReason}
                                       onChange={(e) => setBanReason(e.target.value)}
+                                      className="text-sm"
                                     />
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                    <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                                      <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
                                       <AlertDialogAction 
                                         onClick={async () => {
                                           if (!report.listing_id) {
@@ -1164,7 +1185,6 @@ const Admin = () => {
                                             return;
                                           }
                                           
-                                          // Get listing to find user_id
                                           const { data: listing } = await supabase
                                             .from("listings")
                                             .select("user_id")
@@ -1176,23 +1196,19 @@ const Admin = () => {
                                             return;
                                           }
                                           
-                                          // Delete listing
                                           await supabase
                                             .from("listings")
                                             .delete()
                                             .eq("id", report.listing_id);
                                           
-                                          // Ban user
                                           await handleBanUser(listing.user_id);
-                                          
-                                          // Resolve report
                                           await handleResolveReport(report.id);
                                           
                                           toast.success("Annonce supprimée et vendeur banni");
                                           setBanReason("");
                                         }}
                                         disabled={!banReason.trim()}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto"
                                       >
                                         Confirmer
                                       </AlertDialogAction>
@@ -1204,23 +1220,23 @@ const Admin = () => {
                                   size="sm" 
                                   variant="outline"
                                   onClick={() => handleResolveReport(report.id)}
-                                  className="h-7 text-[10px] px-1.5 w-full"
+                                  className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1 sm:px-1.5 w-full"
                                 >
-                                  <CheckCircle className="h-3 w-3 mr-0.5" />
-                                  OK
+                                  <CheckCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 sm:mr-0.5" />
+                                  <span className="hidden sm:inline">OK</span>
                                 </Button>
                                 
                                 <Dialog>
                                   <DialogTrigger asChild>
-                                    <Button size="sm" variant="ghost" className="h-7 text-[10px] px-1.5 w-full">
-                                      <XCircle className="h-3 w-3 mr-0.5" />
-                                      Non
+                                    <Button size="sm" variant="ghost" className="h-6 sm:h-7 text-[9px] sm:text-[10px] px-1 sm:px-1.5 w-full">
+                                      <XCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 sm:mr-0.5" />
+                                      <span className="hidden sm:inline">Non</span>
                                     </Button>
                                   </DialogTrigger>
-                                  <DialogContent>
+                                  <DialogContent className="mx-4 max-w-[calc(100%-2rem)] sm:max-w-lg">
                                     <DialogHeader>
                                       <DialogTitle>Rejeter le signalement</DialogTitle>
-                                      <DialogDescription>
+                                      <DialogDescription className="text-xs sm:text-sm">
                                         Le signalement sera marqué comme non fondé.
                                       </DialogDescription>
                                     </DialogHeader>
@@ -1228,10 +1244,11 @@ const Admin = () => {
                                       placeholder="Notes pour le rejet (optionnel)..."
                                       value={messageContent}
                                       onChange={(e) => setMessageContent(e.target.value)}
-                                      rows={4}
+                                      rows={3}
+                                      className="text-sm"
                                     />
-                                    <DialogFooter>
-                                      <Button variant="outline" onClick={() => setMessageContent("")}>
+                                    <DialogFooter className="flex-col sm:flex-row gap-2">
+                                      <Button variant="outline" onClick={() => setMessageContent("")} className="w-full sm:w-auto">
                                         Annuler
                                       </Button>
                                       <Button
@@ -1239,6 +1256,7 @@ const Admin = () => {
                                           handleDismissReport(report.id, messageContent);
                                           setMessageContent("");
                                         }}
+                                        className="w-full sm:w-auto"
                                       >
                                         Confirmer
                                       </Button>
@@ -1252,47 +1270,35 @@ const Admin = () => {
                         
                         {/* Report details */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-base truncate">{report.listings?.title || "Annonce supprimée"}</h3>
+                          <h3 className="font-semibold text-sm sm:text-base truncate">{report.listings?.title || "Annonce supprimée"}</h3>
                           {report.listings?.price && (
-                            <p className="text-sm font-medium text-primary mt-1">
+                            <p className="text-xs sm:text-sm font-medium text-primary mt-0.5 sm:mt-1">
                               {report.listings.price.toLocaleString()} FCFA
                             </p>
                           )}
-                          <div className="mt-2 space-y-1">
-                            <p className="text-sm">
-                              <span className="font-medium">Raison:</span>{" "}
-                              <Badge variant={report.reason === 'fraud' || report.reason === 'inappropriate' ? 'destructive' : 'secondary'}>
-                                {report.reason === 'inappropriate' ? 'Contenu inapproprié' : 
-                                 report.reason === 'fraud' ? 'Arnaque/Fraude' :
+                          <div className="mt-1.5 sm:mt-2 space-y-0.5 sm:space-y-1">
+                            <div className="flex flex-wrap items-center gap-1">
+                              <Badge variant={report.reason === 'fraud' || report.reason === 'inappropriate' ? 'destructive' : 'secondary'} className="text-[10px] sm:text-xs">
+                                {report.reason === 'inappropriate' ? 'Inapproprié' : 
+                                 report.reason === 'fraud' ? 'Fraude' :
                                  report.reason === 'spam' ? 'Spam' : 'Autre'}
                               </Badge>
-                            </p>
-                            {report.description && (
-                              <p className="text-sm text-muted-foreground">
-                                <span className="font-medium">Description:</span> {report.description}
-                              </p>
-                            )}
-                            <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">Signalé par:</span> {report.reporter_profile?.full_name || "Inconnu"}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">Date:</span> {new Date(report.created_at).toLocaleDateString('fr-FR', { 
-                                day: '2-digit', 
-                                month: 'long', 
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                            <p className="text-sm">
-                              <span className="font-medium">Statut:</span>{" "}
                               <Badge variant={
                                 report.status === 'pending' ? 'default' :
                                 report.status === 'resolved' ? 'secondary' : 'outline'
-                              }>
+                              } className="text-[10px] sm:text-xs">
                                 {report.status === 'pending' ? 'En attente' :
                                  report.status === 'resolved' ? 'Résolu' : 'Rejeté'}
                               </Badge>
+                            </div>
+                            {report.description && (
+                              <p className="text-[10px] sm:text-sm text-muted-foreground line-clamp-2">{report.description}</p>
+                            )}
+                            <p className="text-[10px] sm:text-sm text-muted-foreground">
+                              Par: {report.reporter_profile?.full_name || "Inconnu"}
+                            </p>
+                            <p className="text-[10px] sm:text-sm text-muted-foreground">
+                              {new Date(report.created_at).toLocaleDateString('fr-FR')}
                             </p>
                           </div>
                         </div>

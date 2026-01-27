@@ -154,38 +154,38 @@ export const BannedWordsManagement = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-4 gap-2 sm:gap-3">
         <Card>
-          <CardContent className="pt-4 pb-3">
+          <CardContent className="pt-3 sm:pt-4 pb-2 sm:pb-3 px-2 sm:px-4">
             <div className="text-center">
-              <p className="text-2xl font-bold">{stats.total}</p>
-              <p className="text-xs text-muted-foreground">Total</p>
+              <p className="text-lg sm:text-2xl font-bold">{stats.total}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Total</p>
             </div>
           </CardContent>
         </Card>
         <Card className="border-destructive/50">
-          <CardContent className="pt-4 pb-3">
+          <CardContent className="pt-3 sm:pt-4 pb-2 sm:pb-3 px-2 sm:px-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-destructive">{stats.high}</p>
-              <p className="text-xs text-muted-foreground">Haute</p>
+              <p className="text-lg sm:text-2xl font-bold text-destructive">{stats.high}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Haute</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-orange-500/50">
-          <CardContent className="pt-4 pb-3">
+        <Card className="border-amber-500/50">
+          <CardContent className="pt-3 sm:pt-4 pb-2 sm:pb-3 px-2 sm:px-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-orange-600">{stats.medium}</p>
-              <p className="text-xs text-muted-foreground">Moyenne</p>
+              <p className="text-lg sm:text-2xl font-bold text-amber-600">{stats.medium}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Moyenne</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-blue-500/50">
-          <CardContent className="pt-4 pb-3">
+        <Card className="border-sky-500/50">
+          <CardContent className="pt-3 sm:pt-4 pb-2 sm:pb-3 px-2 sm:px-4">
             <div className="text-center">
-              <p className="text-2xl font-bold text-blue-600">{stats.low}</p>
-              <p className="text-xs text-muted-foreground">Basse</p>
+              <p className="text-lg sm:text-2xl font-bold text-sky-600">{stats.low}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Basse</p>
             </div>
           </CardContent>
         </Card>
@@ -193,150 +193,156 @@ export const BannedWordsManagement = () => {
 
       {/* Actions Bar */}
       <Card>
-        <CardContent className="pt-4 pb-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un mot..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
+        <CardContent className="pt-3 sm:pt-4 pb-3 sm:pb-4 px-3 sm:px-6">
+          <div className="flex flex-col gap-2 sm:gap-3">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 text-sm h-9"
+                />
+              </div>
+              <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9">
+                <RefreshCw className="h-4 w-4" />
+              </Button>
             </div>
-            <Select value={severityFilter} onValueChange={setSeverityFilter}>
-              <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Sévérité" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes</SelectItem>
-                <SelectItem value="high">Haute</SelectItem>
-                <SelectItem value="medium">Moyenne</SelectItem>
-                <SelectItem value="low">Basse</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="icon" onClick={() => refetch()}>
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Ajouter
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Ajouter un mot interdit</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Mot ou expression</label>
-                    <Input
-                      placeholder="Ex: arnaque, contrefaçon..."
-                      value={newWord}
-                      onChange={(e) => setNewWord(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Sévérité</label>
-                    <Select value={newSeverity} onValueChange={setNewSeverity}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="high">
-                          <div className="flex items-center gap-2">
-                            <AlertTriangle className="h-4 w-4 text-destructive" />
-                            Haute - Bloque la publication
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="medium">
-                          <div className="flex items-center gap-2">
-                            <AlertCircle className="h-4 w-4 text-orange-600" />
-                            Moyenne - Avertissement
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="low">
-                          <div className="flex items-center gap-2">
-                            <Info className="h-4 w-4 text-blue-600" />
-                            Basse - Surveillance
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                    Annuler
+            <div className="flex gap-2">
+              <Select value={severityFilter} onValueChange={setSeverityFilter}>
+                <SelectTrigger className="flex-1 text-sm h-9">
+                  <SelectValue placeholder="Sévérité" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Toutes</SelectItem>
+                  <SelectItem value="high">Haute</SelectItem>
+                  <SelectItem value="medium">Moyenne</SelectItem>
+                  <SelectItem value="low">Basse</SelectItem>
+                </SelectContent>
+              </Select>
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="h-9">
+                    <Plus className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Ajouter</span>
                   </Button>
-                  <Button 
-                    onClick={() => addWordMutation.mutate({ word: newWord, severity: newSeverity })}
-                    disabled={!newWord.trim() || addWordMutation.isPending}
-                  >
-                    Ajouter
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent className="mx-4 max-w-[calc(100%-2rem)] sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle className="text-base sm:text-lg">Ajouter un mot interdit</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-3 sm:space-y-4 py-3 sm:py-4">
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <label className="text-xs sm:text-sm font-medium">Mot ou expression</label>
+                      <Input
+                        placeholder="Ex: arnaque, contrefaçon..."
+                        value={newWord}
+                        onChange={(e) => setNewWord(e.target.value)}
+                        className="text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1.5 sm:space-y-2">
+                      <label className="text-xs sm:text-sm font-medium">Sévérité</label>
+                      <Select value={newSeverity} onValueChange={setNewSeverity}>
+                        <SelectTrigger className="text-sm">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="high">
+                            <div className="flex items-center gap-2 text-sm">
+                              <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-destructive" />
+                              Haute - Bloque
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="medium">
+                            <div className="flex items-center gap-2 text-sm">
+                              <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" />
+                              Moyenne - Avertir
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="low">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Info className="h-3 w-3 sm:h-4 sm:w-4 text-sky-600" />
+                              Basse - Surveiller
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter className="flex-col sm:flex-row gap-2">
+                    <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="w-full sm:w-auto">
+                      Annuler
+                    </Button>
+                    <Button 
+                      onClick={() => addWordMutation.mutate({ word: newWord, severity: newSeverity })}
+                      disabled={!newWord.trim() || addWordMutation.isPending}
+                      className="w-full sm:w-auto"
+                    >
+                      Ajouter
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Words List */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquareOff className="h-5 w-5" />
+        <CardHeader className="px-3 sm:px-6 py-3 sm:py-4">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <MessageSquareOff className="h-4 w-4 sm:h-5 sm:w-5" />
             Mots interdits ({filteredWords.length})
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-2 sm:px-6">
           {isLoading ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-6 sm:py-8 text-muted-foreground text-sm">
               Chargement...
             </div>
           ) : filteredWords.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-6 sm:py-8 text-muted-foreground text-sm">
               Aucun mot trouvé
             </div>
           ) : (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {filteredWords.map((word) => (
                 <div
                   key={word.id}
-                  className="group flex items-center gap-1 bg-muted rounded-lg px-3 py-2 hover:bg-muted/80 transition-colors"
+                  className="group flex items-center gap-0.5 sm:gap-1 bg-muted rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:bg-muted/80 transition-colors"
                 >
-                  <Badge variant={getSeverityVariant(word.severity)} className="flex items-center gap-1">
+                  <Badge variant={getSeverityVariant(word.severity)} className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs">
                     {getSeverityIcon(word.severity)}
                     {word.word}
                   </Badge>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6"
+                      className="h-5 w-5 sm:h-6 sm:w-6"
                       onClick={() => handleEdit(word)}
                     >
-                      <Edit2 className="h-3 w-3" />
+                      <Edit2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive">
-                          <Trash2 className="h-3 w-3" />
+                        <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6 text-destructive">
+                          <Trash2 className="h-2.5 w-2.5 sm:h-3 sm:w-3" />
                         </Button>
                       </AlertDialogTrigger>
-                      <AlertDialogContent>
+                      <AlertDialogContent className="mx-4 max-w-[calc(100%-2rem)] sm:max-w-md">
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Supprimer ce mot ?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Le mot "{word.word}" sera supprimé de la liste des mots interdits.
+                          <AlertDialogTitle className="text-base sm:text-lg">Supprimer ce mot ?</AlertDialogTitle>
+                          <AlertDialogDescription className="text-xs sm:text-sm">
+                            Le mot "{word.word}" sera supprimé.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Annuler</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => deleteWordMutation.mutate(word.id)}>
+                        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                          <AlertDialogCancel className="w-full sm:w-auto">Annuler</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteWordMutation.mutate(word.id)} className="w-full sm:w-auto">
                             Supprimer
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -352,40 +358,41 @@ export const BannedWordsManagement = () => {
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="mx-4 max-w-[calc(100%-2rem)] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Modifier le mot interdit</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">Modifier le mot</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Mot ou expression</label>
+          <div className="space-y-3 sm:space-y-4 py-3 sm:py-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <label className="text-xs sm:text-sm font-medium">Mot ou expression</label>
               <Input
                 value={editedWord}
                 onChange={(e) => setEditedWord(e.target.value)}
+                className="text-sm"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Sévérité</label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <label className="text-xs sm:text-sm font-medium">Sévérité</label>
               <Select value={editedSeverity} onValueChange={setEditedSeverity}>
-                <SelectTrigger>
+                <SelectTrigger className="text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="high">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-destructive" />
+                    <div className="flex items-center gap-2 text-sm">
+                      <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-destructive" />
                       Haute
                     </div>
                   </SelectItem>
                   <SelectItem value="medium">
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 text-orange-600" />
+                    <div className="flex items-center gap-2 text-sm">
+                      <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 text-amber-600" />
                       Moyenne
                     </div>
                   </SelectItem>
                   <SelectItem value="low">
-                    <div className="flex items-center gap-2">
-                      <Info className="h-4 w-4 text-blue-600" />
+                    <div className="flex items-center gap-2 text-sm">
+                      <Info className="h-3 w-3 sm:h-4 sm:w-4 text-sky-600" />
                       Basse
                     </div>
                   </SelectItem>
@@ -393,8 +400,8 @@ export const BannedWordsManagement = () => {
               </Select>
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)} className="w-full sm:w-auto">
               Annuler
             </Button>
             <Button 
@@ -408,6 +415,7 @@ export const BannedWordsManagement = () => {
                 }
               }}
               disabled={!editedWord.trim() || updateWordMutation.isPending}
+              className="w-full sm:w-auto"
             >
               Enregistrer
             </Button>

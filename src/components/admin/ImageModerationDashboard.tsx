@@ -61,46 +61,48 @@ export const ImageModerationDashboard = () => {
   };
 
   return (
-    <Tabs defaultValue="images" className="space-y-4">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="images" className="flex items-center gap-2">
-          <ImageOff className="h-4 w-4" />
-          Images
-        </TabsTrigger>
-        <TabsTrigger value="image-rules" className="flex items-center gap-2">
-          <Settings className="h-4 w-4" />
-          Règles images
-        </TabsTrigger>
-        <TabsTrigger value="words" className="flex items-center gap-2">
-          <MessageSquareOff className="h-4 w-4" />
-          Mots interdits
-        </TabsTrigger>
-      </TabsList>
+    <Tabs defaultValue="images" className="space-y-3 sm:space-y-4">
+      <div className="overflow-x-auto -mx-2 px-2 scrollbar-hide">
+        <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-3 gap-0.5 sm:gap-1">
+          <TabsTrigger value="images" className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 text-xs sm:text-sm whitespace-nowrap">
+            <ImageOff className="h-4 w-4" />
+            <span>Images</span>
+          </TabsTrigger>
+          <TabsTrigger value="image-rules" className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 text-xs sm:text-sm whitespace-nowrap">
+            <Settings className="h-4 w-4" />
+            <span>Règles</span>
+          </TabsTrigger>
+          <TabsTrigger value="words" className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 text-xs sm:text-sm whitespace-nowrap">
+            <MessageSquareOff className="h-4 w-4" />
+            <span>Mots</span>
+          </TabsTrigger>
+        </TabsList>
+      </div>
 
-      <TabsContent value="images" className="space-y-4">
+      <TabsContent value="images" className="space-y-3 sm:space-y-4">
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-3 sm:pt-6 px-2 sm:px-6">
               <div className="text-center">
-                <p className="text-3xl font-bold">{stats.total}</p>
-                <p className="text-sm text-muted-foreground">Total analysées</p>
+                <p className="text-xl sm:text-3xl font-bold">{stats.total}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground">Total</p>
               </div>
             </CardContent>
           </Card>
           <Card className="border-destructive/50">
-            <CardContent className="pt-6">
+            <CardContent className="pt-3 sm:pt-6 px-2 sm:px-6">
               <div className="text-center">
-                <p className="text-3xl font-bold text-destructive">{stats.rejected}</p>
-                <p className="text-sm text-muted-foreground">Rejetées</p>
+                <p className="text-xl sm:text-3xl font-bold text-destructive">{stats.rejected}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground">Rejetées</p>
               </div>
             </CardContent>
           </Card>
-          <Card className="border-green-500/50">
-            <CardContent className="pt-6">
+          <Card className="border-emerald-500/50">
+            <CardContent className="pt-3 sm:pt-6 px-2 sm:px-6">
               <div className="text-center">
-                <p className="text-3xl font-bold text-green-600">{stats.approved}</p>
-                <p className="text-sm text-muted-foreground">Approuvées</p>
+                <p className="text-xl sm:text-3xl font-bold text-emerald-600">{stats.approved}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground">OK</p>
               </div>
             </CardContent>
           </Card>
@@ -108,13 +110,14 @@ export const ImageModerationDashboard = () => {
 
         {/* Filters */}
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div className="flex gap-2">
+          <CardContent className="pt-4 sm:pt-6 px-3 sm:px-6">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-0">
+              <div className="flex gap-1.5 sm:gap-2">
                 <Button
                   variant={filterSafe === null ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilterSafe(null)}
+                  className="flex-1 sm:flex-none h-8 text-xs sm:text-sm"
                 >
                   Toutes
                 </Button>
@@ -122,22 +125,24 @@ export const ImageModerationDashboard = () => {
                   variant={filterSafe === false ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilterSafe(false)}
+                  className="flex-1 sm:flex-none h-8 text-xs sm:text-sm"
                 >
-                  <ShieldX className="h-4 w-4 mr-1" />
-                  Rejetées
+                  <ShieldX className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">Rejetées</span>
                 </Button>
                 <Button
                   variant={filterSafe === true ? "default" : "outline"}
                   size="sm"
                   onClick={() => setFilterSafe(true)}
+                  className="flex-1 sm:flex-none h-8 text-xs sm:text-sm"
                 >
-                  <ShieldCheck className="h-4 w-4 mr-1" />
-                  Approuvées
+                  <ShieldCheck className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">OK</span>
                 </Button>
               </div>
-              <Button variant="outline" size="sm" onClick={() => refetch()}>
-                <RefreshCw className="h-4 w-4 mr-1" />
-                Actualiser
+              <Button variant="outline" size="sm" onClick={() => refetch()} className="h-8 text-xs sm:text-sm">
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Actualiser</span>
               </Button>
             </div>
           </CardContent>
@@ -145,29 +150,29 @@ export const ImageModerationDashboard = () => {
 
         {/* Logs List */}
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShieldX className="h-5 w-5" />
-              Historique de modération ({moderationLogs?.length || 0})
+          <CardHeader className="px-3 sm:px-6 py-3 sm:py-4">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <ShieldX className="h-4 w-4 sm:h-5 sm:w-5" />
+              Historique ({moderationLogs?.length || 0})
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 sm:px-6">
             {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-6 sm:py-8 text-muted-foreground text-sm">
                 Chargement...
               </div>
             ) : moderationLogs?.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Aucun log de modération trouvé
+              <div className="text-center py-6 sm:py-8 text-muted-foreground text-sm">
+                Aucun log de modération
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {moderationLogs?.map((log: any) => (
-                  <Card key={log.id} className={`p-4 ${!log.is_safe ? 'border-destructive/50 bg-destructive/5' : ''}`}>
-                    <div className="flex items-start gap-4">
+                  <Card key={log.id} className={`p-2 sm:p-4 ${!log.is_safe ? 'border-destructive/50 bg-destructive/5' : ''}`}>
+                    <div className="flex items-start gap-2 sm:gap-4">
                       {/* Thumbnail */}
                       <div 
-                        className="relative w-20 h-20 rounded-lg overflow-hidden bg-muted cursor-pointer shrink-0"
+                        className="relative w-14 h-14 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-muted cursor-pointer shrink-0"
                         onClick={() => setSelectedImage(log.image_url)}
                       >
                         <img
@@ -179,27 +184,27 @@ export const ImageModerationDashboard = () => {
                           }}
                         />
                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                          <Eye className="h-5 w-5 text-white" />
+                          <Eye className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                         </div>
                       </div>
 
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant={log.is_safe ? "default" : "destructive"}>
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                          <Badge variant={log.is_safe ? "default" : "destructive"} className="text-[10px] sm:text-xs">
                             {log.is_safe ? (
                               <>
-                                <ShieldCheck className="h-3 w-3 mr-1" />
-                                Approuvée
+                                <ShieldCheck className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                                OK
                               </>
                             ) : (
                               <>
-                                <ShieldX className="h-3 w-3 mr-1" />
-                                Rejetée
+                                <ShieldX className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />
+                                Non
                               </>
                             )}
                           </Badge>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-[10px] sm:text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(log.created_at), {
                               addSuffix: true,
                               locale: fr,
@@ -208,21 +213,21 @@ export const ImageModerationDashboard = () => {
                         </div>
 
                         {log.reason && (
-                          <p className="text-sm text-muted-foreground mb-2">
-                            <span className="font-medium">Raison:</span> {log.reason}
+                          <p className="text-[10px] sm:text-sm text-muted-foreground mb-1 sm:mb-2 line-clamp-2">
+                            {log.reason}
                           </p>
                         )}
 
                         {log.profile && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <Avatar className="h-5 w-5">
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                            <Avatar className="h-4 w-4 sm:h-5 sm:w-5">
                               <AvatarImage src={log.profile.avatar_url || ""} />
-                              <AvatarFallback className="text-xs">
+                              <AvatarFallback className="text-[8px] sm:text-xs">
                                 {log.profile.full_name?.charAt(0) || "?"}
                               </AvatarFallback>
                             </Avatar>
-                            <span className="text-muted-foreground">
-                              {log.profile.full_name || "Utilisateur inconnu"}
+                            <span className="text-muted-foreground truncate">
+                              {log.profile.full_name || "Inconnu"}
                             </span>
                           </div>
                         )}
@@ -233,8 +238,9 @@ export const ImageModerationDashboard = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => window.open(log.image_url, '_blank')}
+                        className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </div>
                   </Card>
@@ -246,16 +252,16 @@ export const ImageModerationDashboard = () => {
 
         {/* Image Preview Dialog */}
         <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="mx-4 max-w-[calc(100%-2rem)] sm:max-w-3xl">
             <DialogHeader>
-              <DialogTitle>Aperçu de l'image</DialogTitle>
+              <DialogTitle className="text-base sm:text-lg">Aperçu</DialogTitle>
             </DialogHeader>
             {selectedImage && (
               <div className="flex justify-center">
                 <img
                   src={selectedImage}
                   alt="Preview"
-                  className="max-h-[70vh] object-contain rounded-lg"
+                  className="max-h-[50vh] sm:max-h-[70vh] object-contain rounded-lg"
                 />
               </div>
             )}

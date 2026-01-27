@@ -136,81 +136,86 @@ export const InactiveListingsReminder = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Message de rappel personnalisé</CardTitle>
+        <CardHeader className="px-3 sm:px-6 py-3 sm:py-4">
+          <CardTitle className="text-base sm:text-lg">Message de rappel</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 sm:px-6">
           <Textarea
             value={customMessage}
             onChange={(e) => setCustomMessage(e.target.value)}
-            rows={10}
-            className="font-mono text-sm"
+            rows={8}
+            className="font-mono text-xs sm:text-sm"
             placeholder="Personnalisez votre message de rappel..."
           />
-          <p className="text-xs text-muted-foreground mt-2">
-            Utilisez {"{TITLE}"} pour insérer automatiquement le titre de l'annonce
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-2">
+            Utilisez {"{TITLE}"} pour insérer le titre de l'annonce
           </p>
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">
-          Annonces inactives ({inactiveListings?.length || 0})
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-1">
+        <h3 className="text-base sm:text-lg font-semibold">
+          Inactives ({inactiveListings?.length || 0})
         </h3>
         {inactiveListings && inactiveListings.length > 0 && (
           <Button
             onClick={handleSendAllReminders}
             disabled={sendingTo === "all"}
             variant="default"
+            size="sm"
+            className="w-full sm:w-auto"
           >
             <Send className="h-4 w-4 mr-2" />
-            {sendingTo === "all" ? "Envoi..." : "Envoyer tous les rappels"}
+            {sendingTo === "all" ? "Envoi..." : "Envoyer tous"}
           </Button>
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {!inactiveListings || inactiveListings.length === 0 ? (
           <Card>
-            <CardContent className="py-8 text-center text-muted-foreground">
+            <CardContent className="py-6 sm:py-8 text-center text-muted-foreground text-sm">
               Aucune annonce inactive de plus de 10 jours
             </CardContent>
           </Card>
         ) : (
           inactiveListings.map((listing: any) => (
             <Card key={listing.id}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <h4 className="font-semibold">{listing.title}</h4>
-                      <Badge variant="outline">
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                  <div className="flex-1 space-y-1.5 sm:space-y-2 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                      <h4 className="font-semibold text-sm sm:text-base truncate">{listing.title}</h4>
+                      <Badge variant="outline" className="text-[10px] sm:text-xs">
                         {listing.categories?.name || "Catégorie inconnue"}
                       </Badge>
                     </div>
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      <p className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3" />
+                    <div className="text-xs sm:text-sm text-muted-foreground space-y-0.5 sm:space-y-1">
+                      <p className="flex items-center gap-1.5 sm:gap-2">
+                        <Calendar className="h-3 w-3 flex-shrink-0" />
                         Publiée{" "}
                         {formatDistanceToNow(new Date(listing.created_at), {
                           addSuffix: true,
                           locale: fr,
                         })}
                       </p>
-                      <p>
-                        Vendeur: {listing.profiles?.full_name || "Nom non renseigné"}
+                      <p className="truncate">
+                        Vendeur: {listing.profiles?.full_name || "Non renseigné"}
                       </p>
-                      <p>Prix: {listing.price} {listing.currency}</p>
-                      <p>Vues: {listing.views || 0}</p>
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                        <span>{listing.price?.toLocaleString()} {listing.currency}</span>
+                        <span>Vues: {listing.views || 0}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex gap-2 sm:flex-col">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => navigate(`/listing/${listing.id}`)}
+                      className="flex-1 sm:flex-none h-8 text-xs"
                     >
                       <Eye className="h-3 w-3 mr-1" />
                       Voir
@@ -219,9 +224,10 @@ export const InactiveListingsReminder = () => {
                       size="sm"
                       onClick={() => handleSendReminder(listing)}
                       disabled={sendingTo === listing.id || sendingTo === "all"}
+                      className="flex-1 sm:flex-none h-8 text-xs"
                     >
                       <Send className="h-3 w-3 mr-1" />
-                      {sendingTo === listing.id ? "Envoi..." : "Envoyer"}
+                      {sendingTo === listing.id ? "..." : "Envoyer"}
                     </Button>
                   </div>
                 </div>
