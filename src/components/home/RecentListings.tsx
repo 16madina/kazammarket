@@ -13,6 +13,27 @@ import { formatPriceWithConversion } from "@/utils/currency";
 import { getUserLocation, geocodeLocation, calculateDistance, formatDistance } from "@/utils/distanceCalculation";
 import { formatRelativeTime } from "@/utils/timeFormatting";
 
+async function reverseGeocodeCoords(lat: number, lng: number): Promise<{ city: string | null; country: string | null } | null> {
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+      {
+        headers: {
+          "User-Agent": "AyokaMarket/1.0",
+        },
+      }
+    );
+    const data = await response.json();
+    return {
+      city: data.address?.city || data.address?.town || data.address?.village || null,
+      country: data.address?.country || null,
+    };
+  } catch (error) {
+    console.error("Error reverse geocoding coords:", error);
+    return null;
+  }
+}
+
 const RecentListings = () => {
   const { t, language } = useLanguage();
   const [guestLocation, setGuestLocation] = useState<{ city: string | null; country: string | null }>(() => {
@@ -156,6 +177,39 @@ const RecentListings = () => {
       if (browserCoords) {
         setUserCoordinates(browserCoords);
         console.log('📍 User coordinates (browser):', browserCoords);
+
+        // IMPORTANT: if the authenticated user's profile has no city/country yet,
+        // use GPS -> reverse geocode and persist (this fixes "newest first" sorting).
+        const needsProfileLocation = !!session?.user?.id && !userProfile?.city && !userProfile?.country;
+        const needsGuestFallback = !guestLocation.city && !guestLocation.country;
+
+        if (needsProfileLocation || needsGuestFallback) {
+          const inferred = await reverseGeocodeCoords(browserCoords.lat, browserCoords.lng);
+          if (inferred?.city || inferred?.country) {
+            // Use as immediate fallback for sorting
+            setGuestLocation(inferred);
+            localStorage.setItem('guestLocation', JSON.stringify(inferred));
+
+            if (needsProfileLocation) {
+              const update: { city?: string; country?: string } = {};
+              if (!userProfile?.city && inferred.city) update.city = inferred.city;
+              if (!userProfile?.country && inferred.country) update.country = inferred.country;
+
+              if (Object.keys(update).length > 0) {
+                const { error } = await supabase
+                  .from('profiles')
+                  .update(update)
+                  .eq('id', session!.user.id);
+
+                if (error) {
+                  console.error('Error updating user profile location:', error);
+                } else {
+                  console.log('✅ Profile location updated from GPS:', update);
+                }
+              }
+            }
+          }
+        }
         return;
       }
 
@@ -196,7 +250,7 @@ const RecentListings = () => {
     };
 
     getCoordinates();
-  }, [userProfile?.city, userProfile?.country, guestLocation.city, guestLocation.country]);
+  }, [session?.user?.id, userProfile?.city, userProfile?.country, guestLocation.city, guestLocation.country]);
 
   // Calculate distances for listings using stored GPS coordinates or geocoding
   useEffect(() => {

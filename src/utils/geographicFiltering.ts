@@ -1,5 +1,18 @@
 import { westAfricanCountries } from '@/data/westAfricaData';
 
+const normalizeText = (value: string) => {
+  return value
+    .trim()
+    .toLowerCase()
+    // Normalize fancy apostrophes to straight
+    .replace(/[’‘]/g, "'")
+    // Remove diacritics (é -> e, ô -> o, etc.)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    // Collapse whitespace
+    .replace(/\s+/g, ' ');
+};
+
 export interface LocationPriority {
   city: string;
   country: string;
@@ -9,11 +22,11 @@ export interface LocationPriority {
 
 // Fonction pour déduire le pays depuis le nom de la ville
 const getCountryFromCity = (cityName: string): string | null => {
-  const normalizedCity = cityName.toLowerCase().trim();
+  const normalizedCity = normalizeText(cityName);
   
   for (const country of westAfricanCountries) {
     const hasCity = country.cities.some(city => 
-      city.toLowerCase() === normalizedCity
+      normalizeText(city) === normalizedCity
     );
     if (hasCity) {
       return country.name;
@@ -58,7 +71,7 @@ export const getLocationPriority = (
     const secondPart = parts[1];
     // Vérifier si c'est un pays d'Afrique de l'Ouest
     const isKnownCountry = westAfricanCountries.some(c => 
-      c.name.toLowerCase() === secondPart.toLowerCase()
+      normalizeText(c.name) === normalizeText(secondPart)
     );
     
     if (isKnownCountry) {
@@ -74,11 +87,11 @@ export const getLocationPriority = (
     }
   }
   
-  // Normaliser les comparaisons
-  const normalizedCity = city.toLowerCase();
-  const normalizedCountry = country.toLowerCase();
-  const normalizedUserCity = userCity?.toLowerCase() || '';
-  const normalizedUserCountry = userCountry?.toLowerCase() || '';
+  // Normaliser les comparaisons (accents + apostrophes)
+  const normalizedCity = normalizeText(city);
+  const normalizedCountry = normalizeText(country);
+  const normalizedUserCity = userCity ? normalizeText(userCity) : '';
+  const normalizedUserCountry = userCountry ? normalizeText(userCountry) : '';
   
   // Même ville (comparaison flexible - accepte si la ville de l'utilisateur contient ou est contenue dans la ville de l'annonce)
   if (userCity && city && 
@@ -104,13 +117,21 @@ export const getLocationPriority = (
   }
   
   // Pays voisin
-  if (userCountry && country && neighboringCountries[userCountry]?.includes(country)) {
-    return {
-      city,
-      country: country || '',
-      priority: 'neighboring-country',
-      distance: `${country} (pays voisin)`
-    };
+  if (userCountry && country) {
+    const canonicalUserCountry = Object.keys(neighboringCountries).find(
+      (k) => normalizeText(k) === normalizedUserCountry
+    );
+    const neighbors = canonicalUserCountry ? neighboringCountries[canonicalUserCountry] : undefined;
+    const isNeighbor = !!neighbors?.some((n) => normalizeText(n) === normalizedCountry);
+
+    if (isNeighbor) {
+      return {
+        city,
+        country: country || '',
+        priority: 'neighboring-country',
+        distance: `${country} (pays voisin)`
+      };
+    }
   }
   
   // Autre
