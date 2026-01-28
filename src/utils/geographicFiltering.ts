@@ -6,11 +6,54 @@ const normalizeText = (value: string) => {
     .toLowerCase()
     // Normalize fancy apostrophes to straight
     .replace(/[’‘]/g, "'")
+    // Treat apostrophes and common separators as whitespace so
+    // "Côte d'Ivoire" ~= "Cote d Ivoire" ~= "Côte d’Ivoire"
+    .replace(/'/g, ' ')
+    .replace(/[\-–—/,().]/g, ' ')
     // Remove diacritics (é -> e, ô -> o, etc.)
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     // Collapse whitespace
-    .replace(/\s+/g, ' ');
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+// Aliases to make country matching robust (GPS / different locales)
+const countryAliases: Record<string, string> = {
+  // Côte d'Ivoire
+  [normalizeText("Ivory Coast")]: "Côte d'Ivoire",
+  [normalizeText("Cote d Ivoire")]: "Côte d'Ivoire",
+  [normalizeText("Cote d'Ivoire")]: "Côte d'Ivoire",
+  [normalizeText("Republic of Côte d'Ivoire")]: "Côte d'Ivoire",
+  // Cap-Vert
+  [normalizeText('Cape Verde')]: 'Cap-Vert',
+  [normalizeText('Cabo Verde')]: 'Cap-Vert',
+  // Gambie
+  [normalizeText('The Gambia')]: 'Gambie',
+  // Mauritanie
+  [normalizeText('Mauritania')]: 'Mauritanie',
+  // Sénégal
+  [normalizeText('Senegal')]: 'Sénégal',
+  // Bénin
+  [normalizeText('Benin')]: 'Bénin',
+  // Guinée
+  [normalizeText('Guinea')]: 'Guinée',
+  // Guinée-Bissau
+  [normalizeText('Guinea Bissau')]: 'Guinée-Bissau',
+  [normalizeText('Guinea-Bissau')]: 'Guinée-Bissau',
+};
+
+const canonicalizeCountry = (countryName: string): string => {
+  const normalized = normalizeText(countryName);
+
+  const aliased = countryAliases[normalized];
+  if (aliased) return aliased;
+
+  const match = westAfricanCountries.find(
+    (c) => normalizeText(c.name) === normalized
+  );
+
+  return match?.name || countryName;
 };
 
 export interface LocationPriority {
@@ -69,13 +112,14 @@ export const getLocationPriority = (
   // Si on a plusieurs parties, vérifier si la deuxième partie est un pays connu
   if (parts.length > 1) {
     const secondPart = parts[1];
+    const canonicalSecondPart = canonicalizeCountry(secondPart);
     // Vérifier si c'est un pays d'Afrique de l'Ouest
     const isKnownCountry = westAfricanCountries.some(c => 
-      normalizeText(c.name) === normalizeText(secondPart)
+      normalizeText(c.name) === normalizeText(canonicalSecondPart)
     );
     
     if (isKnownCountry) {
-      country = secondPart;
+      country = canonicalSecondPart;
     }
   }
   
@@ -86,12 +130,16 @@ export const getLocationPriority = (
       country = deducedCountry;
     }
   }
+
+  // Canonicalize country names (handles "Ivory Coast" etc.)
+  const canonicalListingCountry = country ? canonicalizeCountry(country) : '';
+  const canonicalUserCountryText = userCountry ? canonicalizeCountry(userCountry) : '';
   
   // Normaliser les comparaisons (accents + apostrophes)
   const normalizedCity = normalizeText(city);
-  const normalizedCountry = normalizeText(country);
+  const normalizedCountry = normalizeText(canonicalListingCountry);
   const normalizedUserCity = userCity ? normalizeText(userCity) : '';
-  const normalizedUserCountry = userCountry ? normalizeText(userCountry) : '';
+  const normalizedUserCountry = canonicalUserCountryText ? normalizeText(canonicalUserCountryText) : '';
   
   // Même ville (comparaison flexible - accepte si la ville de l'utilisateur contient ou est contenue dans la ville de l'annonce)
   if (userCity && city && 
@@ -100,7 +148,7 @@ export const getLocationPriority = (
        normalizedUserCity.includes(normalizedCity))) {
     return {
       city,
-      country: country || '',
+      country: canonicalListingCountry || '',
       priority: 'same-city',
       distance: 'À proximité'
     };
@@ -110,26 +158,26 @@ export const getLocationPriority = (
   if (userCountry && country && normalizedCountry === normalizedUserCountry) {
     return {
       city,
-      country: country || '',
+      country: canonicalListingCountry || '',
       priority: 'same-country',
-      distance: `${country}`
+      distance: `${canonicalListingCountry}`
     };
   }
   
   // Pays voisin
   if (userCountry && country) {
-    const canonicalUserCountry = Object.keys(neighboringCountries).find(
+    const canonicalUserCountryKey = Object.keys(neighboringCountries).find(
       (k) => normalizeText(k) === normalizedUserCountry
     );
-    const neighbors = canonicalUserCountry ? neighboringCountries[canonicalUserCountry] : undefined;
+    const neighbors = canonicalUserCountryKey ? neighboringCountries[canonicalUserCountryKey] : undefined;
     const isNeighbor = !!neighbors?.some((n) => normalizeText(n) === normalizedCountry);
 
     if (isNeighbor) {
       return {
         city,
-        country: country || '',
+        country: canonicalListingCountry || '',
         priority: 'neighboring-country',
-        distance: `${country} (pays voisin)`
+        distance: `${canonicalListingCountry} (pays voisin)`
       };
     }
   }
@@ -137,9 +185,9 @@ export const getLocationPriority = (
   // Autre
   return {
     city,
-    country: country || '',
+    country: canonicalListingCountry || '',
     priority: 'other',
-    distance: country || listingLocation
+    distance: canonicalListingCountry || listingLocation
   };
 };
 

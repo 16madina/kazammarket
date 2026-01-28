@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MapPin, Navigation, Rocket, Sparkles } from "lucide-react";
 import { translateCondition } from "@/utils/translations";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { sortListingsByLocation, getLocationPriority } from "@/utils/geographicFiltering";
+import { getLocationPriority } from "@/utils/geographicFiltering";
 import { formatPriceWithConversion } from "@/utils/currency";
 import { getUserLocation, geocodeLocation, calculateDistance, formatDistance } from "@/utils/distanceCalculation";
 import { formatRelativeTime } from "@/utils/timeFormatting";
@@ -318,6 +318,26 @@ const RecentListings = () => {
   // Trier : 1) Annonces boostées en premier, 2) Puis par proximité
   const sortedListings = useMemo(() => {
     if (!listings) return [];
+
+    const priorityOrder: Record<ReturnType<typeof getLocationPriority>['priority'], number> = {
+      'same-city': 0,
+      'same-country': 1,
+      'neighboring-country': 2,
+      'other': 3,
+    };
+
+    const sortByProximityThenRecency = (items: any[]) => {
+      return [...items].sort((a, b) => {
+        const pa = getLocationPriority(a.location, userCity, userCountry).priority;
+        const pb = getLocationPriority(b.location, userCity, userCountry).priority;
+        const diff = priorityOrder[pa] - priorityOrder[pb];
+        if (diff !== 0) return diff;
+
+        const ta = Date.parse(a.created_at) || 0;
+        const tb = Date.parse(b.created_at) || 0;
+        return tb - ta; // plus récent d'abord (dans le même groupe)
+      });
+    };
     
     // Séparer les annonces boostées des autres
     const boostedListings = listings.filter(l => activeBoosts.includes(l.id));
@@ -325,8 +345,8 @@ const RecentListings = () => {
     
     // TOUJOURS trier par proximité si localisation disponible
     if (hasValidLocation) {
-      const sortedBoosted = sortListingsByLocation(boostedListings, userCity, userCountry);
-      const sortedRegular = sortListingsByLocation(regularListings, userCity, userCountry);
+      const sortedBoosted = sortByProximityThenRecency(boostedListings);
+      const sortedRegular = sortByProximityThenRecency(regularListings);
       
       // DEBUG: Afficher les priorités pour les premières annonces
       if (sortedRegular.length > 0) {
