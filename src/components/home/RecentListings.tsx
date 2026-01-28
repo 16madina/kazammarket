@@ -110,7 +110,8 @@ const RecentListings = () => {
   });
   
   // Ne charger le profil QUE si l'utilisateur est authentifié
-  const { data: userProfile } = useQuery({
+  // Rechargement rapide pour s'assurer que le tri par localisation fonctionne
+  const { data: userProfile, refetch: refetchProfile } = useQuery({
     queryKey: ["userProfile", session?.user?.id],
     queryFn: async () => {
       if (!session?.user) return null;
@@ -129,7 +130,10 @@ const RecentListings = () => {
       console.log("👤 User profile loaded:", data);
       return data;
     },
-    enabled: !!session?.user, // NE S'EXÉCUTE QUE SI L'UTILISATEUR EST AUTHENTIFIÉ
+    enabled: !!session?.user,
+    staleTime: 0, // Toujours recharger le profil pour avoir les données à jour
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
   
   // Fetch active boosts to prioritize boosted listings
@@ -308,6 +312,9 @@ const RecentListings = () => {
   
   const hasValidLocation = !!(userCity?.trim() || userCountry?.trim());
   
+  // DEBUG: Log pour vérifier les valeurs
+  console.log('🔍 DEBUG Sorting - userCity:', userCity, '| userCountry:', userCountry, '| hasValidLocation:', hasValidLocation, '| profile:', userProfile);
+  
   // Trier : 1) Annonces boostées en premier, 2) Puis par proximité
   const sortedListings = useMemo(() => {
     if (!listings) return [];
@@ -316,16 +323,25 @@ const RecentListings = () => {
     const boostedListings = listings.filter(l => activeBoosts.includes(l.id));
     const regularListings = listings.filter(l => !activeBoosts.includes(l.id));
     
-    // Trier par proximité si localisation disponible
-    const sortedBoosted = hasValidLocation 
-      ? sortListingsByLocation(boostedListings, userCity, userCountry)
-      : boostedListings;
-    const sortedRegular = hasValidLocation 
-      ? sortListingsByLocation(regularListings, userCity, userCountry)
-      : regularListings;
+    // TOUJOURS trier par proximité si localisation disponible
+    if (hasValidLocation) {
+      const sortedBoosted = sortListingsByLocation(boostedListings, userCity, userCountry);
+      const sortedRegular = sortListingsByLocation(regularListings, userCity, userCountry);
+      
+      // DEBUG: Afficher les priorités pour les premières annonces
+      if (sortedRegular.length > 0) {
+        const firstFew = sortedRegular.slice(0, 5).map(l => {
+          const priority = getLocationPriority(l.location, userCity, userCountry);
+          return { title: l.title, location: l.location, priority: priority.priority };
+        });
+        console.log('🔍 DEBUG Sorted listings (first 5):', firstFew);
+      }
+      
+      return [...sortedBoosted, ...sortedRegular];
+    }
     
-    // Annonces boostées en premier
-    return [...sortedBoosted, ...sortedRegular];
+    // Sans localisation: ordre chronologique (plus récent en premier)
+    return [...boostedListings, ...regularListings];
   }, [listings, activeBoosts, hasValidLocation, userCity, userCountry]);
   
   const displayedListings = sortedListings;
