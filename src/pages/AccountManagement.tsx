@@ -8,7 +8,8 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2, MapPin } from "lucide-react";
 import { DeleteAccountDialog } from "@/components/settings/DeleteAccountDialog";
-import { LocationAutocomplete } from "@/components/listing/LocationAutocomplete";
+import { CountrySelect } from "@/components/account/CountrySelect";
+import { allCountries, Country } from "@/data/westAfricaData";
 
 const AccountManagement = () => {
   const navigate = useNavigate();
@@ -219,7 +220,7 @@ const AccountManagement = () => {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="location">Ville et Pays</Label>
+                  <Label>Pays</Label>
                   <Button
                     type="button"
                     variant="ghost"
@@ -232,28 +233,26 @@ const AccountManagement = () => {
                     <span>Détecter ma position</span>
                   </Button>
                 </div>
-                <LocationAutocomplete
-                  value={formData.city && formData.country ? `${formData.city}, ${formData.country}` : formData.city || formData.country || ""}
-                  onChange={(value) => {
-                    // Extraire ville et pays depuis la valeur sélectionnée
-                    const parts = value.split(',').map(s => s.trim());
-                    if (parts.length >= 2) {
-                      const city = parts[0];
-                      const country = parts.slice(1).join(', ');
-                      setFormData({ 
-                        ...formData, 
-                        city,
-                        country,
-                      });
-                    } else if (parts.length === 1 && parts[0]) {
-                      // Si seulement une partie, considérer comme ville
-                      setFormData({
-                        ...formData,
-                        city: parts[0],
-                      });
-                    }
+                <CountrySelect
+                  value={formData.country}
+                  onChange={(country: Country) => {
+                    setFormData({
+                      ...formData,
+                      country: country.name,
+                    });
                   }}
-                  placeholder="Ex: Abidjan, Côte d'Ivoire"
+                  placeholder="Sélectionner votre pays"
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="city">Ville</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  placeholder="Ex: Abidjan"
                   disabled={loading}
                 />
                 <p className="text-xs text-muted-foreground">
